@@ -6,12 +6,20 @@
 #include <GLFW/glfw3.h>
 
 #include "main.h"
+#include "Config.h"
+#include "SaveEditorUI.h"
 
-using namespace std;
+GLFWwindow* window = nullptr;
 
 void error_callback(int error, const char* description)
 {
 	fprintf(stderr, "Error: %s\n", description);
+}
+
+void CloseMainWindow()
+{
+	if (window == nullptr) return;
+	glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
 
 int main()
@@ -23,10 +31,16 @@ int main()
 		return -1;
 	}
 
+	char title[64];
+	sprintf_s(title, 64, "%s - v%s", WINDOW_TITLE, PROJECT_VER);
+
+	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+	glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
+
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	GLFWwindow* window = glfwCreateWindow(800, 600, "Hello World", NULL, NULL);
+	window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, title, NULL, NULL);
 
 	if (!window)
 	{
@@ -35,6 +49,16 @@ int main()
 	}
 
 	glfwMakeContextCurrent(window);
+
+	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+	if (monitor)
+	{
+		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+		if (mode)
+		{
+			glfwSetWindowPos(window, (mode->width >> 1) - (WINDOW_WIDTH >> 1), (mode->height >> 1) - (WINDOW_HEIGHT >> 1));
+		}
+	}
 
 	//gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 	glfwSwapInterval(1);
@@ -47,6 +71,8 @@ int main()
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
+	io.IniFilename = NULL;
+
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
 	//ImGui::StyleColorsLight();
@@ -56,6 +82,9 @@ int main()
 	ImGui_ImplOpenGL3_Init("#version 330");
 
 	bool show_demo_window = true;
+
+	SaveEditorUI* saveEditorUI = new SaveEditorUI();
+	saveEditorUI->SetIsVisible(true);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -67,13 +96,13 @@ int main()
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui::NewFrame();
 
-		ImGui::ShowDemoWindow(&show_demo_window);
+		saveEditorUI->Render();
 
 		ImGui::Render();
 
 		/* Render here */
 
-		glClearColor(0.2f, 0.05f, 0.1f, 1.0f);
+		glClearColor(0.1f, 0.025f, 0.05f, 0.9f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -82,6 +111,9 @@ int main()
 
 		glfwSwapBuffers(window);
 	}
+
+	delete saveEditorUI;
+	saveEditorUI = nullptr;
 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
