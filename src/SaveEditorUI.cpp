@@ -4,14 +4,11 @@
 
 SaveEditorUI::SaveEditorUI()
 {
-	printf("Constructor: %s\n", typeid(*this).name());
-
 	aboutWindow = new AboutWindow();
 }
 
 SaveEditorUI::~SaveEditorUI()
 {
-	printf("Destructor: %s\n", typeid(*this).name());
 
 	delete aboutWindow;
 	aboutWindow = nullptr;

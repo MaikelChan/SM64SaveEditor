@@ -5,15 +5,13 @@
 
 AboutWindow::AboutWindow()
 {
-	printf("Constructor: %s\n", typeid(*this).name());
-
 	sprintf_s(windowTitle, 64, "About %s", WINDOW_TITLE);
 	sprintf_s(description, 64, "%s - v%s", WINDOW_TITLE, PROJECT_VER);
 }
 
 AboutWindow::~AboutWindow()
 {
-	printf("Destructor: %s\n", typeid(*this).name());
+
 }
 
 void AboutWindow::VisibilityChanged(const bool isVisible)
