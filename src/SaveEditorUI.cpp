@@ -78,6 +78,8 @@ void SaveEditorUI::DoRender()
 				{
 					ImGui::Checkbox("File Exists", &saveData->saveSlots[s].FileExists);
 
+					if(!saveData->saveSlots[s].FileExists) ImGui::BeginDisabled();
+
 					if (ImGui::BeginTable("FlagsTable", 3))
 					{
 						ImGui::TableSetupColumn("one", ImGuiTableColumnFlags_WidthStretch);
@@ -160,6 +162,8 @@ void SaveEditorUI::DoRender()
 
 						for (int c = 0; c < COURSE_COUNT; c++)
 						{
+							ImGui::PushID(c);
+
 							ImGui::TableNextRow();
 
 							ImGui::TableSetColumnIndex(0);
@@ -169,38 +173,42 @@ void SaveEditorUI::DoRender()
 							ImGui::Text(courseNames[c]);
 
 							ImGui::TableSetColumnIndex(2);
-							ImGui::Checkbox("", &saveData->saveSlots[s].CourseStars[c].Star1);
+							ImGui::Checkbox("##Star 1", &saveData->saveSlots[s].CourseStars[c].Star1);
 
 							ImGui::TableSetColumnIndex(3);
-							ImGui::Checkbox("", &saveData->saveSlots[s].CourseStars[c].Star2);
+							ImGui::Checkbox("##Star 2", &saveData->saveSlots[s].CourseStars[c].Star2);
 
 							ImGui::TableSetColumnIndex(4);
-							ImGui::Checkbox("", &saveData->saveSlots[s].CourseStars[c].Star3);
+							ImGui::Checkbox("##Star 3", &saveData->saveSlots[s].CourseStars[c].Star3);
 
 							ImGui::TableSetColumnIndex(5);
-							ImGui::Checkbox("", &saveData->saveSlots[s].CourseStars[c].Star4);
+							ImGui::Checkbox("##Star 4", &saveData->saveSlots[s].CourseStars[c].Star4);
 
 							ImGui::TableSetColumnIndex(6);
-							ImGui::Checkbox("", &saveData->saveSlots[s].CourseStars[c].Star5);
+							ImGui::Checkbox("##Star 5", &saveData->saveSlots[s].CourseStars[c].Star5);
 
 							ImGui::TableSetColumnIndex(7);
-							ImGui::Checkbox("", &saveData->saveSlots[s].CourseStars[c].Star6);
+							ImGui::Checkbox("##Star 6", &saveData->saveSlots[s].CourseStars[c].Star6);
 
 							ImGui::TableSetColumnIndex(8);
-							ImGui::Checkbox("", &saveData->saveSlots[s].CourseStars[c].HundredCoinStar);
+							ImGui::Checkbox("##100 Coin Star", &saveData->saveSlots[s].CourseStars[c].HundredCoinStar);
 
 							ImGui::TableSetColumnIndex(9);
-							ImGui::Checkbox("", &saveData->saveSlots[s].CourseStars[c].CannonOpen);
+							ImGui::Checkbox("##Cannon Open", &saveData->saveSlots[s].CourseStars[c].CannonOpen);
 
 							const ImU8 u8_min = 0, u8_max = 255;
 
 							ImGui::TableSetColumnIndex(10);
-							ImGui::InputScalar("", ImGuiDataType_U8, &saveData->saveSlots[s].CourseStars[c].MaxCoins, NULL, NULL, "%u");
+							ImGui::InputScalar("##Max Coins", ImGuiDataType_U8, &saveData->saveSlots[s].CourseStars[c].MaxCoins, NULL, NULL, "%u");
+
+							ImGui::PopID();
 						}
 						ImGui::EndTable();
 					}
 
 					ImGui::EndTabItem();
+
+					if (!saveData->saveSlots[s].FileExists) ImGui::EndDisabled();
 				}
 			}
 			ImGui::EndTabBar();
