@@ -170,7 +170,7 @@ void SaveEditorUI::DoRender()
 							ImGui::Text("%i", c + 1);
 
 							ImGui::TableSetColumnIndex(1);
-							ImGui::Text(courseNames[c]);
+							ImGui::Text("%s", courseNames[c]);
 
 							ImGui::TableSetColumnIndex(2);
 							ImGui::Checkbox("##Star 1", &saveData->saveSlots[s].CourseStars[c].Star1);

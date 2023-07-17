@@ -33,7 +33,7 @@ void AboutWindow::DoRender()
 
 	if (ImGui::BeginPopupModal(windowTitle, &isVisible, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse))
 	{
-		ImGui::Text(description);
+		ImGui::Text("%s", description);
 		ImGui::Separator();
 		ImGui::Text("By PacoChan.\n\n");
 		ImGui::Text("This save editor is compatible with the PC port.");
