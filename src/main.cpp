@@ -32,7 +32,7 @@ int main()
 	}
 
 	char title[64];
-	sprintf_s(title, 64, "%s - v%s", WINDOW_TITLE, PROJECT_VER);
+	snprintf(title, 64, "%s - v%s", WINDOW_TITLE, PROJECT_VER);
 
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 	glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);

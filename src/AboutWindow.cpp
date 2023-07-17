@@ -5,8 +5,8 @@
 
 AboutWindow::AboutWindow()
 {
-	sprintf_s(windowTitle, 64, "About %s", WINDOW_TITLE);
-	sprintf_s(description, 64, "%s - v%s", WINDOW_TITLE, PROJECT_VER);
+	snprintf(windowTitle, 64, "About %s", WINDOW_TITLE);
+	snprintf(description, 64, "%s - v%s", WINDOW_TITLE, PROJECT_VER);
 }
 
 AboutWindow::~AboutWindow()

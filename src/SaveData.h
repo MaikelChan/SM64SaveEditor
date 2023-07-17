@@ -120,7 +120,7 @@ class SaveData
 {
 public:
 	SaveSlot saveSlots[4];
-	MenuData MenuData;
+	MenuData menuData;
 
 	SaveData();
 
