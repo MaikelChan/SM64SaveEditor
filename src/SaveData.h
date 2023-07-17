@@ -2,7 +2,7 @@
 
 #include <fstream>
 
-#define NUM_SAVE_FILES 4
+#define NUM_SAVE_SLOTS 4
 #define NUM_COPIES 2
 #define COURSE_COUNT 24
 #define COURSE_STAGES_COUNT 15
@@ -48,7 +48,7 @@ public:
 	// Each save file has a 2 bit "age" for each course. The higher this value,
 	// the older the high score is. This is used for tie-breaking when displaying
 	// on the high score screen.
-	uint32_t CoinScoreAges[NUM_SAVE_FILES] = {};
+	uint32_t CoinScoreAges[NUM_SAVE_SLOTS] = {};
 
 	uint16_t soundMode = 0;
 	//public bool SoundStereo{ get { return soundMode == 0; } set { if (value) soundMode = 0; OnPropertyChanged(); } }
@@ -56,7 +56,7 @@ public:
 	//public bool SoundHeadset{ get { return soundMode == 2; } set { if (value) soundMode = 2; OnPropertyChanged(); } }
 
 		// Pad to match the EEPROM size of 0x200 (10 bytes on JP/US, 8 bytes on EU)
-		//u8 filler[EEPROM_SIZE / 2 - SUBTRAHEND - NUM_SAVE_FILES * (4 + sizeof(struct SaveFile))];
+		//u8 filler[EEPROM_SIZE / 2 - SUBTRAHEND - NUM_SAVE_SLOTS * (4 + sizeof(struct SaveFile))];
 };
 
 struct CourseData
@@ -113,14 +113,14 @@ public:
 	bool CapOnMrBlizzard = false;
 	bool FiftyStarDoorUnlocked = false;
 
-	CourseData CourseStars[COURSE_COUNT];
+	CourseData Courses[COURSE_COUNT] = {};
 };
 
 class SaveData
 {
 public:
-	SaveSlot saveSlots[4];
-	MenuData menuData;
+	SaveSlot saveSlots[4] = {};
+	MenuData menuData = {};
 
 	SaveData();
 

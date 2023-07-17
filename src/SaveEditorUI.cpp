@@ -72,7 +72,7 @@ void SaveEditorUI::DoRender()
 		ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
 		if (saveData && ImGui::BeginTabBar("Save Slots", tab_bar_flags))
 		{
-			for (int s = 0; s < NUM_SAVE_FILES; s++)
+			for (int s = 0; s < NUM_SAVE_SLOTS; s++)
 			{
 				if (ImGui::BeginTabItem(tabNames[s]))
 				{
@@ -173,33 +173,33 @@ void SaveEditorUI::DoRender()
 							ImGui::Text("%s", courseNames[c]);
 
 							ImGui::TableSetColumnIndex(2);
-							ImGui::Checkbox("##Star 1", &saveData->saveSlots[s].CourseStars[c].Star1);
+							ImGui::Checkbox("##Star 1", &saveData->saveSlots[s].Courses[c].Star1);
 
 							ImGui::TableSetColumnIndex(3);
-							ImGui::Checkbox("##Star 2", &saveData->saveSlots[s].CourseStars[c].Star2);
+							ImGui::Checkbox("##Star 2", &saveData->saveSlots[s].Courses[c].Star2);
 
 							ImGui::TableSetColumnIndex(4);
-							ImGui::Checkbox("##Star 3", &saveData->saveSlots[s].CourseStars[c].Star3);
+							ImGui::Checkbox("##Star 3", &saveData->saveSlots[s].Courses[c].Star3);
 
 							ImGui::TableSetColumnIndex(5);
-							ImGui::Checkbox("##Star 4", &saveData->saveSlots[s].CourseStars[c].Star4);
+							ImGui::Checkbox("##Star 4", &saveData->saveSlots[s].Courses[c].Star4);
 
 							ImGui::TableSetColumnIndex(6);
-							ImGui::Checkbox("##Star 5", &saveData->saveSlots[s].CourseStars[c].Star5);
+							ImGui::Checkbox("##Star 5", &saveData->saveSlots[s].Courses[c].Star5);
 
 							ImGui::TableSetColumnIndex(7);
-							ImGui::Checkbox("##Star 6", &saveData->saveSlots[s].CourseStars[c].Star6);
+							ImGui::Checkbox("##Star 6", &saveData->saveSlots[s].Courses[c].Star6);
 
 							ImGui::TableSetColumnIndex(8);
-							ImGui::Checkbox("##100 Coin Star", &saveData->saveSlots[s].CourseStars[c].HundredCoinStar);
+							ImGui::Checkbox("##100 Coin Star", &saveData->saveSlots[s].Courses[c].HundredCoinStar);
 
 							ImGui::TableSetColumnIndex(9);
-							ImGui::Checkbox("##Cannon Open", &saveData->saveSlots[s].CourseStars[c].CannonOpen);
+							ImGui::Checkbox("##Cannon Open", &saveData->saveSlots[s].Courses[c].CannonOpen);
 
 							const ImU8 u8_min = 0, u8_max = 255;
 
 							ImGui::TableSetColumnIndex(10);
-							ImGui::InputScalar("##Max Coins", ImGuiDataType_U8, &saveData->saveSlots[s].CourseStars[c].MaxCoins, NULL, NULL, "%u");
+							ImGui::InputScalar("##Max Coins", ImGuiDataType_U8, &saveData->saveSlots[s].Courses[c].MaxCoins, NULL, NULL, "%u");
 
 							ImGui::PopID();
 						}

@@ -17,9 +17,9 @@ bool SaveData::Load(const char* filePath)
 
 	stream.seekg(0, std::ios_base::beg);
 
-	for (int f = 0; f < NUM_SAVE_FILES; f++)
+	for (int s = 0; s < NUM_SAVE_SLOTS; s++)
 	{
-		for (int c = 0; c < NUM_COPIES; c++)
+		for (int cp = 0; cp < NUM_COPIES; cp++)
 		{
 			size_t currentPosition = stream.tellg();
 			bool valid = IsValid(stream, SAVE_FILE_SIZE, SAVE_FILE_MAGIC);
@@ -27,7 +27,7 @@ bool SaveData::Load(const char* filePath)
 
 			if (!valid)
 			{
-				if (c == 0)
+				if (cp == 0)
 				{
 					stream.seekg(SAVE_FILE_SIZE, std::ios::cur);
 					continue;
@@ -40,36 +40,36 @@ bool SaveData::Load(const char* filePath)
 				}
 			}
 
-			stream.read((char*)&saveSlots[f].CapLevel, 1);
-			stream.read((char*)&saveSlots[f].CapArea, 1);
-			stream.read((char*)&saveSlots[f].CapPos[0], sizeof(uint16_t) * 3);
+			stream.read((char*)&saveSlots[s].CapLevel, 1);
+			stream.read((char*)&saveSlots[s].CapArea, 1);
+			stream.read((char*)&saveSlots[s].CapPos[0], sizeof(uint16_t) * 3);
 
 			uint32_t flags;
 			stream.read((char*)&flags, sizeof(uint32_t));
 
-			saveSlots[f].FileExists = (flags & (1 << 0)) != 0;
-			saveSlots[f].HaveWingCap = (flags & (1 << 1)) != 0;
-			saveSlots[f].HaveMetalCap = (flags & (1 << 2)) != 0;
-			saveSlots[f].HaveVanishCap = (flags & (1 << 3)) != 0;
-			saveSlots[f].HaveKey1 = (flags & (1 << 4)) != 0;
-			saveSlots[f].HaveKey2 = (flags & (1 << 5)) != 0;
-			saveSlots[f].BasementDoorUnlocked = (flags & (1 << 6)) != 0;
-			saveSlots[f].UpstairsDoorUnlocked = (flags & (1 << 7)) != 0;
-			saveSlots[f].DDDMovedBack = (flags & (1 << 8)) != 0;
-			saveSlots[f].MoatDrained = (flags & (1 << 9)) != 0;
-			saveSlots[f].PSSDoorUnlocked = (flags & (1 << 10)) != 0;
-			saveSlots[f].WFDoorUnlocked = (flags & (1 << 11)) != 0;
-			saveSlots[f].CCMDoorUnlocked = (flags & (1 << 12)) != 0;
-			saveSlots[f].JRBDoorUnlocked = (flags & (1 << 13)) != 0;
-			saveSlots[f].BITDWDoorUnlocked = (flags & (1 << 14)) != 0;
-			saveSlots[f].BITSDoorUnlocked = (flags & (1 << 15)) != 0;
-			saveSlots[f].CapOnGround = (flags & (1 << 16)) != 0;
-			saveSlots[f].CapOnKlepto = (flags & (1 << 17)) != 0;
-			saveSlots[f].CapOnUkiki = (flags & (1 << 18)) != 0;
-			saveSlots[f].CapOnMrBlizzard = (flags & (1 << 19)) != 0;
-			saveSlots[f].FiftyStarDoorUnlocked = (flags & (1 << 20)) != 0;
+			saveSlots[s].FileExists = (flags & (1 << 0)) != 0;
+			saveSlots[s].HaveWingCap = (flags & (1 << 1)) != 0;
+			saveSlots[s].HaveMetalCap = (flags & (1 << 2)) != 0;
+			saveSlots[s].HaveVanishCap = (flags & (1 << 3)) != 0;
+			saveSlots[s].HaveKey1 = (flags & (1 << 4)) != 0;
+			saveSlots[s].HaveKey2 = (flags & (1 << 5)) != 0;
+			saveSlots[s].BasementDoorUnlocked = (flags & (1 << 6)) != 0;
+			saveSlots[s].UpstairsDoorUnlocked = (flags & (1 << 7)) != 0;
+			saveSlots[s].DDDMovedBack = (flags & (1 << 8)) != 0;
+			saveSlots[s].MoatDrained = (flags & (1 << 9)) != 0;
+			saveSlots[s].PSSDoorUnlocked = (flags & (1 << 10)) != 0;
+			saveSlots[s].WFDoorUnlocked = (flags & (1 << 11)) != 0;
+			saveSlots[s].CCMDoorUnlocked = (flags & (1 << 12)) != 0;
+			saveSlots[s].JRBDoorUnlocked = (flags & (1 << 13)) != 0;
+			saveSlots[s].BITDWDoorUnlocked = (flags & (1 << 14)) != 0;
+			saveSlots[s].BITSDoorUnlocked = (flags & (1 << 15)) != 0;
+			saveSlots[s].CapOnGround = (flags & (1 << 16)) != 0;
+			saveSlots[s].CapOnKlepto = (flags & (1 << 17)) != 0;
+			saveSlots[s].CapOnUkiki = (flags & (1 << 18)) != 0;
+			saveSlots[s].CapOnMrBlizzard = (flags & (1 << 19)) != 0;
+			saveSlots[s].FiftyStarDoorUnlocked = (flags & (1 << 20)) != 0;
 
-			for (int i = 0; i < COURSE_COUNT; i++)
+			for (int cc = 0; cc < COURSE_COUNT; cc++)
 			{
 				uint8_t stars;
 				stream.read((char*)&stars, 1);
@@ -79,20 +79,20 @@ bool SaveData::Load(const char* filePath)
 
 				bool cannonOpen = (cannon & 0x80) != 0;
 
-				saveSlots[f].CourseStars[i].SetStars(stars);
-				saveSlots[f].CourseStars[i].CannonOpen = cannonOpen;
+				saveSlots[s].Courses[cc].SetStars(stars);
+				saveSlots[s].Courses[cc].CannonOpen = cannonOpen;
 
 				stream.seekg(-1, std::ios::cur);
 			}
 
 			stream.seekg(1, std::ios::cur);
 
-			for (int i = 0; i < COURSE_STAGES_COUNT; i++)
+			for (int cc = 0; cc < COURSE_STAGES_COUNT; cc++)
 			{
-				stream.read((char*)&saveSlots[f].CourseStars[i].MaxCoins, 1);
+				stream.read((char*)&saveSlots[s].Courses[cc].MaxCoins, 1);
 			}
 
-			if (c == 0)
+			if (cp == 0)
 			{
 				stream.seekg(4 + SAVE_FILE_SIZE, std::ios::cur);
 				break;
