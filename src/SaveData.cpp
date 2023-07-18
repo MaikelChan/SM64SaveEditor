@@ -1,4 +1,6 @@
 #include "SaveData.h"
+#include <format>
+#include <exception>
 
 SaveData::SaveData()
 {
@@ -11,7 +13,7 @@ SaveData* SaveData::Load(const char* filePath)
 
 	if (!stream || !stream.is_open())
 	{
-		printf("Can't open file \"%s\".\n", filePath);
+		throw std::runtime_error(std::format("Can't open file \"{}\".", filePath));
 		return nullptr;
 	}
 
@@ -21,7 +23,7 @@ SaveData* SaveData::Load(const char* filePath)
 	if (size != 0x200)
 	{
 		stream.close();
-		printf("File \"%s\" is not a valid Super Mario 64 save file.\n", filePath);
+		throw std::runtime_error(std::format("File \"{}\" is not a valid Super Mario 64 save file.", filePath));
 		return nullptr;
 	}
 
@@ -112,7 +114,7 @@ SaveData* SaveData::Load(const char* filePath)
 
 			stream.close();
 			delete saveData;
-			printf("Save slot %i in file \"%s\" is corrupted.\n", s, filePath);
+			throw std::runtime_error(std::format("Save slot {} in file \"{}\" is corrupted.", s, filePath));
 			return nullptr;
 		}
 	}
@@ -144,7 +146,7 @@ SaveData* SaveData::Load(const char* filePath)
 
 		stream.close();
 		delete saveData;
-		printf("Menu data in file \"%s\" is corrupted.\n", filePath);
+		throw std::runtime_error(std::format("Menu data in file \"{}\" is corrupted.", filePath));
 		return nullptr;
 	}
 

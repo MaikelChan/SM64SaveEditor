@@ -1,10 +1,12 @@
 ﻿#include "SaveEditorUI.h"
+#include <format>
 #include "imgui/imgui.h"
 #include "main.h"
 
 SaveEditorUI::SaveEditorUI()
 {
 	aboutWindow = new AboutWindow();
+	popupDialog = new PopupDialog();
 
 	currentFileName = nullptr;
 	saveData = nullptr;
@@ -17,6 +19,9 @@ SaveEditorUI::~SaveEditorUI()
 		delete saveData;
 		saveData = nullptr;
 	}
+
+	delete popupDialog;
+	popupDialog = nullptr;
 
 	delete aboutWindow;
 	aboutWindow = nullptr;
@@ -35,17 +40,37 @@ void SaveEditorUI::DoRender()
 	{
 		if (ImGui::BeginMenu("File"))
 		{
-			if (ImGui::MenuItem("Load...", "CTRL+L"))
+			if (ImGui::MenuItem("Load..."))
 			{
-				if (saveData) delete saveData;
-				saveData = SaveData::Load("D:\\Consolas\\PC\\Juegos\\Super Mario 64 - PC\\sm64_save_file.bin");
+				if (saveData)
+				{
+					delete saveData;
+					saveData = nullptr;
+				}
+
+				try
+				{
+					saveData = SaveData::Load("D:\\Consolas\\PC\\Juegos\\Super Mario 64 - PC\\sm64_save_file.bin");
+				}
+				catch (const std::runtime_error& error)
+				{
+					popupDialog->SetMessage(MessageTypes::Error, "Error", error.what());
+					popupDialog->SetIsVisible(true);
+				}
 			}
-			if (ImGui::MenuItem("Save...", "CTRL+S")) {}
+
+			if (ImGui::MenuItem("Save..."))
+			{
+
+			}
+
 			ImGui::Separator();
-			if (ImGui::MenuItem("Quit", "CTRL+Q"))
+
+			if (ImGui::MenuItem("Quit"))
 			{
 				CloseMainWindow();
 			}
+
 			ImGui::EndMenu();
 		}
 
@@ -302,5 +327,6 @@ void SaveEditorUI::DoRender()
 
 	ImGui::ShowDemoWindow();
 
+	popupDialog->Render();
 	aboutWindow->Render();
 }

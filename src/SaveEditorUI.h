@@ -1,6 +1,7 @@
 #pragma once
 
 #include "BaseUI.h"
+#include "PopupDialog.h"
 #include "AboutWindow.h"
 #include "SaveData.h"
 
@@ -15,6 +16,7 @@ const char* const tabNames[]
 class SaveEditorUI : public BaseUI
 {
 private:
+	PopupDialog* popupDialog;
 	AboutWindow* aboutWindow;
 
 	const char* currentFileName;
