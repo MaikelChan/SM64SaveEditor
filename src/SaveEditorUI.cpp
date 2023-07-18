@@ -158,6 +158,7 @@ void SaveEditorUI::DoRender()
 						ImGui::TableSetupColumn("100 Coin *");
 						ImGui::TableSetupColumn("Cannon Open");
 						ImGui::TableSetupColumn("Max Coins");
+
 						ImGui::TableHeadersRow();
 
 						for (int c = 0; c < COURSE_COUNT; c++)
@@ -191,14 +192,17 @@ void SaveEditorUI::DoRender()
 							ImGui::Checkbox("##Star 6", &saveData->saveSlots[s].Courses[c].Star6);
 
 							ImGui::TableSetColumnIndex(8);
+							//ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetColumnWidth(8) / 2) - (ImGui::GetItemRectSize().x / 2));
 							ImGui::Checkbox("##100 Coin Star", &saveData->saveSlots[s].Courses[c].HundredCoinStar);
 
 							ImGui::TableSetColumnIndex(9);
+							//ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetColumnWidth(9) / 2) - (ImGui::GetItemRectSize().x / 2));
 							ImGui::Checkbox("##Cannon Open", &saveData->saveSlots[s].Courses[c].CannonOpen);
 
 							const ImU8 u8_min = 0, u8_max = 255;
 
 							ImGui::TableSetColumnIndex(10);
+							//ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetColumnWidth(10) / 2) - (ImGui::CalcItemWidth() / 2));
 							ImGui::InputScalar("##Max Coins", ImGuiDataType_U8, &saveData->saveSlots[s].Courses[c].MaxCoins, NULL, NULL, "%u");
 
 							ImGui::PopID();
@@ -233,6 +237,61 @@ void SaveEditorUI::DoRender()
 				ImGui::SameLine();
 				ImGui::RadioButton("German", &value, 2);
 				saveData->settings.language = static_cast<uint16_t>(value);
+
+				ImGui::SeparatorText("Coin Ages");
+
+				static ImGuiTableFlags flags = ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_BordersOuter;
+
+				if (ImGui::BeginTable("CoinAges", 6, flags))
+				{
+					ImGui::TableSetupScrollFreeze(0, 1);
+					ImGui::TableSetupColumn("#");
+					ImGui::TableSetupColumn("Name");
+					ImGui::TableSetupColumn("Mario A");
+					ImGui::TableSetupColumn("Mario B");
+					ImGui::TableSetupColumn("Mario C");
+					ImGui::TableSetupColumn("Mario D");
+
+					ImGui::TableHeadersRow();
+
+					for (int c = 0; c < COURSE_STAGES_COUNT; c++)
+					{
+						ImGui::PushID(c);
+
+						ImGui::TableNextRow();
+
+						ImGui::TableSetColumnIndex(0);
+						ImGui::Text("%i", c + 1);
+
+						ImGui::TableSetColumnIndex(1);
+						ImGui::Text("%s", courseNames[c]);
+
+						const ImU8 minRange = 0, maxRange = 4, step = 1;
+						int shift = c * 2;
+
+						for (int s = 0; s < NUM_SAVE_SLOTS; s++)
+						{
+							ImGui::PushID(s);
+
+							uint8_t value = (saveData->settings.CoinScoreAges[s] >> shift) & 0x3;
+
+							ImGui::TableSetColumnIndex(2 + s);
+
+							ImGui::SetNextItemWidth(80);
+							if (ImGui::InputScalar("##CoinAgeCell", ImGuiDataType_U8, &value, &step, NULL, "%u"))
+							{
+								if (value > 3) value = 3;
+								saveData->settings.CoinScoreAges[s] &= ~(0x3 << shift);
+								saveData->settings.CoinScoreAges[s] |= value << shift;
+							}
+
+							ImGui::PopID();
+						}
+
+						ImGui::PopID();
+					}
+					ImGui::EndTable();
+				}
 
 				ImGui::EndTabItem();
 			}
