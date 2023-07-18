@@ -20,6 +20,7 @@ SaveData* SaveData::Load(const char* filePath)
 
 	if (size != 0x200)
 	{
+		stream.close();
 		printf("File \"%s\" is not a valid Super Mario 64 save file.\n", filePath);
 		return nullptr;
 	}
@@ -110,7 +111,8 @@ SaveData* SaveData::Load(const char* filePath)
 			}
 
 			stream.close();
-			printf("Save slot %i in file %s is corrupted.\n", s, filePath);
+			delete saveData;
+			printf("Save slot %i in file \"%s\" is corrupted.\n", s, filePath);
 			return nullptr;
 		}
 	}
@@ -141,7 +143,8 @@ SaveData* SaveData::Load(const char* filePath)
 		}
 
 		stream.close();
-		printf("Menu data in file %s is corrupted.\n", filePath);
+		delete saveData;
+		printf("Menu data in file \"%s\" is corrupted.\n", filePath);
 		return nullptr;
 	}
 
