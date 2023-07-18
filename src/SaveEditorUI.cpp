@@ -78,7 +78,7 @@ void SaveEditorUI::DoRender()
 				{
 					ImGui::Checkbox("File Exists", &saveData->saveSlots[s].FileExists);
 
-					if(!saveData->saveSlots[s].FileExists) ImGui::BeginDisabled();
+					if (!saveData->saveSlots[s].FileExists) ImGui::BeginDisabled();
 
 					if (ImGui::BeginTable("FlagsTable", 3))
 					{
@@ -211,6 +211,32 @@ void SaveEditorUI::DoRender()
 					if (!saveData->saveSlots[s].FileExists) ImGui::EndDisabled();
 				}
 			}
+
+			if (ImGui::BeginTabItem("Settings"))
+			{
+				ImGui::SeparatorText("Sound Mode");
+
+				int value = saveData->settings.soundMode;
+				ImGui::RadioButton("Stereo", &value, 0);
+				ImGui::SameLine();
+				ImGui::RadioButton("Mono", &value, 1);
+				ImGui::SameLine();
+				ImGui::RadioButton("Headset", &value, 2);
+				saveData->settings.soundMode = static_cast<uint16_t>(value);
+
+				ImGui::SeparatorText("Language");
+
+				value = saveData->settings.language;
+				ImGui::RadioButton("English", &value, 0);
+				ImGui::SameLine();
+				ImGui::RadioButton("French", &value, 1);
+				ImGui::SameLine();
+				ImGui::RadioButton("German", &value, 2);
+				saveData->settings.language = static_cast<uint16_t>(value);
+
+				ImGui::EndTabItem();
+			}
+
 			ImGui::EndTabBar();
 		}
 	}

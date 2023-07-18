@@ -7,11 +7,11 @@
 #define COURSE_COUNT 24
 #define COURSE_STAGES_COUNT 15
 
-#define SAVE_FILE_SIZE 0x38
-#define MENU_DATA_SIZE 0x20
+#define SETTINGS_DATA_MAGIC 0x4849
+#define SETTINGS_DATA_SIZE 0x20
 
-#define MENU_DATA_MAGIC 0x4849
 #define SAVE_FILE_MAGIC 0x4441
+#define SAVE_FILE_SIZE 0x38
 
 const char* const courseNames[]
 {
@@ -42,21 +42,15 @@ const char* const courseNames[]
 	"Secret Aquarium"
 };
 
-struct MenuData
+struct SettingsData
 {
 public:
 	// Each save file has a 2 bit "age" for each course. The higher this value,
 	// the older the high score is. This is used for tie-breaking when displaying
 	// on the high score screen.
 	uint32_t CoinScoreAges[NUM_SAVE_SLOTS] = {};
-
 	uint16_t soundMode = 0;
-	//public bool SoundStereo{ get { return soundMode == 0; } set { if (value) soundMode = 0; OnPropertyChanged(); } }
-	//public bool SoundMono{ get { return soundMode == 1; } set { if (value) soundMode = 1; OnPropertyChanged(); } }
-	//public bool SoundHeadset{ get { return soundMode == 2; } set { if (value) soundMode = 2; OnPropertyChanged(); } }
-
-		// Pad to match the EEPROM size of 0x200 (10 bytes on JP/US, 8 bytes on EU)
-		//u8 filler[EEPROM_SIZE / 2 - SUBTRAHEND - NUM_SAVE_SLOTS * (4 + sizeof(struct SaveFile))];
+	uint16_t language = 0;
 };
 
 struct CourseData
@@ -120,7 +114,7 @@ class SaveData
 {
 public:
 	SaveSlot saveSlots[4] = {};
-	MenuData menuData = {};
+	SettingsData settings = {};
 
 	SaveData();
 
