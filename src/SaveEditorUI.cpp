@@ -38,8 +38,7 @@ void SaveEditorUI::DoRender()
 			if (ImGui::MenuItem("Load...", "CTRL+L"))
 			{
 				if (saveData) delete saveData;
-				saveData = new SaveData();
-				saveData->Load("D:\\Consolas\\PC\\Juegos\\Super Mario 64 - PC\\sm64_save_file.bin");
+				saveData = SaveData::Load("D:\\Consolas\\PC\\Juegos\\Super Mario 64 - PC\\sm64_save_file.bin");
 			}
 			if (ImGui::MenuItem("Save...", "CTRL+S")) {}
 			ImGui::Separator();

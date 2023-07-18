@@ -5,17 +5,28 @@ SaveData::SaveData()
 
 }
 
-bool SaveData::Load(const char* filePath)
+SaveData* SaveData::Load(const char* filePath)
 {
 	std::ifstream stream = std::ifstream(filePath, std::ios::binary);
 
-	if (!stream.is_open())
+	if (!stream || !stream.is_open())
 	{
-		printf("Can't load file: %s\n", filePath);
-		return false;
+		printf("Can't open file \"%s\".\n", filePath);
+		return nullptr;
+	}
+
+	stream.seekg(0, std::ios_base::end);
+	size_t size = stream.tellg();
+
+	if (size != 0x200)
+	{
+		printf("File \"%s\" is not a valid Super Mario 64 save file.\n", filePath);
+		return nullptr;
 	}
 
 	stream.seekg(0, std::ios_base::beg);
+
+	SaveData* saveData = new SaveData();
 
 	for (int s = 0; s < NUM_SAVE_SLOTS; s++)
 	{
@@ -27,34 +38,34 @@ bool SaveData::Load(const char* filePath)
 
 			if (valid)
 			{
-				stream.read((char*)&saveSlots[s].CapLevel, 1);
-				stream.read((char*)&saveSlots[s].CapArea, 1);
-				stream.read((char*)&saveSlots[s].CapPos[0], sizeof(uint16_t) * 3);
+				stream.read((char*)&saveData->saveSlots[s].CapLevel, 1);
+				stream.read((char*)&saveData->saveSlots[s].CapArea, 1);
+				stream.read((char*)&saveData->saveSlots[s].CapPos[0], sizeof(uint16_t) * 3);
 
 				uint32_t flags;
 				stream.read((char*)&flags, sizeof(uint32_t));
 
-				saveSlots[s].FileExists = (flags & (1 << 0)) != 0;
-				saveSlots[s].HaveWingCap = (flags & (1 << 1)) != 0;
-				saveSlots[s].HaveMetalCap = (flags & (1 << 2)) != 0;
-				saveSlots[s].HaveVanishCap = (flags & (1 << 3)) != 0;
-				saveSlots[s].HaveKey1 = (flags & (1 << 4)) != 0;
-				saveSlots[s].HaveKey2 = (flags & (1 << 5)) != 0;
-				saveSlots[s].BasementDoorUnlocked = (flags & (1 << 6)) != 0;
-				saveSlots[s].UpstairsDoorUnlocked = (flags & (1 << 7)) != 0;
-				saveSlots[s].DDDMovedBack = (flags & (1 << 8)) != 0;
-				saveSlots[s].MoatDrained = (flags & (1 << 9)) != 0;
-				saveSlots[s].PSSDoorUnlocked = (flags & (1 << 10)) != 0;
-				saveSlots[s].WFDoorUnlocked = (flags & (1 << 11)) != 0;
-				saveSlots[s].CCMDoorUnlocked = (flags & (1 << 12)) != 0;
-				saveSlots[s].JRBDoorUnlocked = (flags & (1 << 13)) != 0;
-				saveSlots[s].BITDWDoorUnlocked = (flags & (1 << 14)) != 0;
-				saveSlots[s].BITSDoorUnlocked = (flags & (1 << 15)) != 0;
-				saveSlots[s].CapOnGround = (flags & (1 << 16)) != 0;
-				saveSlots[s].CapOnKlepto = (flags & (1 << 17)) != 0;
-				saveSlots[s].CapOnUkiki = (flags & (1 << 18)) != 0;
-				saveSlots[s].CapOnMrBlizzard = (flags & (1 << 19)) != 0;
-				saveSlots[s].FiftyStarDoorUnlocked = (flags & (1 << 20)) != 0;
+				saveData->saveSlots[s].FileExists = (flags & (1 << 0)) != 0;
+				saveData->saveSlots[s].HaveWingCap = (flags & (1 << 1)) != 0;
+				saveData->saveSlots[s].HaveMetalCap = (flags & (1 << 2)) != 0;
+				saveData->saveSlots[s].HaveVanishCap = (flags & (1 << 3)) != 0;
+				saveData->saveSlots[s].HaveKey1 = (flags & (1 << 4)) != 0;
+				saveData->saveSlots[s].HaveKey2 = (flags & (1 << 5)) != 0;
+				saveData->saveSlots[s].BasementDoorUnlocked = (flags & (1 << 6)) != 0;
+				saveData->saveSlots[s].UpstairsDoorUnlocked = (flags & (1 << 7)) != 0;
+				saveData->saveSlots[s].DDDMovedBack = (flags & (1 << 8)) != 0;
+				saveData->saveSlots[s].MoatDrained = (flags & (1 << 9)) != 0;
+				saveData->saveSlots[s].PSSDoorUnlocked = (flags & (1 << 10)) != 0;
+				saveData->saveSlots[s].WFDoorUnlocked = (flags & (1 << 11)) != 0;
+				saveData->saveSlots[s].CCMDoorUnlocked = (flags & (1 << 12)) != 0;
+				saveData->saveSlots[s].JRBDoorUnlocked = (flags & (1 << 13)) != 0;
+				saveData->saveSlots[s].BITDWDoorUnlocked = (flags & (1 << 14)) != 0;
+				saveData->saveSlots[s].BITSDoorUnlocked = (flags & (1 << 15)) != 0;
+				saveData->saveSlots[s].CapOnGround = (flags & (1 << 16)) != 0;
+				saveData->saveSlots[s].CapOnKlepto = (flags & (1 << 17)) != 0;
+				saveData->saveSlots[s].CapOnUkiki = (flags & (1 << 18)) != 0;
+				saveData->saveSlots[s].CapOnMrBlizzard = (flags & (1 << 19)) != 0;
+				saveData->saveSlots[s].FiftyStarDoorUnlocked = (flags & (1 << 20)) != 0;
 
 				for (int cc = 0; cc < COURSE_COUNT; cc++)
 				{
@@ -66,8 +77,8 @@ bool SaveData::Load(const char* filePath)
 
 					bool cannonOpen = (cannon & 0x80) != 0;
 
-					saveSlots[s].Courses[cc].SetStars(stars);
-					saveSlots[s].Courses[cc].CannonOpen = cannonOpen;
+					saveData->saveSlots[s].Courses[cc].SetStars(stars);
+					saveData->saveSlots[s].Courses[cc].CannonOpen = cannonOpen;
 
 					stream.seekg(-1, std::ios::cur);
 				}
@@ -76,7 +87,7 @@ bool SaveData::Load(const char* filePath)
 
 				for (int cc = 0; cc < COURSE_STAGES_COUNT; cc++)
 				{
-					stream.read((char*)&saveSlots[s].Courses[cc].MaxCoins, 1);
+					stream.read((char*)&saveData->saveSlots[s].Courses[cc].MaxCoins, 1);
 				}
 
 				if (cp == 0)
@@ -100,7 +111,7 @@ bool SaveData::Load(const char* filePath)
 
 			stream.close();
 			printf("Save slot %i in file %s is corrupted.\n", s, filePath);
-			return false;
+			return nullptr;
 		}
 	}
 
@@ -114,11 +125,11 @@ bool SaveData::Load(const char* filePath)
 		{
 			for (int s = 0; s < NUM_SAVE_SLOTS; s++)
 			{
-				stream.read((char*)&settings.CoinScoreAges[s], 4);
+				stream.read((char*)&saveData->settings.CoinScoreAges[s], 4);
 			}
 
-			stream.read((char*)&settings.soundMode, 2);
-			stream.read((char*)&settings.language, 2);
+			stream.read((char*)&saveData->settings.soundMode, 2);
+			stream.read((char*)&saveData->settings.language, 2);
 
 			break;
 		}
@@ -131,11 +142,11 @@ bool SaveData::Load(const char* filePath)
 
 		stream.close();
 		printf("Menu data in file %s is corrupted.\n", filePath);
-		return false;
+		return nullptr;
 	}
 
 	stream.close();
-	return true;
+	return saveData;
 }
 
 uint16_t SaveData::CalculateChecksum(std::ifstream& stream, const size_t size)

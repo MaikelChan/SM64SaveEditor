@@ -118,9 +118,9 @@ public:
 
 	SaveData();
 
-	bool Load(const char* filePath);
+	static SaveData* Load(const char* filePath);
 
 private:
-	uint16_t CalculateChecksum(std::ifstream& stream, const size_t size);
-	bool IsValid(std::ifstream& stream, const size_t size, const uint16_t magicToCheck);
+	static uint16_t CalculateChecksum(std::ifstream& stream, const size_t size);
+	static bool IsValid(std::ifstream& stream, const size_t size, const uint16_t magicToCheck);
 };
