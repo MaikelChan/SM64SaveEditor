@@ -121,9 +121,9 @@ void SaveEditorUI::DoRender()
 
 					if (ImGui::BeginTable("FlagsTable", 3))
 					{
-						ImGui::TableSetupColumn("one", ImGuiTableColumnFlags_WidthStretch);
-						ImGui::TableSetupColumn("two", ImGuiTableColumnFlags_WidthStretch);
-						ImGui::TableSetupColumn("three", ImGuiTableColumnFlags_WidthFixed, WINDOW_WIDTH * 0.18f);
+						ImGui::TableSetupColumn("DoorColumn", ImGuiTableColumnFlags_WidthStretch, 0.8f);
+						ImGui::TableSetupColumn("CapColumn", ImGuiTableColumnFlags_WidthStretch);
+						ImGui::TableSetupColumn("MiscColumn", ImGuiTableColumnFlags_WidthStretch, 0.4f);
 
 						ImGui::TableNextRow();
 
@@ -165,6 +165,22 @@ void SaveEditorUI::DoRender()
 							CheckboxSaveFlags("Cap on Klepto", s, showBackup, SAVE_FLAG_CAP_ON_KLEPTO);
 							CheckboxSaveFlags("Cap on Ukiki", s, showBackup, SAVE_FLAG_CAP_ON_UKIKI);
 							CheckboxSaveFlags("Cap on Mr Blizzard", s, showBackup, SAVE_FLAG_CAP_ON_MR_BLIZZARD);
+
+							ImGui::SetNextItemWidth(24);
+							if (ImGui::InputScalar("##Cap Level", ImGuiDataType_U8, &saveData->saveSlots[s][showBackup].CapLevel, NULL, NULL, "%u"))
+							{
+								if (saveData->saveSlots[s][showBackup].CapLevel > COURSE_STAGES_COUNT_INTERNAL)
+									saveData->saveSlots[s][showBackup].CapLevel = COURSE_STAGES_COUNT_INTERNAL;
+								saveData->saveSlots[s][showBackup].CalculateChecksum();
+							}
+
+							ImGui::SameLine();
+
+							ImGui::SetNextItemWidth(24);
+							if (ImGui::InputScalar("Cap Level/Area", ImGuiDataType_U8, &saveData->saveSlots[s][showBackup].CapArea, NULL, NULL, "%u"))
+							{
+								saveData->saveSlots[s][showBackup].CalculateChecksum();
+							}
 
 							ImGui::EndTable();
 						}
@@ -335,7 +351,7 @@ void SaveEditorUI::DoRender()
 						ImGui::TableSetColumnIndex(1);
 						ImGui::Text("%s", courseNames[c]);
 
-						const ImU8 minRange = 0, maxRange = 4, step = 1;
+						const ImU8 step = 1;
 						int shift = c * 2;
 
 						for (int s = 0; s < NUM_SAVE_SLOTS; s++)

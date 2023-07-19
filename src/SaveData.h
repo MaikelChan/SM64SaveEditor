@@ -8,6 +8,7 @@
 #define NUM_COPIES 2
 #define COURSE_COUNT 24
 #define COURSE_STAGES_COUNT 15
+#define COURSE_STAGES_COUNT_INTERNAL 38 // This is the actual game's number of levels, including unused ones.
 
 #define SETTINGS_DATA_MAGIC 0x4849
 #define SETTINGS_DATA_SIZE 0x20
