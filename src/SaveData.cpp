@@ -20,135 +20,24 @@ SaveData* SaveData::Load(const char* filePath)
 	stream.seekg(0, std::ios_base::end);
 	size_t size = stream.tellg();
 
-	if (size != 0x200)
+	if (size != SAVE_DATA_SIZE)
 	{
 		stream.close();
 		throw std::runtime_error(std::format("File \"{}\" is not a valid Super Mario 64 save file.", filePath));
 		return nullptr;
 	}
 
-	stream.seekg(0, std::ios_base::beg);
+	if (sizeof(SaveData) != SAVE_DATA_SIZE)
+	{
+		stream.close();
+		throw std::runtime_error(std::format("Size of SaveData struct is not {} but {}. This shouldn't be happening.", SAVE_DATA_SIZE, sizeof(SaveData)));
+		return nullptr;
+	}
 
 	SaveData* saveData = new SaveData();
 
-	for (int s = 0; s < NUM_SAVE_SLOTS; s++)
-	{
-		for (int cp = 0; cp < NUM_COPIES; cp++)
-		{
-			size_t currentPosition = stream.tellg();
-			bool valid = IsValid(stream, SAVE_FILE_SIZE, SAVE_FILE_MAGIC);
-			stream.seekg(currentPosition, std::ios::beg);
-
-			if (valid)
-			{
-				stream.read((char*)&saveData->saveSlots[s].CapLevel, 1);
-				stream.read((char*)&saveData->saveSlots[s].CapArea, 1);
-				stream.read((char*)&saveData->saveSlots[s].CapPos[0], sizeof(uint16_t) * 3);
-
-				uint32_t flags;
-				stream.read((char*)&flags, sizeof(uint32_t));
-
-				saveData->saveSlots[s].FileExists = (flags & (1 << 0)) != 0;
-				saveData->saveSlots[s].HaveWingCap = (flags & (1 << 1)) != 0;
-				saveData->saveSlots[s].HaveMetalCap = (flags & (1 << 2)) != 0;
-				saveData->saveSlots[s].HaveVanishCap = (flags & (1 << 3)) != 0;
-				saveData->saveSlots[s].HaveKey1 = (flags & (1 << 4)) != 0;
-				saveData->saveSlots[s].HaveKey2 = (flags & (1 << 5)) != 0;
-				saveData->saveSlots[s].BasementDoorUnlocked = (flags & (1 << 6)) != 0;
-				saveData->saveSlots[s].UpstairsDoorUnlocked = (flags & (1 << 7)) != 0;
-				saveData->saveSlots[s].DDDMovedBack = (flags & (1 << 8)) != 0;
-				saveData->saveSlots[s].MoatDrained = (flags & (1 << 9)) != 0;
-				saveData->saveSlots[s].PSSDoorUnlocked = (flags & (1 << 10)) != 0;
-				saveData->saveSlots[s].WFDoorUnlocked = (flags & (1 << 11)) != 0;
-				saveData->saveSlots[s].CCMDoorUnlocked = (flags & (1 << 12)) != 0;
-				saveData->saveSlots[s].JRBDoorUnlocked = (flags & (1 << 13)) != 0;
-				saveData->saveSlots[s].BITDWDoorUnlocked = (flags & (1 << 14)) != 0;
-				saveData->saveSlots[s].BITSDoorUnlocked = (flags & (1 << 15)) != 0;
-				saveData->saveSlots[s].CapOnGround = (flags & (1 << 16)) != 0;
-				saveData->saveSlots[s].CapOnKlepto = (flags & (1 << 17)) != 0;
-				saveData->saveSlots[s].CapOnUkiki = (flags & (1 << 18)) != 0;
-				saveData->saveSlots[s].CapOnMrBlizzard = (flags & (1 << 19)) != 0;
-				saveData->saveSlots[s].FiftyStarDoorUnlocked = (flags & (1 << 20)) != 0;
-
-				for (int cc = 0; cc < COURSE_COUNT; cc++)
-				{
-					uint8_t stars;
-					stream.read((char*)&stars, 1);
-
-					uint8_t cannon;
-					stream.read((char*)&cannon, 1);
-
-					bool cannonOpen = (cannon & 0x80) != 0;
-
-					saveData->saveSlots[s].Courses[cc].SetStars(stars);
-					saveData->saveSlots[s].Courses[cc].CannonOpen = cannonOpen;
-
-					stream.seekg(-1, std::ios::cur);
-				}
-
-				stream.seekg(1, std::ios::cur);
-
-				for (int cc = 0; cc < COURSE_STAGES_COUNT; cc++)
-				{
-					stream.read((char*)&saveData->saveSlots[s].Courses[cc].MaxCoins, 1);
-				}
-
-				if (cp == 0)
-				{
-					stream.seekg(4 + SAVE_FILE_SIZE, std::ios::cur);
-					break;
-				}
-				else
-				{
-					stream.seekg(4, std::ios::cur);
-				}
-
-				break;
-			}
-
-			if (cp == 0)
-			{
-				stream.seekg(SAVE_FILE_SIZE, std::ios::cur);
-				continue;
-			}
-
-			stream.close();
-			delete saveData;
-			throw std::runtime_error(std::format("Save slot {} in file \"{}\" is corrupted.", s, filePath));
-			return nullptr;
-		}
-	}
-
-	for (int cp = 0; cp < NUM_COPIES; cp++)
-	{
-		size_t currentPosition = stream.tellg();
-		bool valid = IsValid(stream, SETTINGS_DATA_SIZE, SETTINGS_DATA_MAGIC);
-		stream.seekg(currentPosition, std::ios::beg);
-
-		if (valid)
-		{
-			for (int s = 0; s < NUM_SAVE_SLOTS; s++)
-			{
-				stream.read((char*)&saveData->settings.CoinScoreAges[s], 4);
-			}
-
-			stream.read((char*)&saveData->settings.soundMode, 2);
-			stream.read((char*)&saveData->settings.language, 2);
-
-			break;
-		}
-
-		if (cp == 0)
-		{
-			stream.seekg(SETTINGS_DATA_SIZE, std::ios::cur);
-			continue;
-		}
-
-		stream.close();
-		delete saveData;
-		throw std::runtime_error(std::format("Menu data in file \"{}\" is corrupted.", filePath));
-		return nullptr;
-	}
+	stream.seekg(0, std::ios_base::beg);
+	stream.read((char*)saveData, SAVE_DATA_SIZE);
 
 	stream.close();
 	return saveData;

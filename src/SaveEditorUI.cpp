@@ -1,7 +1,5 @@
 ﻿#include "SaveEditorUI.h"
 #include <format>
-#include "imgui/imgui.h"
-#include "main.h"
 
 SaveEditorUI::SaveEditorUI()
 {
@@ -10,6 +8,8 @@ SaveEditorUI::SaveEditorUI()
 
 	currentFileName = nullptr;
 	saveData = nullptr;
+
+	showBackup = false;
 }
 
 SaveEditorUI::~SaveEditorUI()
@@ -100,9 +100,14 @@ void SaveEditorUI::DoRender()
 			{
 				if (ImGui::BeginTabItem(tabNames[s]))
 				{
-					ImGui::Checkbox("File Exists", &saveData->saveSlots[s].FileExists);
+					ImGui::Checkbox("Show backup", &showBackup);
+					ImGui::SameLine();
 
-					if (!saveData->saveSlots[s].FileExists) ImGui::BeginDisabled();
+					bool fileExists = CheckboxSaveFlags("File Exists", s, showBackup, SAVE_FLAG_FILE_EXISTS);
+					if (!fileExists) ImGui::BeginDisabled();
+
+					ImGui::SameLine();
+					PrintChecksum(saveData->saveSlots[s][showBackup].Checksum);
 
 					if (ImGui::BeginTable("FlagsTable", 3))
 					{
@@ -119,17 +124,17 @@ void SaveEditorUI::DoRender()
 							ImGui::TableNextRow();
 
 							ImGui::TableSetColumnIndex(0);
-							ImGui::Checkbox("Basement Door", &saveData->saveSlots[s].BasementDoorUnlocked);
-							ImGui::Checkbox("WF Door", &saveData->saveSlots[s].WFDoorUnlocked);
-							ImGui::Checkbox("CCM Door", &saveData->saveSlots[s].CCMDoorUnlocked);
-							ImGui::Checkbox("BITDW Door", &saveData->saveSlots[s].BITDWDoorUnlocked);
-							ImGui::Checkbox("50 Star Door", &saveData->saveSlots[s].FiftyStarDoorUnlocked);
+							CheckboxSaveFlags("Basement Door", s, showBackup, SAVE_FLAG_UNLOCKED_BASEMENT_DOOR);
+							CheckboxSaveFlags("WF Door", s, showBackup, SAVE_FLAG_UNLOCKED_WF_DOOR);
+							CheckboxSaveFlags("CCM Door", s, showBackup, SAVE_FLAG_UNLOCKED_CCM_DOOR);
+							CheckboxSaveFlags("BITDW Door", s, showBackup, SAVE_FLAG_UNLOCKED_BITDW_DOOR);
+							CheckboxSaveFlags("50 Star Door", s, showBackup, SAVE_FLAG_UNLOCKED_50_STAR_DOOR);
 
 							ImGui::TableSetColumnIndex(1);
-							ImGui::Checkbox("Upstairs Door", &saveData->saveSlots[s].UpstairsDoorUnlocked);
-							ImGui::Checkbox("JRB Door", &saveData->saveSlots[s].JRBDoorUnlocked);
-							ImGui::Checkbox("PSS Door", &saveData->saveSlots[s].PSSDoorUnlocked);
-							ImGui::Checkbox("BITFS Door", &saveData->saveSlots[s].BITSDoorUnlocked);
+							CheckboxSaveFlags("Upstairs Door", s, showBackup, SAVE_FLAG_UNLOCKED_UPSTAIRS_DOOR);
+							CheckboxSaveFlags("JRB Door", s, showBackup, SAVE_FLAG_UNLOCKED_JRB_DOOR);
+							CheckboxSaveFlags("PSS Door", s, showBackup, SAVE_FLAG_UNLOCKED_PSS_DOOR);
+							CheckboxSaveFlags("BITFS Door", s, showBackup, SAVE_FLAG_UNLOCKED_BITFS_DOOR);
 
 							ImGui::EndTable();
 						}
@@ -141,25 +146,46 @@ void SaveEditorUI::DoRender()
 							ImGui::TableNextRow();
 
 							ImGui::TableSetColumnIndex(0);
-							ImGui::Checkbox("Have Wing Cap", &saveData->saveSlots[s].HaveWingCap);
-							ImGui::Checkbox("Have Metal Cap", &saveData->saveSlots[s].HaveMetalCap);
-							ImGui::Checkbox("Have Vanish Cap", &saveData->saveSlots[s].HaveVanishCap);
+							CheckboxSaveFlags("Have Wing Cap", s, showBackup, SAVE_FLAG_HAVE_WING_CAP);
+							CheckboxSaveFlags("Have Metal Cap", s, showBackup, SAVE_FLAG_HAVE_METAL_CAP);
+							CheckboxSaveFlags("Have Vanish Cap", s, showBackup, SAVE_FLAG_HAVE_VANISH_CAP);
 
 							ImGui::TableSetColumnIndex(1);
-							ImGui::Checkbox("Cap on Ground", &saveData->saveSlots[s].CapOnGround);
-							ImGui::Checkbox("Cap on Klepto", &saveData->saveSlots[s].CapOnKlepto);
-							ImGui::Checkbox("Cap on Ukiki", &saveData->saveSlots[s].CapOnUkiki);
-							ImGui::Checkbox("Cap on Mr Blizzard", &saveData->saveSlots[s].CapOnMrBlizzard);
+							CheckboxSaveFlags("Cap on Ground", s, showBackup, SAVE_FLAG_CAP_ON_GROUND);
+							CheckboxSaveFlags("Cap on Klepto", s, showBackup, SAVE_FLAG_CAP_ON_KLEPTO);
+							CheckboxSaveFlags("Cap on Ukiki", s, showBackup, SAVE_FLAG_CAP_ON_UKIKI);
+							CheckboxSaveFlags("Cap on Mr Blizzard", s, showBackup, SAVE_FLAG_CAP_ON_MR_BLIZZARD);
 
 							ImGui::EndTable();
 						}
 
 						ImGui::TableSetColumnIndex(2);
 						ImGui::SeparatorText("Miscellaneous");
-						ImGui::Checkbox("Basement Key", &saveData->saveSlots[s].HaveKey1);
-						ImGui::Checkbox("Upstairs Key", &saveData->saveSlots[s].HaveKey2);
-						ImGui::Checkbox("Moat Drained", &saveData->saveSlots[s].MoatDrained);
-						ImGui::Checkbox("DDD Moved Back", &saveData->saveSlots[s].DDDMovedBack);
+						CheckboxSaveFlags("Basement Key", s, showBackup, SAVE_FLAG_HAVE_KEY_1);
+						CheckboxSaveFlags("Upstairs Key", s, showBackup, SAVE_FLAG_HAVE_KEY_2);
+						CheckboxSaveFlags("Moat Drained", s, showBackup, SAVE_FLAG_MOAT_DRAINED);
+						CheckboxSaveFlags("DDD Moved Back", s, showBackup, SAVE_FLAG_DDD_MOVED_BACK);
+
+						ImGui::EndTable();
+					}
+
+					ImGui::SeparatorText("Castle Stars");
+
+					if (ImGui::BeginTable("CastleStarsTable", 2))
+					{
+						ImGui::TableNextRow();
+
+						ImGui::TableSetColumnIndex(0);
+						CheckboxSaveFlags("Toad Star 1", s, showBackup, SAVE_FLAG_COLLECTED_TOAD_STAR_1);
+						ImGui::SameLine();
+						CheckboxSaveFlags("Toad Star 2", s, showBackup, SAVE_FLAG_COLLECTED_TOAD_STAR_2);
+						ImGui::SameLine();
+						CheckboxSaveFlags("Toad Star 3", s, showBackup, SAVE_FLAG_COLLECTED_TOAD_STAR_3);
+
+						ImGui::TableSetColumnIndex(1);
+						CheckboxSaveFlags("Mips Star 1", s, showBackup, SAVE_FLAG_COLLECTED_MIPS_STAR_1);
+						ImGui::SameLine();
+						CheckboxSaveFlags("Mips Star 2", s, showBackup, SAVE_FLAG_COLLECTED_MIPS_STAR_2);
 
 						ImGui::EndTable();
 					}
@@ -197,37 +223,33 @@ void SaveEditorUI::DoRender()
 							ImGui::TableSetColumnIndex(1);
 							ImGui::Text("%s", courseNames[c]);
 
-							ImGui::TableSetColumnIndex(2);
-							ImGui::Checkbox("##Star 1", &saveData->saveSlots[s].Courses[c].Star1);
+							for (int st = 0; st < MAX_STARS_PER_LEVEL; st++)
+							{
+								if (st >= courseStarCount[c]) continue;
 
-							ImGui::TableSetColumnIndex(3);
-							ImGui::Checkbox("##Star 2", &saveData->saveSlots[s].Courses[c].Star2);
+								ImGui::PushID(st);
 
-							ImGui::TableSetColumnIndex(4);
-							ImGui::Checkbox("##Star 3", &saveData->saveSlots[s].Courses[c].Star3);
+								ImGui::TableSetColumnIndex(2 + st);
+								CheckboxCourseData("##Star", s, showBackup, c, 1 << st);
 
-							ImGui::TableSetColumnIndex(5);
-							ImGui::Checkbox("##Star 4", &saveData->saveSlots[s].Courses[c].Star4);
+								ImGui::PopID();
+							}
 
-							ImGui::TableSetColumnIndex(6);
-							ImGui::Checkbox("##Star 5", &saveData->saveSlots[s].Courses[c].Star5);
-
-							ImGui::TableSetColumnIndex(7);
-							ImGui::Checkbox("##Star 6", &saveData->saveSlots[s].Courses[c].Star6);
-
-							ImGui::TableSetColumnIndex(8);
-							//ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetColumnWidth(8) / 2) - (ImGui::GetItemRectSize().x / 2));
-							ImGui::Checkbox("##100 Coin Star", &saveData->saveSlots[s].Courses[c].HundredCoinStar);
-
-							ImGui::TableSetColumnIndex(9);
-							//ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetColumnWidth(9) / 2) - (ImGui::GetItemRectSize().x / 2));
-							ImGui::Checkbox("##Cannon Open", &saveData->saveSlots[s].Courses[c].CannonOpen);
-
-							const ImU8 u8_min = 0, u8_max = 255;
+							if (courseHasCannon[c])
+							{
+								ImGui::TableSetColumnIndex(9);
+								CheckboxCourseData("##Cannon Open", s, showBackup, c + 1, SAVE_COURSE_FLAG_STAR_CANNON_OPEN);
+							}
 
 							ImGui::TableSetColumnIndex(10);
-							//ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetColumnWidth(10) / 2) - (ImGui::CalcItemWidth() / 2));
-							ImGui::InputScalar("##Max Coins", ImGuiDataType_U8, &saveData->saveSlots[s].Courses[c].MaxCoins, NULL, NULL, "%u");
+
+							if (c < COURSE_STAGES_COUNT)
+							{
+								if (ImGui::InputScalar("##Max Coins", ImGuiDataType_U8, &saveData->saveSlots[s][showBackup].CourseCoinScores[c], NULL, NULL, "%u"))
+								{
+									saveData->saveSlots[s][showBackup].CalculateChecksum();
+								}
+							}
 
 							ImGui::PopID();
 						}
@@ -236,31 +258,44 @@ void SaveEditorUI::DoRender()
 
 					ImGui::EndTabItem();
 
-					if (!saveData->saveSlots[s].FileExists) ImGui::EndDisabled();
+					if (!fileExists) ImGui::EndDisabled();
 				}
 			}
 
 			if (ImGui::BeginTabItem("Settings"))
 			{
+				ImGui::Checkbox("Show backup", &showBackup);
+
+				ImGui::SameLine();
+				PrintChecksum(saveData->settings[showBackup].Checksum);
+
 				ImGui::SeparatorText("Sound Mode");
 
-				int value = saveData->settings.soundMode;
+				int value = saveData->settings[showBackup].soundMode;
 				ImGui::RadioButton("Stereo", &value, 0);
 				ImGui::SameLine();
 				ImGui::RadioButton("Mono", &value, 1);
 				ImGui::SameLine();
 				ImGui::RadioButton("Headset", &value, 2);
-				saveData->settings.soundMode = static_cast<uint16_t>(value);
+				if (saveData->settings[showBackup].soundMode != value)
+				{
+					saveData->settings[showBackup].soundMode = static_cast<uint16_t>(value);
+					saveData->settings[showBackup].CalculateChecksum();
+				}
 
 				ImGui::SeparatorText("Language");
 
-				value = saveData->settings.language;
+				value = saveData->settings[showBackup].language;
 				ImGui::RadioButton("English", &value, 0);
 				ImGui::SameLine();
 				ImGui::RadioButton("French", &value, 1);
 				ImGui::SameLine();
 				ImGui::RadioButton("German", &value, 2);
-				saveData->settings.language = static_cast<uint16_t>(value);
+				if (saveData->settings[showBackup].language != value)
+				{
+					saveData->settings[showBackup].language = static_cast<uint16_t>(value);
+					saveData->settings[showBackup].CalculateChecksum();
+				}
 
 				ImGui::SeparatorText("Coin Ages");
 
@@ -297,7 +332,7 @@ void SaveEditorUI::DoRender()
 						{
 							ImGui::PushID(s);
 
-							uint8_t value = (saveData->settings.CoinScoreAges[s] >> shift) & 0x3;
+							uint8_t value = (saveData->settings[showBackup].CoinScoreAges[s] >> shift) & 0x3;
 
 							ImGui::TableSetColumnIndex(2 + s);
 
@@ -305,8 +340,9 @@ void SaveEditorUI::DoRender()
 							if (ImGui::InputScalar("##CoinAgeCell", ImGuiDataType_U8, &value, &step, NULL, "%u"))
 							{
 								if (value > 3) value = 3;
-								saveData->settings.CoinScoreAges[s] &= ~(0x3 << shift);
-								saveData->settings.CoinScoreAges[s] |= value << shift;
+								saveData->settings[showBackup].CoinScoreAges[s] &= ~(0x3 << shift);
+								saveData->settings[showBackup].CoinScoreAges[s] |= value << shift;
+								saveData->settings[showBackup].CalculateChecksum();
 							}
 
 							ImGui::PopID();

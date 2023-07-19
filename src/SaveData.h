@@ -2,6 +2,8 @@
 
 #include <fstream>
 
+#define SAVE_DATA_SIZE 0x200
+
 #define NUM_SAVE_SLOTS 4
 #define NUM_COPIES 2
 #define COURSE_COUNT 24
@@ -10,8 +12,46 @@
 #define SETTINGS_DATA_MAGIC 0x4849
 #define SETTINGS_DATA_SIZE 0x20
 
-#define SAVE_FILE_MAGIC 0x4441
-#define SAVE_FILE_SIZE 0x38
+#define SAVE_SLOT_MAGIC 0x4441
+#define SAVE_SLOT_SIZE 0x38
+
+#define MAX_STARS_PER_LEVEL 7
+
+#define SAVE_FLAG_FILE_EXISTS             (1 << 0)
+#define SAVE_FLAG_HAVE_WING_CAP           (1 << 1)
+#define SAVE_FLAG_HAVE_METAL_CAP          (1 << 2)
+#define SAVE_FLAG_HAVE_VANISH_CAP         (1 << 3)
+#define SAVE_FLAG_HAVE_KEY_1              (1 << 4)
+#define SAVE_FLAG_HAVE_KEY_2              (1 << 5)
+#define SAVE_FLAG_UNLOCKED_BASEMENT_DOOR  (1 << 6)
+#define SAVE_FLAG_UNLOCKED_UPSTAIRS_DOOR  (1 << 7)
+#define SAVE_FLAG_DDD_MOVED_BACK          (1 << 8)
+#define SAVE_FLAG_MOAT_DRAINED            (1 << 9)
+#define SAVE_FLAG_UNLOCKED_PSS_DOOR       (1 << 10)
+#define SAVE_FLAG_UNLOCKED_WF_DOOR        (1 << 11)
+#define SAVE_FLAG_UNLOCKED_CCM_DOOR       (1 << 12)
+#define SAVE_FLAG_UNLOCKED_JRB_DOOR       (1 << 13)
+#define SAVE_FLAG_UNLOCKED_BITDW_DOOR     (1 << 14)
+#define SAVE_FLAG_UNLOCKED_BITFS_DOOR     (1 << 15)
+#define SAVE_FLAG_CAP_ON_GROUND           (1 << 16)
+#define SAVE_FLAG_CAP_ON_KLEPTO           (1 << 17)
+#define SAVE_FLAG_CAP_ON_UKIKI            (1 << 18)
+#define SAVE_FLAG_CAP_ON_MR_BLIZZARD      (1 << 19)
+#define SAVE_FLAG_UNLOCKED_50_STAR_DOOR   (1 << 20)
+#define SAVE_FLAG_COLLECTED_TOAD_STAR_1   (1 << 24)
+#define SAVE_FLAG_COLLECTED_TOAD_STAR_2   (1 << 25)
+#define SAVE_FLAG_COLLECTED_TOAD_STAR_3   (1 << 26)
+#define SAVE_FLAG_COLLECTED_MIPS_STAR_1   (1 << 27)
+#define SAVE_FLAG_COLLECTED_MIPS_STAR_2   (1 << 28)
+
+#define SAVE_COURSE_FLAG_STAR_1           (1 << 0)
+#define SAVE_COURSE_FLAG_STAR_2           (1 << 1)
+#define SAVE_COURSE_FLAG_STAR_3           (1 << 2)
+#define SAVE_COURSE_FLAG_STAR_4           (1 << 3)
+#define SAVE_COURSE_FLAG_STAR_5           (1 << 4)
+#define SAVE_COURSE_FLAG_STAR_6           (1 << 5)
+#define SAVE_COURSE_FLAG_STAR_100_COIN    (1 << 6)
+#define SAVE_COURSE_FLAG_STAR_CANNON_OPEN (1 << 7)
 
 const char* const courseNames[]
 {
@@ -42,79 +82,95 @@ const char* const courseNames[]
 	"Secret Aquarium"
 };
 
+const uint8_t const courseStarCount[]
+{
+	7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, // Main courses
+	1, 1, 1, 2, 1, 1, 1, 1, 1                    // Extra courses
+};
+
+const bool const courseHasCannon[]
+{
+	true, true, true, true, false, false, false, true, false, true, true, true, true, false, true, // Main courses
+	false, false, false, false, false, false, false, true, false                                    // Extra courses
+};
+
 struct SettingsData
 {
 public:
 	// Each save file has a 2 bit "age" for each course. The higher this value,
 	// the older the high score is. This is used for tie-breaking when displaying
 	// on the high score screen.
-	uint32_t CoinScoreAges[NUM_SAVE_SLOTS] = {};
-	uint16_t soundMode = 0;
-	uint16_t language = 0;
-};
+	uint32_t CoinScoreAges[NUM_SAVE_SLOTS];
+	uint16_t soundMode;
+	uint16_t language;
+	uint8_t padding[8];
+	uint16_t Magic;
+	uint16_t Checksum;
 
-struct CourseData
-{
-public:
-	bool Star1 = false;
-	bool Star2 = false;
-	bool Star3 = false;
-	bool Star4 = false;
-	bool Star5 = false;
-	bool Star6 = false;
-	bool HundredCoinStar = false;
-	bool CannonOpen = false;
-	uint8_t MaxCoins = 0;
-
-	void SetStars(const uint8_t stars)
+	inline void CalculateChecksum()
 	{
-		Star1 = (stars & (1 << 0)) != 0;
-		Star2 = (stars & (1 << 1)) != 0;
-		Star3 = (stars & (1 << 2)) != 0;
-		Star4 = (stars & (1 << 3)) != 0;
-		Star5 = (stars & (1 << 4)) != 0;
-		Star6 = (stars & (1 << 5)) != 0;
-		HundredCoinStar = (stars & (1 << 6)) != 0;
+		Checksum = 0;
+		uint8_t* p = reinterpret_cast<uint8_t*>(&CoinScoreAges[0]);
+
+		for (int i = 0; i < SETTINGS_DATA_SIZE - 2; i++)
+		{
+			Checksum += *p++;
+		}
 	}
 };
 
 struct SaveSlot
 {
 public:
-	uint8_t CapLevel = 0;
-	uint8_t CapArea = 0;
-	uint16_t CapPos[3] = {};
+	uint8_t CapLevel;
+	uint8_t CapArea;
+	uint16_t CapPos[3];
+	uint32_t Flags;
+	uint8_t CourseData[COURSE_COUNT];
+	uint8_t unusedCourseData;
+	uint8_t CourseCoinScores[COURSE_STAGES_COUNT];
+	uint16_t Magic;
+	uint16_t Checksum;
 
-	bool FileExists = false;
-	bool HaveWingCap = false;
-	bool HaveMetalCap = false;
-	bool HaveVanishCap = false;
-	bool HaveKey1 = false;
-	bool HaveKey2 = false;
-	bool BasementDoorUnlocked = false;
-	bool UpstairsDoorUnlocked = false;
-	bool DDDMovedBack = false;
-	bool MoatDrained = false;
-	bool PSSDoorUnlocked = false;
-	bool WFDoorUnlocked = false;
-	bool CCMDoorUnlocked = false;
-	bool JRBDoorUnlocked = false;
-	bool BITDWDoorUnlocked = false;
-	bool BITSDoorUnlocked = false;
-	bool CapOnGround = false;
-	bool CapOnKlepto = false;
-	bool CapOnUkiki = false;
-	bool CapOnMrBlizzard = false;
-	bool FiftyStarDoorUnlocked = false;
+	inline void CalculateChecksum()
+	{
+		Checksum = 0;
+		uint8_t* p = &CapLevel;
 
-	CourseData Courses[COURSE_COUNT] = {};
+		for (int i = 0; i < SAVE_SLOT_SIZE - 2; i++)
+		{
+			Checksum += *p++;
+		}
+	}
+
+	inline bool GetFlag(const uint32_t mask)
+	{
+		return (Flags & mask) != 0;
+	}
+
+	inline void SetFlag(const uint32_t mask, const bool value)
+	{
+		if (value) Flags |= mask;
+		else Flags &= ~mask;
+	}
+
+	inline bool GetCourseDataFlag(const uint8_t courseIndex, const uint8_t mask)
+	{
+		return (CourseData[courseIndex] & mask) != 0;
+	}
+
+	inline void SetCourseDataFlag(const uint8_t courseIndex, const uint8_t mask, const bool value)
+	{
+		if (value) CourseData[courseIndex] |= mask;
+		else CourseData[courseIndex] &= ~mask;
+	}
 };
 
 class SaveData
 {
 public:
-	SaveSlot saveSlots[4] = {};
-	SettingsData settings = {};
+	SaveSlot saveSlots[NUM_SAVE_SLOTS][NUM_COPIES] = {};
+	SettingsData settings[NUM_COPIES] = {};
 
 	SaveData();
 
