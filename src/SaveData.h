@@ -82,13 +82,13 @@ const char* const courseNames[]
 	"Secret Aquarium"
 };
 
-const uint8_t const courseStarCount[]
+const uint8_t courseStarCount[]
 {
 	7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, // Main courses
 	1, 1, 1, 2, 1, 1, 1, 1, 1                    // Extra courses
 };
 
-const bool const courseHasCannon[]
+const bool courseHasCannon[]
 {
 	true, true, true, true, false, false, false, true, false, true, true, true, true, false, true, // Main courses
 	false, false, false, false, false, false, false, true, false                                    // Extra courses

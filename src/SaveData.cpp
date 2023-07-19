@@ -1,5 +1,5 @@
 #include "SaveData.h"
-#include <format>
+#include <string>
 #include <exception>
 
 SaveData::SaveData()
@@ -13,7 +13,7 @@ SaveData* SaveData::Load(const char* filePath)
 
 	if (!stream || !stream.is_open())
 	{
-		throw std::runtime_error(std::format("Can't open file \"{}\".", filePath));
+		throw std::runtime_error(std::string("Can't open file \"") + filePath + "\".");
 		return nullptr;
 	}
 
@@ -23,14 +23,14 @@ SaveData* SaveData::Load(const char* filePath)
 	if (size != SAVE_DATA_SIZE)
 	{
 		stream.close();
-		throw std::runtime_error(std::format("File \"{}\" is not a valid Super Mario 64 save file.", filePath));
+		throw std::runtime_error(std::string("File \"") + filePath + "\" is not a valid Super Mario 64 save file.");
 		return nullptr;
 	}
 
 	if (sizeof(SaveData) != SAVE_DATA_SIZE)
 	{
 		stream.close();
-		throw std::runtime_error(std::format("Size of SaveData struct is not {} but {}. This shouldn't be happening.", SAVE_DATA_SIZE, sizeof(SaveData)));
+		throw std::runtime_error(std::string("Size of SaveData struct is not ") + std::to_string(SAVE_DATA_SIZE) + " but " + std::to_string(sizeof(SaveData)) + ". This shouldn't be happening.");
 		return nullptr;
 	}
 
@@ -49,7 +49,7 @@ void SaveData::Save(const char* filePath, const SaveData* saveData)
 
 	if (!stream || !stream.is_open())
 	{
-		throw std::runtime_error(std::format("Can't open file \"{}\".", filePath));
+		throw std::runtime_error(std::string("Can't open file \"") + filePath + "\".");
 	}
 
 	stream.write((char*)saveData, SAVE_DATA_SIZE);

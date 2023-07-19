@@ -42,13 +42,13 @@ void PopupDialog::DoRender()
 		switch (type)
 		{
 		case MessageTypes::Error:
-			ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.4f, 1.0f), message.c_str());
+			ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.4f, 1.0f), "%s", message.c_str());
 			break;
 		case MessageTypes::Warning:
-			ImGui::TextColored(ImVec4(1.0f, 0.7f, 0.4f, 1.0f), message.c_str());
+			ImGui::TextColored(ImVec4(1.0f, 0.7f, 0.4f, 1.0f), "%s", message.c_str());
 			break;
 		default:
-			ImGui::Text(message.c_str());
+			ImGui::Text("%s", message.c_str());
 			break;
 		}
 
