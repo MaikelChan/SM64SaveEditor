@@ -175,6 +175,7 @@ public:
 	SaveData();
 
 	static SaveData* Load(const char* filePath);
+	static void Save(const char* filePath, const SaveData* saveData);
 
 private:
 	static uint16_t CalculateChecksum(std::ifstream& stream, const size_t size);

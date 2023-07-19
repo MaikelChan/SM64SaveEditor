@@ -43,6 +43,19 @@ SaveData* SaveData::Load(const char* filePath)
 	return saveData;
 }
 
+void SaveData::Save(const char* filePath, const SaveData* saveData)
+{
+	std::ofstream stream = std::ofstream(filePath, std::ios::binary);
+
+	if (!stream || !stream.is_open())
+	{
+		throw std::runtime_error(std::format("Can't open file \"{}\".", filePath));
+	}
+
+	stream.write((char*)saveData, SAVE_DATA_SIZE);
+	stream.close();
+}
+
 uint16_t SaveData::CalculateChecksum(std::ifstream& stream, const size_t size)
 {
 	uint16_t chksum = 0;

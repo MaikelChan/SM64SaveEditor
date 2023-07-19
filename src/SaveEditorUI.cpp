@@ -61,7 +61,18 @@ void SaveEditorUI::DoRender()
 
 			if (ImGui::MenuItem("Save..."))
 			{
-
+				if (saveData)
+				{
+					try
+					{
+						SaveData::Save("D:\\Consolas\\PC\\Juegos\\Super Mario 64 - PC\\sm64_save_file.bin", saveData);
+					}
+					catch (const std::runtime_error& error)
+					{
+						popupDialog->SetMessage(MessageTypes::Error, "Error", error.what());
+						popupDialog->SetIsVisible(true);
+					}
+				}
 			}
 
 			ImGui::Separator();
@@ -361,7 +372,7 @@ void SaveEditorUI::DoRender()
 	}
 	ImGui::End();
 
-	ImGui::ShowDemoWindow();
+	//ImGui::ShowDemoWindow();
 
 	popupDialog->Render();
 	aboutWindow->Render();
