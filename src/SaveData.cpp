@@ -1,10 +1,11 @@
 #include "SaveData.h"
 #include <string>
 #include <exception>
+#include <cassert>
 
 SaveData::SaveData()
 {
-
+	assert(sizeof(SaveData) == SAVE_DATA_SIZE);
 }
 
 SaveData* SaveData::Load(const char* filePath)
@@ -13,7 +14,7 @@ SaveData* SaveData::Load(const char* filePath)
 
 	if (!stream || !stream.is_open())
 	{
-		throw std::runtime_error(std::string("Can't open file \"") + filePath + "\".");
+		throw std::runtime_error("There was an error trying to open open the file.");
 		return nullptr;
 	}
 
@@ -23,14 +24,7 @@ SaveData* SaveData::Load(const char* filePath)
 	if (size != SAVE_DATA_SIZE)
 	{
 		stream.close();
-		throw std::runtime_error(std::string("File \"") + filePath + "\" is not a valid Super Mario 64 save file.");
-		return nullptr;
-	}
-
-	if (sizeof(SaveData) != SAVE_DATA_SIZE)
-	{
-		stream.close();
-		throw std::runtime_error(std::string("Size of SaveData struct is not ") + std::to_string(SAVE_DATA_SIZE) + " but " + std::to_string(sizeof(SaveData)) + ". This shouldn't be happening.");
+		throw std::runtime_error("The selected file is not a valid Super Mario 64 save file.");
 		return nullptr;
 	}
 
