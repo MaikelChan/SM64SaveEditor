@@ -1,14 +1,16 @@
 ﻿#include "SaveEditorUI.h"
+#include <nlohmann/json.hpp>
 
 SaveEditorUI::SaveEditorUI()
 {
 	aboutWindow = new AboutWindow();
 	popupDialog = new PopupDialog();
 
-	currentFileName = nullptr;
 	saveData = nullptr;
 
 	showBackup = false;
+
+	LoadConfig();
 }
 
 SaveEditorUI::~SaveEditorUI()
@@ -391,4 +393,65 @@ void SaveEditorUI::DoRender()
 
 	popupDialog->Render();
 	aboutWindow->Render();
+
+bool SaveEditorUI::CheckboxSaveFlags(const char* label, const uint8_t saveSlot, const uint8_t copyIndex, const uint32_t flag)
+{
+	bool value = saveData->saveSlots[saveSlot][copyIndex].GetFlag(flag);
+
+	if (ImGui::Checkbox(label, &value))
+	{
+		saveData->saveSlots[saveSlot][copyIndex].SetFlag(flag, value);
+		saveData->saveSlots[saveSlot][copyIndex].CalculateChecksum();
+	}
+
+	return value;
+}
+
+bool SaveEditorUI::CheckboxCourseData(const char* label, const uint8_t saveSlot, const uint8_t copyIndex, const uint8_t courseIndex, const uint8_t flag)
+{
+	bool value = saveData->saveSlots[saveSlot][copyIndex].GetCourseDataFlag(courseIndex, flag);
+
+	if (ImGui::Checkbox(label, &value))
+	{
+		saveData->saveSlots[saveSlot][copyIndex].SetCourseDataFlag(courseIndex, flag, value);
+		saveData->saveSlots[saveSlot][copyIndex].CalculateChecksum();
+	}
+
+	return value;
+}
+
+void SaveEditorUI::PrintChecksum(const uint16_t checksum)
+{
+	ImGui::SetCursorPosX(WINDOW_WIDTH - ImGui::CalcTextSize("Checksum: 0xFFFF").x - 32);
+	ImGui::Text("Checksum: 0x%x", checksum);
+}
+
+void SaveEditorUI::LoadConfig()
+{
+	std::ifstream stream(CONFIG_FILE_NAME);
+
+	if (!stream || !stream.is_open())
+	{
+		return;
+	}
+
+	nlohmann::json config;
+	stream >> config;
+	stream.close();
+
+	//currentFilePath = config["lastPath"];
+	//fileDialog.current_path = config["lastPath"];
+}
+
+void SaveEditorUI::SaveConfig()
+{
+	nlohmann::json config;
+	//config["lastPath"] = currentFilePath;
+	config["lastPath"] = fileDialog.current_path;
+
+	// The setw manipulator was overloaded to set the indentation for pretty printing.
+
+	std::ofstream stream(CONFIG_FILE_NAME);
+	stream << std::setw(4) << config << std::endl;
+	stream.close();
 }
