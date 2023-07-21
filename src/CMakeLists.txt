@@ -18,8 +18,7 @@ else()
 	target_link_libraries(${PROJECT_NAME} glfw OpenGL::GL)
 endif()
 
-if (CMAKE_VERSION VERSION_GREATER 3.12)
-  set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)
-endif()
+# imfilebrowser requires c++17.
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
 
 # TODO: Add tests and install targets if needed.

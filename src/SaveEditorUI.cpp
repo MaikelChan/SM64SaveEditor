@@ -1,5 +1,7 @@
 ﻿#include "SaveEditorUI.h"
+#define JSON_USE_IMPLICIT_CONVERSIONS 0
 #include <nlohmann/json.hpp>
+using json = nlohmann::json;
 
 SaveEditorUI::SaveEditorUI()
 {
@@ -7,19 +9,19 @@ SaveEditorUI::SaveEditorUI()
 	popupDialog = new PopupDialog();
 
 	saveData = nullptr;
+	currentFileName.clear();
 
 	showBackup = false;
+
+	fileDialog.SetTitle("title");
+	fileDialog.SetTypeFilters({ ".bin", ".eep", ".*" });
 
 	LoadConfig();
 }
 
 SaveEditorUI::~SaveEditorUI()
 {
-	if (saveData)
-	{
-		delete saveData;
-		saveData = nullptr;
-	}
+	ClearSaveData();
 
 	delete popupDialog;
 	popupDialog = nullptr;
@@ -43,21 +45,7 @@ void SaveEditorUI::DoRender()
 		{
 			if (ImGui::MenuItem("Load..."))
 			{
-				if (saveData)
-				{
-					delete saveData;
-					saveData = nullptr;
-				}
-
-				try
-				{
-					saveData = SaveData::Load("D:\\Consolas\\PC\\Juegos\\Super Mario 64 - PC\\sm64_save_file.bin");
-				}
-				catch (const std::runtime_error& error)
-				{
-					popupDialog->SetMessage(MessageTypes::Error, "Error", error.what());
-					popupDialog->SetIsVisible(true);
-				}
+				fileDialog.Open();
 			}
 
 			if (ImGui::MenuItem("Save..."))
@@ -94,6 +82,14 @@ void SaveEditorUI::DoRender()
 			}
 
 			ImGui::EndMenu();
+		}
+
+		if (saveData)
+		{
+			std::string fileText = std::string("Current file: ") + currentFileName;
+
+			ImGui::SetCursorPosX(WINDOW_WIDTH - ImGui::CalcTextSize(fileText.c_str()).x - 32);
+			ImGui::Text("%s", fileText.c_str());
 		}
 
 		ImGui::EndMainMenuBar();
@@ -394,6 +390,29 @@ void SaveEditorUI::DoRender()
 	popupDialog->Render();
 	aboutWindow->Render();
 
+	fileDialog.Display();
+
+	if (fileDialog.HasSelected())
+	{
+		ClearSaveData();
+
+		try
+		{
+			saveData = SaveData::Load(fileDialog.GetSelected().string().c_str());
+			currentFileName = fileDialog.GetSelected().filename().string();
+		}
+		catch (const std::runtime_error& error)
+		{
+			popupDialog->SetMessage(MessageTypes::Error, "Error", error.what());
+			popupDialog->SetIsVisible(true);
+		}
+
+		SaveConfig();
+
+		fileDialog.ClearSelected();
+	}
+}
+
 bool SaveEditorUI::CheckboxSaveFlags(const char* label, const uint8_t saveSlot, const uint8_t copyIndex, const uint32_t flag)
 {
 	bool value = saveData->saveSlots[saveSlot][copyIndex].GetFlag(flag);
@@ -426,32 +445,55 @@ void SaveEditorUI::PrintChecksum(const uint16_t checksum)
 	ImGui::Text("Checksum: 0x%x", checksum);
 }
 
+void SaveEditorUI::ClearSaveData()
+{
+	if (!saveData) return;
+
+	delete saveData;
+	saveData = nullptr;
+
+	currentFileName.clear();
+}
+
 void SaveEditorUI::LoadConfig()
 {
-	std::ifstream stream(CONFIG_FILE_NAME);
-
-	if (!stream || !stream.is_open())
+	try
 	{
-		return;
+		std::ifstream stream(CONFIG_FILE_NAME);
+
+		if (!stream || !stream.is_open())
+		{
+			return;
+		}
+
+		json config;
+		stream >> config;
+		stream.close();
+
+		std::string path = config["lastPath"].template get<std::string>();
+		fileDialog.SetPwd(std::filesystem::u8path(path));
 	}
-
-	nlohmann::json config;
-	stream >> config;
-	stream.close();
-
-	//currentFilePath = config["lastPath"];
-	//fileDialog.current_path = config["lastPath"];
+	catch (const json::parse_error& error)
+	{
+		printf("Json Error: %s\n", error.what());
+	}
 }
 
 void SaveEditorUI::SaveConfig()
 {
-	nlohmann::json config;
-	//config["lastPath"] = currentFilePath;
-	config["lastPath"] = fileDialog.current_path;
+	try
+	{
+		json config;
+		config["lastPath"] = fileDialog.GetPwd().u8string();
 
-	// The setw manipulator was overloaded to set the indentation for pretty printing.
+		// The setw manipulator was overloaded to set the indentation for pretty printing.
 
-	std::ofstream stream(CONFIG_FILE_NAME);
-	stream << std::setw(4) << config << std::endl;
-	stream.close();
+		std::ofstream stream(CONFIG_FILE_NAME);
+		stream << std::setw(4) << config << std::endl;
+		stream.close();
+	}
+	catch (const json::type_error& error)
+	{
+		printf("Json Error: %s\n", error.what());
+	}
 }
