@@ -1,33 +1,16 @@
 ﻿#include "SaveEditorUI.h"
-#define JSON_USE_IMPLICIT_CONVERSIONS 0
-#include <nlohmann/json.hpp>
-using json = nlohmann::json;
+#include "MainUI.h"
+#include "SaveData.h"
 
-SaveEditorUI::SaveEditorUI()
+SaveEditorUI::SaveEditorUI(const MainUI* mainUI) : BaseUI(mainUI)
 {
-	aboutWindow = new AboutWindow();
-	popupDialog = new PopupDialog();
-
-	saveData = nullptr;
-	currentFileName.clear();
-
+	SaveEditorUI::mainUI = mainUI;
 	showBackup = false;
-
-	fileDialog.SetTitle("title");
-	fileDialog.SetTypeFilters({ ".bin", ".eep", ".*" });
-
-	LoadConfig();
 }
 
 SaveEditorUI::~SaveEditorUI()
 {
-	ClearSaveData();
 
-	delete popupDialog;
-	popupDialog = nullptr;
-
-	delete aboutWindow;
-	aboutWindow = nullptr;
 }
 
 void SaveEditorUI::VisibilityChanged(const bool isVisible)
@@ -39,61 +22,7 @@ void SaveEditorUI::DoRender()
 {
 	BaseUI::DoRender();
 
-	if (ImGui::BeginMainMenuBar())
-	{
-		if (ImGui::BeginMenu("File"))
-		{
-			if (ImGui::MenuItem("Load..."))
-			{
-				fileDialog.Open();
-			}
-
-			if (ImGui::MenuItem("Save..."))
-			{
-				if (saveData)
-				{
-					try
-					{
-						SaveData::Save("D:\\Consolas\\PC\\Juegos\\Super Mario 64 - PC\\sm64_save_file.bin", saveData);
-					}
-					catch (const std::runtime_error& error)
-					{
-						popupDialog->SetMessage(MessageTypes::Error, "Error", error.what());
-						popupDialog->SetIsVisible(true);
-					}
-				}
-			}
-
-			ImGui::Separator();
-
-			if (ImGui::MenuItem("Quit"))
-			{
-				CloseMainWindow();
-			}
-
-			ImGui::EndMenu();
-		}
-
-		if (ImGui::BeginMenu("Help"))
-		{
-			if (ImGui::MenuItem("About...", NULL, aboutWindow->GetIsVisible()))
-			{
-				aboutWindow->ToggleIsVisible();
-			}
-
-			ImGui::EndMenu();
-		}
-
-		if (saveData)
-		{
-			std::string fileText = std::string("Current file: ") + currentFileName;
-
-			ImGui::SetCursorPosX(WINDOW_WIDTH - ImGui::CalcTextSize(fileText.c_str()).x - 32);
-			ImGui::Text("%s", fileText.c_str());
-		}
-
-		ImGui::EndMainMenuBar();
-	}
+	SaveData* saveData = mainUI->GetSaveData();
 
 	const ImGuiViewport* viewport = ImGui::GetMainViewport();
 	ImGui::SetNextWindowPos(viewport->WorkPos);
@@ -384,37 +313,12 @@ void SaveEditorUI::DoRender()
 		}
 	}
 	ImGui::End();
-
-	//ImGui::ShowDemoWindow();
-
-	popupDialog->Render();
-	aboutWindow->Render();
-
-	fileDialog.Display();
-
-	if (fileDialog.HasSelected())
-	{
-		ClearSaveData();
-
-		try
-		{
-			saveData = SaveData::Load(fileDialog.GetSelected().string().c_str());
-			currentFileName = fileDialog.GetSelected().filename().string();
-		}
-		catch (const std::runtime_error& error)
-		{
-			popupDialog->SetMessage(MessageTypes::Error, "Error", error.what());
-			popupDialog->SetIsVisible(true);
-		}
-
-		SaveConfig();
-
-		fileDialog.ClearSelected();
-	}
 }
 
-bool SaveEditorUI::CheckboxSaveFlags(const char* label, const uint8_t saveSlot, const uint8_t copyIndex, const uint32_t flag)
+bool SaveEditorUI::CheckboxSaveFlags(const char* label, const uint8_t saveSlot, const uint8_t copyIndex, const uint32_t flag) const
 {
+	SaveData* saveData = mainUI->GetSaveData();
+
 	bool value = saveData->saveSlots[saveSlot][copyIndex].GetFlag(flag);
 
 	if (ImGui::Checkbox(label, &value))
@@ -426,8 +330,10 @@ bool SaveEditorUI::CheckboxSaveFlags(const char* label, const uint8_t saveSlot, 
 	return value;
 }
 
-bool SaveEditorUI::CheckboxCourseData(const char* label, const uint8_t saveSlot, const uint8_t copyIndex, const uint8_t courseIndex, const uint8_t flag)
+bool SaveEditorUI::CheckboxCourseData(const char* label, const uint8_t saveSlot, const uint8_t copyIndex, const uint8_t courseIndex, const uint8_t flag) const
 {
+	SaveData* saveData = mainUI->GetSaveData();
+
 	bool value = saveData->saveSlots[saveSlot][copyIndex].GetCourseDataFlag(courseIndex, flag);
 
 	if (ImGui::Checkbox(label, &value))
@@ -439,61 +345,8 @@ bool SaveEditorUI::CheckboxCourseData(const char* label, const uint8_t saveSlot,
 	return value;
 }
 
-void SaveEditorUI::PrintChecksum(const uint16_t checksum)
+void SaveEditorUI::PrintChecksum(const uint16_t checksum) const
 {
-	ImGui::SetCursorPosX(WINDOW_WIDTH - ImGui::CalcTextSize("Checksum: 0xFFFF").x - 32);
+	ImGui::SetCursorPosX(ImGui::GetWindowWidth() - ImGui::CalcTextSize("Checksum: 0xFFFF").x - 32);
 	ImGui::Text("Checksum: 0x%x", checksum);
-}
-
-void SaveEditorUI::ClearSaveData()
-{
-	if (!saveData) return;
-
-	delete saveData;
-	saveData = nullptr;
-
-	currentFileName.clear();
-}
-
-void SaveEditorUI::LoadConfig()
-{
-	try
-	{
-		std::ifstream stream(CONFIG_FILE_NAME);
-
-		if (!stream || !stream.is_open())
-		{
-			return;
-		}
-
-		json config;
-		stream >> config;
-		stream.close();
-
-		std::string path = config["lastPath"].template get<std::string>();
-		fileDialog.SetPwd(std::filesystem::u8path(path));
-	}
-	catch (const json::parse_error& error)
-	{
-		printf("Json Error: %s\n", error.what());
-	}
-}
-
-void SaveEditorUI::SaveConfig()
-{
-	try
-	{
-		json config;
-		config["lastPath"] = fileDialog.GetPwd().u8string();
-
-		// The setw manipulator was overloaded to set the indentation for pretty printing.
-
-		std::ofstream stream(CONFIG_FILE_NAME);
-		stream << std::setw(4) << config << std::endl;
-		stream.close();
-	}
-	catch (const json::type_error& error)
-	{
-		printf("Json Error: %s\n", error.what());
-	}
 }

@@ -144,7 +144,7 @@ public:
 		}
 	}
 
-	inline bool GetFlag(const uint32_t mask)
+	inline bool GetFlag(const uint32_t mask) const
 	{
 		return (Flags & mask) != 0;
 	}
@@ -155,7 +155,7 @@ public:
 		else Flags &= ~mask;
 	}
 
-	inline bool GetCourseDataFlag(const uint8_t courseIndex, const uint8_t mask)
+	inline bool GetCourseDataFlag(const uint8_t courseIndex, const uint8_t mask) const
 	{
 		return (CourseData[courseIndex] & mask) != 0;
 	}
@@ -177,8 +177,4 @@ public:
 
 	static SaveData* Load(const char* filePath);
 	static void Save(const char* filePath, const SaveData* saveData);
-
-private:
-	static uint16_t CalculateChecksum(std::ifstream& stream, const size_t size);
-	static bool IsValid(std::ifstream& stream, const size_t size, const uint16_t magicToCheck);
 };

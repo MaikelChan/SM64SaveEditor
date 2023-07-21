@@ -3,7 +3,7 @@
 #include "main.h"
 #include "Config.h"
 
-AboutWindow::AboutWindow()
+AboutWindow::AboutWindow(const BaseUI* parentUI) : BaseUI(parentUI)
 {
 	snprintf(windowTitle, 64, "About %s", WINDOW_TITLE);
 	snprintf(description, 64, "%s - v%s", WINDOW_TITLE, PROJECT_VER);

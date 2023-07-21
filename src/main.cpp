@@ -1,13 +1,13 @@
-﻿#include "imgui/imgui.h"
+﻿#include "main.h"
+#include "Config.h"
+#include "MainUI.h"
+
+#include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
 //#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
-
-#include "main.h"
-#include "Config.h"
-#include "SaveEditorUI.h"
 
 GLFWwindow* window = nullptr;
 
@@ -83,8 +83,8 @@ int main()
 
 	bool show_demo_window = true;
 
-	SaveEditorUI* saveEditorUI = new SaveEditorUI();
-	saveEditorUI->SetIsVisible(true);
+	MainUI* mainUI = new MainUI();
+	mainUI->SetIsVisible(true);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -96,7 +96,7 @@ int main()
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui::NewFrame();
 
-		saveEditorUI->Render();
+		mainUI->Render();
 
 		ImGui::Render();
 
@@ -112,8 +112,8 @@ int main()
 		glfwSwapBuffers(window);
 	}
 
-	delete saveEditorUI;
-	saveEditorUI = nullptr;
+	delete mainUI;
+	mainUI = nullptr;
 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();

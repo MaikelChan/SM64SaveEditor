@@ -13,7 +13,7 @@ private:
 	std::string message;
 
 public:
-	PopupDialog();
+	PopupDialog(const BaseUI* parentUI);
 	~PopupDialog();
 
 	void SetMessage(const MessageTypes type, std::string title, std::string message);

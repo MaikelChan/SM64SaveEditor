@@ -1,8 +1,10 @@
 #include "BaseUI.h"
 #include <stdio.h>
 
-BaseUI::BaseUI()
+BaseUI::BaseUI(const BaseUI* parentUI)
 {
+	BaseUI::parentUI = parentUI;
+
 	isVisible = false;
 	previousIsVisible = false;
 }
