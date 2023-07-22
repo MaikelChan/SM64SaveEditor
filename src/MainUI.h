@@ -4,7 +4,7 @@
 class SaveEditorUI;
 class PopupDialog;
 class AboutWindow;
-class SaveData;
+#include "SaveData.h"
 #include "imgui/imgui.h"
 #include <imfilebrowser.h>
 
@@ -21,6 +21,7 @@ private:
 
 	std::string currentFilePath;
 	std::string currentFileName;
+	SaveData::Types currentFileType;
 	SaveData* saveData;
 
 public:
@@ -38,4 +39,10 @@ private:
 
 	void LoadConfig();
 	void SaveConfig() const;
+
+	void Load();
+	void LoadingProcess();
+	void Save();
+	void SavingProcess();
+	void EndianSwap();
 };

@@ -98,7 +98,7 @@ void SaveEditorUI::DoRender()
 							{
 								if (saveData->saveSlots[s][showBackup].CapLevel > COURSE_STAGES_COUNT_INTERNAL)
 									saveData->saveSlots[s][showBackup].CapLevel = COURSE_STAGES_COUNT_INTERNAL;
-								saveData->saveSlots[s][showBackup].CalculateChecksum();
+								saveData->saveSlots[s][showBackup].UpdateChecksum();
 							}
 
 							ImGui::SameLine();
@@ -106,7 +106,7 @@ void SaveEditorUI::DoRender()
 							ImGui::SetNextItemWidth(24);
 							if (ImGui::InputScalar("Cap Level/Area", ImGuiDataType_U8, &saveData->saveSlots[s][showBackup].CapArea, NULL, NULL, "%u"))
 							{
-								saveData->saveSlots[s][showBackup].CalculateChecksum();
+								saveData->saveSlots[s][showBackup].UpdateChecksum();
 							}
 
 							ImGui::EndTable();
@@ -200,7 +200,7 @@ void SaveEditorUI::DoRender()
 							{
 								if (ImGui::InputScalar("##Max Coins", ImGuiDataType_U8, &saveData->saveSlots[s][showBackup].CourseCoinScores[c], NULL, NULL, "%u"))
 								{
-									saveData->saveSlots[s][showBackup].CalculateChecksum();
+									saveData->saveSlots[s][showBackup].UpdateChecksum();
 								}
 							}
 
@@ -233,7 +233,7 @@ void SaveEditorUI::DoRender()
 				if (saveData->settings[showBackup].soundMode != value)
 				{
 					saveData->settings[showBackup].soundMode = static_cast<uint16_t>(value);
-					saveData->settings[showBackup].CalculateChecksum();
+					saveData->settings[showBackup].UpdateChecksum();
 				}
 
 				ImGui::SeparatorText("Language");
@@ -247,7 +247,7 @@ void SaveEditorUI::DoRender()
 				if (saveData->settings[showBackup].language != value)
 				{
 					saveData->settings[showBackup].language = static_cast<uint16_t>(value);
-					saveData->settings[showBackup].CalculateChecksum();
+					saveData->settings[showBackup].UpdateChecksum();
 				}
 
 				ImGui::SeparatorText("Coin Ages");
@@ -295,7 +295,7 @@ void SaveEditorUI::DoRender()
 								if (value > 3) value = 3;
 								saveData->settings[showBackup].CoinScoreAges[s] &= ~(0x3 << shift);
 								saveData->settings[showBackup].CoinScoreAges[s] |= value << shift;
-								saveData->settings[showBackup].CalculateChecksum();
+								saveData->settings[showBackup].UpdateChecksum();
 							}
 
 							ImGui::PopID();
@@ -324,7 +324,7 @@ bool SaveEditorUI::CheckboxSaveFlags(const char* label, const uint8_t saveSlot, 
 	if (ImGui::Checkbox(label, &value))
 	{
 		saveData->saveSlots[saveSlot][copyIndex].SetFlag(flag, value);
-		saveData->saveSlots[saveSlot][copyIndex].CalculateChecksum();
+		saveData->saveSlots[saveSlot][copyIndex].UpdateChecksum();
 	}
 
 	return value;
@@ -339,7 +339,7 @@ bool SaveEditorUI::CheckboxCourseData(const char* label, const uint8_t saveSlot,
 	if (ImGui::Checkbox(label, &value))
 	{
 		saveData->saveSlots[saveSlot][copyIndex].SetCourseDataFlag(courseIndex, flag, value);
-		saveData->saveSlots[saveSlot][copyIndex].CalculateChecksum();
+		saveData->saveSlots[saveSlot][copyIndex].UpdateChecksum();
 	}
 
 	return value;

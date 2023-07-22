@@ -32,8 +32,17 @@ SaveData* SaveData::Load(const char* filePath)
 
 	stream.seekg(0, std::ios_base::beg);
 	stream.read((char*)saveData, SAVE_DATA_SIZE);
-
 	stream.close();
+
+	SaveData::Types type = saveData->GetType();
+
+	if (type == SaveData::Types::NotValid)
+	{
+		delete saveData;
+		throw std::runtime_error("The selected file is not a valid Super Mario 64 save file.");
+		return nullptr;
+	}
+
 	return saveData;
 }
 
@@ -48,4 +57,21 @@ void SaveData::Save(const char* filePath, const SaveData* saveData)
 
 	stream.write((char*)saveData, SAVE_DATA_SIZE);
 	stream.close();
+}
+
+SaveData::Types SaveData::GetType() const
+{
+	if ((saveSlots[0][0].Magic == SAVE_SLOT_MAGIC_LE || saveSlots[0][1].Magic == SAVE_SLOT_MAGIC_LE) &&
+		(settings[0].Magic == SETTINGS_DATA_MAGIC_LE || settings[1].Magic == SETTINGS_DATA_MAGIC_LE))
+	{
+		return SaveData::Types::PC;
+	}
+
+	if ((saveSlots[0][0].Magic == SAVE_SLOT_MAGIC_BE || saveSlots[0][1].Magic == SAVE_SLOT_MAGIC_BE) &&
+		(settings[0].Magic == SETTINGS_DATA_MAGIC_BE || settings[1].Magic == SETTINGS_DATA_MAGIC_BE))
+	{
+		return SaveData::Types::Nintendo64;
+	}
+
+	return SaveData::Types::NotValid;
 }

@@ -10,10 +10,12 @@
 #define COURSE_STAGES_COUNT 15
 #define COURSE_STAGES_COUNT_INTERNAL 38 // This is the actual game's number of levels, including unused ones.
 
-#define SETTINGS_DATA_MAGIC 0x4849
+#define SETTINGS_DATA_MAGIC_LE 0x4849
+#define SETTINGS_DATA_MAGIC_BE 0x4948
 #define SETTINGS_DATA_SIZE 0x20
 
-#define SAVE_SLOT_MAGIC 0x4441
+#define SAVE_SLOT_MAGIC_LE 0x4441
+#define SAVE_SLOT_MAGIC_BE 0x4144
 #define SAVE_SLOT_SIZE 0x38
 
 #define MAX_STARS_PER_LEVEL 7
@@ -108,15 +110,27 @@ public:
 	uint16_t Magic;
 	uint16_t Checksum;
 
-	inline void CalculateChecksum()
+	inline uint16_t CalculateChecksum() const
 	{
-		Checksum = 0;
-		uint8_t* p = reinterpret_cast<uint8_t*>(&CoinScoreAges[0]);
+		uint16_t checksum = 0;
+		const uint8_t* p = reinterpret_cast<const uint8_t*>(&CoinScoreAges[0]);
 
 		for (int i = 0; i < SETTINGS_DATA_SIZE - 2; i++)
 		{
-			Checksum += *p++;
+			checksum += *p++;
 		}
+
+		return checksum;
+	}
+
+	inline void UpdateChecksum()
+	{
+		Checksum = CalculateChecksum();
+	}
+
+	inline bool IsValid()
+	{
+		return Checksum == CalculateChecksum();
 	}
 };
 
@@ -133,15 +147,27 @@ public:
 	uint16_t Magic;
 	uint16_t Checksum;
 
-	inline void CalculateChecksum()
+	inline uint16_t CalculateChecksum() const
 	{
-		Checksum = 0;
-		uint8_t* p = &CapLevel;
+		uint16_t checksum = 0;
+		const uint8_t* p = &CapLevel;
 
 		for (int i = 0; i < SAVE_SLOT_SIZE - 2; i++)
 		{
-			Checksum += *p++;
+			checksum += *p++;
 		}
+
+		return checksum;
+	}
+
+	inline void UpdateChecksum()
+	{
+		Checksum = CalculateChecksum();
+	}
+
+	inline bool IsValid()
+	{
+		return Checksum == CalculateChecksum();
 	}
 
 	inline bool GetFlag(const uint32_t mask) const
@@ -173,8 +199,12 @@ public:
 	SaveSlot saveSlots[NUM_SAVE_SLOTS][NUM_COPIES] = {};
 	SettingsData settings[NUM_COPIES] = {};
 
+	enum class Types { NotValid, PC, Nintendo64 };
+
 	SaveData();
 
 	static SaveData* Load(const char* filePath);
 	static void Save(const char* filePath, const SaveData* saveData);
+
+	Types GetType() const;
 };
