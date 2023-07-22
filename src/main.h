@@ -7,3 +7,4 @@
 #define WINDOW_HEIGHT 600
 
 void CloseMainWindow();
+void SetImGuiStyle();
