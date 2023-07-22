@@ -10,9 +10,10 @@ file(GLOB_RECURSE SOURCE_FILES
 #)
 
 # Add source to this project's executable.
-add_executable (${PROJECT_NAME} ${SOURCE_FILES})
+add_executable (${PROJECT_NAME} ${SOURCE_FILES} ${APP_ICON_RESOURCE_WINDOWS})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+	set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/ENTRY:mainCRTStartup /SUBSYSTEM:WINDOWS")
 	target_link_libraries(${PROJECT_NAME} glfw3 OpenGL::GL)
 else()
 	target_link_libraries(${PROJECT_NAME} glfw OpenGL::GL)

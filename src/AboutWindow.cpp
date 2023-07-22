@@ -35,8 +35,9 @@ void AboutWindow::DoRender()
 	{
 		ImGui::Text("%s", description);
 		ImGui::Separator();
-		ImGui::Text("By PacoChan.\n\n");
-		ImGui::Text("This save editor is compatible with the PC port.");
+		ImGui::Text("By PacoChan.\n");
+		ImGui::Text("https://pacochan.net/software/sm64-save-editor/\n\n");
+		ImGui::Text("This save editor is compatible with the Nintendo 64 version and the PC port.");
 
 		ImGui::EndPopup();
 	}
