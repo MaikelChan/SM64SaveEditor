@@ -1,6 +1,6 @@
 #pragma once
 
-#include <fstream>
+#include <cstdint>
 
 #define SAVE_DATA_SIZE 0x200
 

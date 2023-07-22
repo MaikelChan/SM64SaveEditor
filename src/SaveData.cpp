@@ -1,5 +1,6 @@
 #include "SaveData.h"
 #include <string>
+#include <fstream>
 #include <exception>
 #include <cassert>
 
