@@ -20,7 +20,7 @@ MainUI::MainUI() : BaseUI(nullptr)
 	currentFileType = SaveData::Types::NotValid;
 
 	fileDialog.SetTitle("Open a Super Mario 64 save file");
-	fileDialog.SetTypeFilters({ ".bin", ".eep", ".*" });
+	fileDialog.SetTypeFilters({ ".eep", ".bin", ".*" });
 
 	LoadConfig();
 }
@@ -67,6 +67,16 @@ void MainUI::DoRender()
 			if (ImGui::MenuItem("Quit"))
 			{
 				CloseMainWindow();
+			}
+
+			ImGui::EndMenu();
+		}
+
+		if (saveData && ImGui::BeginMenu("Tools"))
+		{
+			if (ImGui::MenuItem("Show backup data", NULL, saveEditor->showBackup))
+			{
+				saveEditor->showBackup = !saveEditor->showBackup;
 			}
 
 			ImGui::EndMenu();
@@ -179,6 +189,7 @@ void MainUI::Load()
 		EndianSwap();
 		LoadingProcess();
 
+		saveEditor->showBackup = false;
 		saveEditor->SetIsVisible(true);
 	}
 	catch (const std::runtime_error& error)

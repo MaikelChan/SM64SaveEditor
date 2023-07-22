@@ -16,9 +16,11 @@ const char* const tabNames[]
 
 class SaveEditorUI : public BaseUI
 {
+public:
+	bool showBackup;
+
 private:
 	const MainUI* mainUI;
-	bool showBackup;
 
 public:
 	SaveEditorUI(const MainUI* mainUI);

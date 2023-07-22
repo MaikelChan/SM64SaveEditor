@@ -37,9 +37,7 @@ void SaveEditorUI::DoRender()
 			{
 				if (ImGui::BeginTabItem(tabNames[s]))
 				{
-					ImGui::Checkbox("Show backup", &showBackup);
-					ImGui::SameLine();
-
+					if (showBackup) ImGui::BeginDisabled();
 					bool fileExists = CheckboxSaveFlags("File Exists", s, showBackup, SAVE_FLAG_FILE_EXISTS);
 					if (!fileExists) ImGui::BeginDisabled();
 
@@ -212,14 +210,15 @@ void SaveEditorUI::DoRender()
 					ImGui::EndTabItem();
 
 					if (!fileExists) ImGui::EndDisabled();
+					if (showBackup) ImGui::EndDisabled();
 				}
 			}
 
 			if (ImGui::BeginTabItem("Settings"))
 			{
-				ImGui::Checkbox("Show backup", &showBackup);
-
+				ImGui::Dummy(ImVec2(21, 21));
 				ImGui::SameLine();
+				ImGui::AlignTextToFramePadding();
 				PrintChecksum(saveData->settings[showBackup].Checksum);
 
 				ImGui::SeparatorText("Sound Mode");
@@ -348,5 +347,5 @@ bool SaveEditorUI::CheckboxCourseData(const char* label, const uint8_t saveSlot,
 void SaveEditorUI::PrintChecksum(const uint16_t checksum) const
 {
 	ImGui::SetCursorPosX(ImGui::GetWindowWidth() - ImGui::CalcTextSize("Checksum: 0xFFFF").x - 32);
-	ImGui::Text("Checksum: 0x%x", checksum);
+	ImGui::TextColored(ImVec4(0.7f, 0.5f, 0.6f, 1.0f), "Checksum: 0x%x", checksum);
 }
