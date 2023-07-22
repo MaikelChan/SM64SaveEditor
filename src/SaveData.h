@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 
 #define SAVE_DATA_SIZE 0x200
 
@@ -203,8 +204,8 @@ public:
 
 	SaveData();
 
-	static SaveData* Load(const char* filePath);
-	static void Save(const char* filePath, const SaveData* saveData);
+	static SaveData* Load(const std::string filePath);
+	static void Save(const std::string filePath, const SaveData* saveData);
 
 	Types GetType() const;
 };

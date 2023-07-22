@@ -9,7 +9,7 @@ SaveData::SaveData()
 	assert(sizeof(SaveData) == SAVE_DATA_SIZE);
 }
 
-SaveData* SaveData::Load(const char* filePath)
+SaveData* SaveData::Load(const std::string filePath)
 {
 	std::ifstream stream = std::ifstream(filePath, std::ios::binary);
 
@@ -47,7 +47,7 @@ SaveData* SaveData::Load(const char* filePath)
 	return saveData;
 }
 
-void SaveData::Save(const char* filePath, const SaveData* saveData)
+void SaveData::Save(const std::string filePath, const SaveData* saveData)
 {
 	std::ofstream stream = std::ofstream(filePath, std::ios::binary);
 

@@ -47,4 +47,5 @@ private:
 	void EndianSwap() const;
 
 	void CompleteSlot(const uint8_t slotIndex) const;
+	void DeleteSlot(const uint8_t slotIndex) const;
 };

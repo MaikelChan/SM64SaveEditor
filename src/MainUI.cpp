@@ -75,24 +75,22 @@ void MainUI::DoRender()
 
 		if (saveData && ImGui::BeginMenu("Tools"))
 		{
-			if (ImGui::MenuItem("100% Complete Mario A"))
+			for (int s = 0; s < NUM_SAVE_SLOTS; s++)
 			{
-				CompleteSlot(0);
-			}
+				if (ImGui::BeginMenu(tabNames[s]))
+				{
+					if (ImGui::MenuItem("100% Complete"))
+					{
+						CompleteSlot(s);
+					}
 
-			if (ImGui::MenuItem("100% Complete Mario B"))
-			{
-				CompleteSlot(1);
-			}
+					if (ImGui::MenuItem("Delete"))
+					{
+						DeleteSlot(s);
+					}
 
-			if (ImGui::MenuItem("100% Complete Mario C"))
-			{
-				CompleteSlot(2);
-			}
-
-			if (ImGui::MenuItem("100% Complete Mario D"))
-			{
-				CompleteSlot(3);
+					ImGui::EndMenu();
+				}
 			}
 
 			ImGui::Separator();
@@ -235,12 +233,12 @@ void MainUI::LoadingProcess() const
 		if (saveData->saveSlots[s][1].IsValid())
 		{
 			memcpy(&saveData->saveSlots[s][0], &saveData->saveSlots[s][1], SAVE_SLOT_SIZE);
-			message += "Save slot " + std::to_string(s + 1) + " is corrupted, but valid data has been restored from the backup data.\n\n";
+			message += std::string("Save slot \"") + tabNames[s] + "\" is corrupted, but valid data has been restored from the backup data.\n\n";
 		}
 		else
 		{
 			saveData->saveSlots[s][0].UpdateChecksum();
-			message += "Save slot " + std::to_string(s + 1) + " is corrupted along with its backup. Data might be completely wrong.\n\n";
+			message += std::string("Save slot \"") + tabNames[s] + "\" is corrupted along with its backup. Data might be completely wrong.\n\n";
 		}
 	}
 
@@ -359,6 +357,15 @@ void MainUI::CompleteSlot(const uint8_t slotIndex) const
 		saveData->saveSlots[slotIndex][0].CourseCoinScores[c] = 100;
 	}
 
+	saveData->saveSlots[slotIndex][0].Magic = SAVE_SLOT_MAGIC_LE;
+	saveData->saveSlots[slotIndex][0].UpdateChecksum();
+}
+
+void MainUI::DeleteSlot(const uint8_t slotIndex) const
+{
+	if (!saveData) return;
+
+	memset(&saveData->saveSlots[slotIndex][0], 0, SAVE_SLOT_SIZE);
 	saveData->saveSlots[slotIndex][0].Magic = SAVE_SLOT_MAGIC_LE;
 	saveData->saveSlots[slotIndex][0].UpdateChecksum();
 }
