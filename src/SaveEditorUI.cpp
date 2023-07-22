@@ -174,10 +174,8 @@ void SaveEditorUI::DoRender()
 							ImGui::TableSetColumnIndex(1);
 							ImGui::Text("%s", courseNames[c]);
 
-							for (int st = 0; st < MAX_STARS_PER_LEVEL; st++)
+							for (int st = 0; st < courseStarCount[c]; st++)
 							{
-								if (st >= courseStarCount[c]) continue;
-
 								ImGui::PushID(st);
 
 								ImGui::TableSetColumnIndex(2 + st);

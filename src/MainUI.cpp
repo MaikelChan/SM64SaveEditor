@@ -74,6 +74,28 @@ void MainUI::DoRender()
 
 		if (saveData && ImGui::BeginMenu("Tools"))
 		{
+			if (ImGui::MenuItem("100% Complete Mario A"))
+			{
+				CompleteSlot(0);
+			}
+
+			if (ImGui::MenuItem("100% Complete Mario B"))
+			{
+				CompleteSlot(1);
+			}
+
+			if (ImGui::MenuItem("100% Complete Mario C"))
+			{
+				CompleteSlot(2);
+			}
+
+			if (ImGui::MenuItem("100% Complete Mario D"))
+			{
+				CompleteSlot(3);
+			}
+
+			ImGui::Separator();
+
 			if (ImGui::MenuItem("Show backup data", NULL, saveEditor->showBackup))
 			{
 				saveEditor->showBackup = !saveEditor->showBackup;
@@ -199,7 +221,7 @@ void MainUI::Load()
 	}
 }
 
-void MainUI::LoadingProcess()
+void MainUI::LoadingProcess() const
 {
 	if (!saveData) return;
 
@@ -242,7 +264,7 @@ void MainUI::LoadingProcess()
 	}
 }
 
-void MainUI::Save()
+void MainUI::Save() const
 {
 	if (!saveData) return;
 
@@ -262,19 +284,21 @@ void MainUI::Save()
 	EndianSwap();
 }
 
-void MainUI::SavingProcess()
+void MainUI::SavingProcess() const
 {
 	if (!saveData) return;
 
 	for (int s = 0; s < NUM_SAVE_SLOTS; s++)
 	{
+		saveData->saveSlots[s][0].Magic = SAVE_SLOT_MAGIC_LE;
 		memcpy(&saveData->saveSlots[s][1], &saveData->saveSlots[s][0], SAVE_SLOT_SIZE);
 	}
 
+	saveData->settings[0].Magic = SETTINGS_DATA_MAGIC_LE;
 	memcpy(&saveData->settings[1], &saveData->settings[0], SETTINGS_DATA_SIZE);
 }
 
-void MainUI::EndianSwap()
+void MainUI::EndianSwap() const
 {
 	if (!saveData) return;
 	if (currentFileType != SaveData::Types::Nintendo64) return;
@@ -306,4 +330,34 @@ void MainUI::EndianSwap()
 		saveData->settings[cp].Magic = Swap16(saveData->settings[cp].Magic);
 		saveData->settings[cp].Checksum = Swap16(saveData->settings[cp].Checksum);
 	}
+}
+
+void MainUI::CompleteSlot(const uint8_t slotIndex) const
+{
+	if (!saveData) return;
+
+	memset(&saveData->saveSlots[slotIndex][0], 0, SAVE_SLOT_SIZE);
+
+	saveData->saveSlots[slotIndex][0].Flags = 0x1f10ffcf;
+
+	for (int c = 0; c < COURSE_COUNT; c++)
+	{
+		for (int st = 0; st < courseStarCount[c]; st++)
+		{
+			saveData->saveSlots[slotIndex][0].CourseData[c] |= (1 << st);
+		}
+
+		if (courseHasCannon[c])
+		{
+			saveData->saveSlots[slotIndex][0].CourseData[c + 1] |= SAVE_COURSE_FLAG_STAR_CANNON_OPEN;
+		}
+	}
+
+	for (int c = 0; c < COURSE_STAGES_COUNT; c++)
+	{
+		saveData->saveSlots[slotIndex][0].CourseCoinScores[c] = 100;
+	}
+
+	saveData->saveSlots[slotIndex][0].Magic = SAVE_SLOT_MAGIC_LE;
+	saveData->saveSlots[slotIndex][0].UpdateChecksum();
 }

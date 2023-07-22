@@ -41,8 +41,10 @@ private:
 	void SaveConfig() const;
 
 	void Load();
-	void LoadingProcess();
-	void Save();
-	void SavingProcess();
-	void EndianSwap();
+	void LoadingProcess() const;
+	void Save() const;
+	void SavingProcess() const;
+	void EndianSwap() const;
+
+	void CompleteSlot(const uint8_t slotIndex) const;
 };

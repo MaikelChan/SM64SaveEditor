@@ -10,13 +10,13 @@
 #define COURSE_STAGES_COUNT 15
 #define COURSE_STAGES_COUNT_INTERNAL 38 // This is the actual game's number of levels, including unused ones.
 
-#define SETTINGS_DATA_MAGIC_LE 0x4849
-#define SETTINGS_DATA_MAGIC_BE 0x4948
-#define SETTINGS_DATA_SIZE 0x20
-
 #define SAVE_SLOT_MAGIC_LE 0x4441
 #define SAVE_SLOT_MAGIC_BE 0x4144
 #define SAVE_SLOT_SIZE 0x38
+
+#define SETTINGS_DATA_MAGIC_LE 0x4849
+#define SETTINGS_DATA_MAGIC_BE 0x4948
+#define SETTINGS_DATA_SIZE 0x20
 
 #define MAX_STARS_PER_LEVEL 7
 
