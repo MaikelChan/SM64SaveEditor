@@ -1,6 +1,7 @@
 #pragma once
 
 #include "BaseUI.h"
+#include "imgui/imgui.h"
 
 class AboutWindow : public BaseUI
 {
@@ -15,4 +16,8 @@ public:
 protected:
 	virtual void VisibilityChanged(const bool isVisible) override;
 	virtual void DoRender() override;
+
+private:
+	inline void AddUnderLine(ImColor color) const;
+	inline void TextURL(const char* url) const;
 };
