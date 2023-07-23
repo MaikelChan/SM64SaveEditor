@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2023-07-23
+### Added
+- Be able to see the total star count of each save slot.
+- Added the star symbol of the game replacing asterisks.
+
 ## [1.1.0] - 2023-07-23
 ### Added
 - Implemented configurable window opacity.
