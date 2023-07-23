@@ -6,6 +6,8 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
+#include "sm64.ttf.h"
+
 //#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
@@ -95,6 +97,19 @@ int main()
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 	io.IniFilename = NULL;
+
+	ImFontConfig config;
+	config.MergeMode = true;
+
+	ImVector<ImWchar> ranges;
+	ImFontGlyphRangesBuilder builder;
+	builder.AddChar(0x0100); // Coin
+	builder.AddChar(0x0101); // Star
+	builder.BuildRanges(&ranges);
+
+	ImFont* defaultFont = io.Fonts->AddFontDefault();
+	ImFont* sm64Font = io.Fonts->AddFontFromMemoryCompressedTTF(sm64_ttf_compressed_data, sm64_ttf_compressed_size, 14, &config, ranges.Data);
+	io.Fonts->Build();
 
 	// Setup Dear ImGui style
 	//ImGui::StyleColorsDark();

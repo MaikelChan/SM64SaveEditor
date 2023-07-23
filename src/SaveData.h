@@ -192,6 +192,27 @@ public:
 		if (value) CourseData[courseIndex] |= mask;
 		else CourseData[courseIndex] &= ~mask;
 	}
+
+	inline uint8_t GetTotalStars()
+	{
+		uint8_t count = 0;
+
+		for (int c = 0; c < COURSE_COUNT; c++)
+		{
+			for (int st = 0; st < courseStarCount[c]; st++)
+			{
+				if ((CourseData[c] & (1 << st)) != 0) count++;
+			}
+		}
+
+		if ((Flags & SAVE_FLAG_COLLECTED_TOAD_STAR_1) != 0) count++;
+		if ((Flags & SAVE_FLAG_COLLECTED_TOAD_STAR_2) != 0) count++;
+		if ((Flags & SAVE_FLAG_COLLECTED_TOAD_STAR_3) != 0) count++;
+		if ((Flags & SAVE_FLAG_COLLECTED_MIPS_STAR_1) != 0) count++;
+		if ((Flags & SAVE_FLAG_COLLECTED_MIPS_STAR_2) != 0) count++;
+
+		return count;
+	}
 };
 
 class SaveData

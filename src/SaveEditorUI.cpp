@@ -35,7 +35,14 @@ void SaveEditorUI::DoRender()
 		{
 			for (int s = 0; s < NUM_SAVE_SLOTS; s++)
 			{
-				if (ImGui::BeginTabItem(tabNames[s]))
+				// Mario A (255 \u0101)###Mario A\0   (27 characters)
+				// "###tabNames[s] is used as tab id, to prevent regenerating
+				// the whole window when updating the number of stars
+				char tabName[27];
+				uint8_t stars = saveData->saveSlots[s][showBackup].GetTotalStars();
+				snprintf(tabName, 27, u8"%s (%u \u0101)###%s", tabNames[s], stars, tabNames[s]);
+
+				if (ImGui::BeginTabItem(tabName))
 				{
 					if (showBackup) ImGui::BeginDisabled();
 					bool fileExists = CheckboxSaveFlags("File Exists", s, showBackup, SAVE_FLAG_FILE_EXISTS);
@@ -150,13 +157,13 @@ void SaveEditorUI::DoRender()
 						ImGui::TableSetupScrollFreeze(0, 1);
 						ImGui::TableSetupColumn("#");
 						ImGui::TableSetupColumn("Name");
-						ImGui::TableSetupColumn("*");
-						ImGui::TableSetupColumn("*");
-						ImGui::TableSetupColumn("*");
-						ImGui::TableSetupColumn("*");
-						ImGui::TableSetupColumn("*");
-						ImGui::TableSetupColumn("*");
-						ImGui::TableSetupColumn("100 Coin *");
+						ImGui::TableSetupColumn(u8"\u0101");
+						ImGui::TableSetupColumn(u8"\u0101");
+						ImGui::TableSetupColumn(u8"\u0101");
+						ImGui::TableSetupColumn(u8"\u0101");
+						ImGui::TableSetupColumn(u8"\u0101");
+						ImGui::TableSetupColumn(u8"\u0101");
+						ImGui::TableSetupColumn(u8"100 Coin \u0101");
 						ImGui::TableSetupColumn("Cannon Open");
 						ImGui::TableSetupColumn("Max Coins");
 
