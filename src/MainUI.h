@@ -24,11 +24,14 @@ private:
 	SaveData::Types currentFileType;
 	SaveData* saveData;
 
+	float windowOpacity;
+
 public:
 	MainUI();
 	~MainUI();
 
 	inline SaveData* GetSaveData() const { return saveData; }
+	inline float GetWindowOpacity() const { return windowOpacity; }
 
 protected:
 	virtual void VisibilityChanged(const bool isVisible) override;

@@ -15,10 +15,12 @@ MainUI::MainUI() : BaseUI(nullptr)
 	aboutWindow = new AboutWindow(this);
 	popupDialog = new PopupDialog(this);
 
-	saveData = nullptr;
 	currentFilePath.clear();
 	currentFileName.clear();
 	currentFileType = SaveData::Types::NotValid;
+	saveData = nullptr;
+
+	windowOpacity = 0.9f;
 
 	fileDialog.SetTitle("Open a Super Mario 64 save file");
 	fileDialog.SetTypeFilters({ ".eep", ".bin", ".*" });
@@ -29,6 +31,7 @@ MainUI::MainUI() : BaseUI(nullptr)
 MainUI::~MainUI()
 {
 	ClearSaveData();
+	SaveConfig();
 
 	delete saveEditor;
 	saveEditor = nullptr;
@@ -103,6 +106,13 @@ void MainUI::DoRender()
 			ImGui::EndMenu();
 		}
 
+		if (ImGui::BeginMenu("Settings"))
+		{
+			ImGui::SliderFloat("Window Opacity", &windowOpacity, 0.0f, 1.0f);
+
+			ImGui::EndMenu();
+		}
+
 		if (ImGui::BeginMenu("Help"))
 		{
 			if (ImGui::MenuItem("About...", NULL, aboutWindow->GetIsVisible()))
@@ -168,8 +178,8 @@ void MainUI::LoadConfig()
 		stream >> config;
 		stream.close();
 
-		std::string path = config["lastPath"].template get<std::string>();
-		fileDialog.SetPwd(std::filesystem::u8path(path));
+		if (config["lastPath"].is_string()) fileDialog.SetPwd(std::filesystem::u8path(config["lastPath"].template get<std::string>()));
+		if (config["windowOpacity"].is_number_float()) windowOpacity = config["windowOpacity"].template get<float>();
 	}
 	catch (const json::parse_error& error)
 	{
@@ -183,6 +193,7 @@ void MainUI::SaveConfig() const
 	{
 		json config;
 		config["lastPath"] = fileDialog.GetPwd().u8string();
+		config["windowOpacity"] = windowOpacity;
 
 		// The setw manipulator was overloaded to set the indentation for pretty printing.
 

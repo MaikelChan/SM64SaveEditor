@@ -125,7 +125,8 @@ int main()
 
 		/* Render here */
 
-		glClearColor(0.1f, 0.025f, 0.05f, 0.9f);
+		float windowOpacity = mainUI->GetWindowOpacity();
+		glClearColor(0.1f * windowOpacity, 0.025f * windowOpacity, 0.05f * windowOpacity, windowOpacity);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

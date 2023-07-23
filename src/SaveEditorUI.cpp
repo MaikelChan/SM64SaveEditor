@@ -205,15 +205,17 @@ void SaveEditorUI::DoRender()
 						ImGui::EndTable();
 					}
 
-					ImGui::EndTabItem();
-
 					if (!fileExists) ImGui::EndDisabled();
 					if (showBackup) ImGui::EndDisabled();
+
+					ImGui::EndTabItem();
 				}
 			}
 
 			if (ImGui::BeginTabItem("Settings"))
 			{
+				if (showBackup) ImGui::BeginDisabled();
+
 				ImGui::Dummy(ImVec2(21, 21));
 				ImGui::SameLine();
 				ImGui::AlignTextToFramePadding();
@@ -302,6 +304,8 @@ void SaveEditorUI::DoRender()
 					}
 					ImGui::EndTable();
 				}
+
+				if (showBackup) ImGui::EndDisabled();
 
 				ImGui::EndTabItem();
 			}
