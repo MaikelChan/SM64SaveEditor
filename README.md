@@ -12,6 +12,10 @@ The program runs on Windows and Linux and requires a GPU compatible with OpenGL 
 - If a save slot is corrupt the program might be able to recover it. Just open the save file and save it again.
 - Can unlock a 100% completed save in any slot.
 
+## Changelog
+
+You can check the changelog [here](https://github.com/MaikelChan/SM64SaveEditor/blob/main/CHANGELOG.md).
+
 ## Screenshots
 
 ![](sm64-editor.png)
