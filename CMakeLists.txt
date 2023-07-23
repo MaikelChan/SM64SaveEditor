@@ -9,10 +9,11 @@ if (POLICY CMP0141)
   set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
 endif()
 
-set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_LIST_DIR}/src/resources.rc")
-
 project ("SM64SaveEditor" VERSION "1.1.0")
 configure_file("${CMAKE_CURRENT_LIST_DIR}/src/Config.h.in" "${CMAKE_CURRENT_LIST_DIR}/src/Config.h")
+configure_file("${CMAKE_CURRENT_LIST_DIR}/src/resources.rc.in" "${CMAKE_CURRENT_LIST_DIR}/src/resources.rc")
+
+set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_LIST_DIR}/src/resources.rc")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
