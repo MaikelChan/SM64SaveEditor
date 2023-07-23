@@ -5,7 +5,7 @@ class SaveEditorUI;
 class PopupDialog;
 class AboutWindow;
 #include "SaveData.h"
-#include "imgui/imgui.h"
+#include <imgui/imgui.h>
 #include <imfilebrowser.h>
 
 #define CONFIG_FILE_NAME "config.json"

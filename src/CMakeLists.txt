@@ -1,5 +1,6 @@
 ﻿
 file(GLOB_RECURSE SOURCE_FILES 
+	${CMAKE_SOURCE_DIR}/include/imgui/*.cpp
 	${CMAKE_CURRENT_LIST_DIR}/*.c
 	${CMAKE_CURRENT_LIST_DIR}/*.cpp
 )
