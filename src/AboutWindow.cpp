@@ -58,7 +58,7 @@ void AboutWindow::TextURL(const char* url) const
 	color.z *= 1.5f;
 
 	ImGui::PushStyleColor(ImGuiCol_Text, color);
-	ImGui::Text(url);
+	ImGui::Text("%s", url);
 	ImGui::PopStyleColor();
 
 	if (ImGui::IsItemHovered())
@@ -76,7 +76,7 @@ void AboutWindow::TextURL(const char* url) const
 #endif
 
 			str.append(url);
-			std::system(str.c_str());
+			int result = std::system(str.c_str());
 		}
 
 		color.x *= 1.5f;
