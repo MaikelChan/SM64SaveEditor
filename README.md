@@ -1,6 +1,6 @@
 # Super Mario 64 - Save Editor
 
-This is a save editor for Super Mario 64. It is compatible with saves of the Nintendo 64 version and the PC port.
+This is a Super Mario 64 cross-platform save editor. It is compatible with saves of the Nintendo 64 version and the PC port.
 
 ## Requirements
 
