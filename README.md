@@ -18,4 +18,6 @@ You can check the changelog [here](https://github.com/MaikelChan/SM64SaveEditor/
 
 ## Screenshots
 
+The editor showing my save files from my youth, dumped from my actual cartridge from back in the 90's.
+
 ![](sm64-editor.png)
