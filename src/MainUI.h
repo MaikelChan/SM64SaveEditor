@@ -8,7 +8,8 @@ class AboutWindow;
 #include <imgui/imgui.h>
 #include <imfilebrowser.h>
 
-#define CONFIG_FILE_NAME "config.json"
+#define CONFIG_FILE_NAME "config.ini"
+#define CONFIG_INI_SECTION "Config"
 
 class MainUI : public BaseUI
 {

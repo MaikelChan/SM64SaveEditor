@@ -4,8 +4,6 @@
 #include "BaseUI.h"
 class MainUI;
 
-#define CONFIG_FILE_NAME "config.json"
-
 const char* const tabNames[]
 {
 	"Mario A",
