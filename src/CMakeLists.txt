@@ -20,7 +20,7 @@ else()
 endif()
 
 if(MSVC)
-  set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/ENTRY:mainCRTStartup /SUBSYSTEM:CONSOLE")
+  set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/ENTRY:mainCRTStartup /SUBSYSTEM:WINDOWS")
   target_compile_options(${PROJECT_NAME} PRIVATE /W4 /wd4458 /wd4100)
   target_link_libraries(${PROJECT_NAME} ${GLFW_Lib} OpenGL::GL)
 else()
