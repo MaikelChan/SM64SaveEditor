@@ -17,8 +17,9 @@
 set( _glfw3_HEADER_SEARCH_DIRS
 "/usr/include"
 "/usr/local/include"
-"${CMAKE_SOURCE_DIR}/includes"
+"${CMAKE_SOURCE_DIR}/include"
 "C:/Program Files (x86)/glfw/include" )
+
 set( _glfw3_LIB_SEARCH_DIRS
 "/usr/lib"
 "/usr/local/lib"
@@ -38,12 +39,9 @@ if( GLFW3_ROOT )
 endif()
 
 # Search for the header
-FIND_PATH(GLFW3_INCLUDE_DIR "GLFW/glfw3.h"
-PATHS ${_glfw3_HEADER_SEARCH_DIRS} )
+FIND_PATH(GLFW3_INCLUDE_DIR "GLFW/glfw3.h" PATHS ${_glfw3_HEADER_SEARCH_DIRS})
 
 # Search for the library
-FIND_LIBRARY(GLFW3_LIBRARY NAMES glfw3 glfw
-PATHS ${_glfw3_LIB_SEARCH_DIRS} )
+FIND_LIBRARY(GLFW3_LIBRARY NAMES glfw3 glfw PATHS ${_glfw3_LIB_SEARCH_DIRS})
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(GLFW3 DEFAULT_MSG
-GLFW3_LIBRARY GLFW3_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(GLFW3 DEFAULT_MSG GLFW3_LIBRARY GLFW3_INCLUDE_DIR)

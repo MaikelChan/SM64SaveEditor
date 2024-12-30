@@ -13,11 +13,19 @@ file(GLOB_RECURSE SOURCE_FILES
 # Add source to this project's executable.
 add_executable (${PROJECT_NAME} ${SOURCE_FILES} ${APP_ICON_RESOURCE_WINDOWS})
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-	set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/ENTRY:mainCRTStartup /SUBSYSTEM:WINDOWS")
-	target_link_libraries(${PROJECT_NAME} glfw3 OpenGL::GL)
+if(WIN32)
+  set(GLFW_Lib glfw3)
 else()
-	target_link_libraries(${PROJECT_NAME} glfw OpenGL::GL)
+  set(GLFW_Lib glfw)
+endif()
+
+if(MSVC)
+  set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/ENTRY:mainCRTStartup /SUBSYSTEM:CONSOLE")
+  target_compile_options(${PROJECT_NAME} PRIVATE /W4 /wd4458 /wd4100)
+  target_link_libraries(${PROJECT_NAME} ${GLFW_Lib} OpenGL::GL)
+else()
+  target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Wno-unused-parameter)
+  target_link_libraries(${PROJECT_NAME} ${GLFW_Lib} OpenGL::GL)
 endif()
 
 # imfilebrowser requires c++17.

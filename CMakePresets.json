@@ -1,4 +1,4 @@
-﻿{
+{
     "version": 3,
     "configurePresets": [
         {
@@ -6,10 +6,6 @@
             "hidden": true,
             "binaryDir": "${sourceDir}/out/build/${presetName}",
             "installDir": "${sourceDir}/out/install/${presetName}",
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "cl.exe",
-                "CMAKE_CXX_COMPILER": "cl.exe"
-            },
             "condition": {
                 "type": "equals",
                 "lhs": "${hostSystemName}",
@@ -17,7 +13,7 @@
             }
         },
         {
-            "name": "windows-x64-debug",
+            "name": "windows-x64-msvc-debug",
             "displayName": "Windows x64 Debug (MSVC)",
             "inherits": "windows-base",
             "architecture": {
@@ -25,13 +21,38 @@
                 "strategy": "external"
             },
             "cacheVariables": {
+                "CMAKE_C_COMPILER": "cl.exe",
+                "CMAKE_CXX_COMPILER": "cl.exe",
                 "CMAKE_BUILD_TYPE": "Debug"
             }
         },
         {
-            "name": "windows-x64-release",
+            "name": "windows-x64-msvc-release",
             "displayName": "Windows x64 Release (MSVC)",
-            "inherits": "windows-x64-debug",
+            "inherits": "windows-x64-msvc-debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "windows-x64-gcc-debug",
+            "displayName": "Windows x64 Debug (GCC)",
+            "inherits": "windows-base",
+            "generator": "MinGW Makefiles",
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
+            },
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "C:/msys64/mingw64/bin/gcc.exe",
+                "CMAKE_CXX_COMPILER": "C:/msys64/mingw64/bin/g++.exe",
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "windows-x64-gcc-release",
+            "displayName": "Windows x64 Release (GCC)",
+            "inherits": "windows-x64-gcc-debug",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
             }
