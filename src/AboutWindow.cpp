@@ -2,8 +2,8 @@
 #include "main.h"
 #include "Config.h"
 
+#include <stdio.h>
 #include <imgui/imgui.h>
-#include <SimpleIni.h>
 #include <GLFW/glfw3.h>
 
 AboutWindow::AboutWindow(const BaseUI* parentUI) : BaseUI(parentUI)
@@ -42,7 +42,6 @@ void AboutWindow::DoRender()
 		ImGui::TextLinkOpenURL("https://pacochan.net/software/sm64-save-editor/");
 		ImGui::Text("\nThis save editor is compatible with the Nintendo 64 version and the PC port.\n\n");
 
-		//ImGui::NewLine();
 		ImGui::SeparatorText("Libraries");
 
 		ImGui::BulletText("ImGui %s:", ImGui::GetVersion());
