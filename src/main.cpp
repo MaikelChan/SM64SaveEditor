@@ -43,9 +43,9 @@ void SetImGuiStyle()
 	colors[ImGuiCol_Separator] = ImVec4(0.47f, 0.30f, 0.36f, 0.50f);
 	colors[ImGuiCol_Tab] = ImVec4(0.31f, 0.09f, 0.16f, 0.86f);
 	colors[ImGuiCol_TabHovered] = ImVec4(0.55f, 0.18f, 0.31f, 1.00f);
-	colors[ImGuiCol_TabActive] = ImVec4(0.54f, 0.21f, 0.32f, 1.00f);
-	colors[ImGuiCol_TabUnfocused] = ImVec4(0.13f, 0.03f, 0.06f, 0.97f);
-	colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.25f, 0.06f, 0.13f, 1.00f);
+	colors[ImGuiCol_TabSelected] = ImVec4(0.54f, 0.21f, 0.32f, 1.00f);
+	colors[ImGuiCol_TabDimmed] = ImVec4(0.13f, 0.03f, 0.06f, 0.97f);
+	colors[ImGuiCol_TabDimmedSelected] = ImVec4(0.25f, 0.06f, 0.13f, 1.00f);
 }
 
 int main()
@@ -107,8 +107,8 @@ int main()
 	builder.AddChar(0x0101); // Star
 	builder.BuildRanges(&ranges);
 
-	ImFont* defaultFont = io.Fonts->AddFontDefault();
-	ImFont* sm64Font = io.Fonts->AddFontFromMemoryCompressedTTF(sm64_ttf_compressed_data, sm64_ttf_compressed_size, 14, &config, ranges.Data);
+	/*ImFont* defaultFont =*/ io.Fonts->AddFontDefault();
+	/*ImFont* sm64Font =*/ io.Fonts->AddFontFromMemoryCompressedTTF(sm64_ttf_compressed_data, sm64_ttf_compressed_size, 14, &config, ranges.Data);
 	io.Fonts->Build();
 
 	// Setup Dear ImGui style
@@ -118,8 +118,6 @@ int main()
 	// Setup Platform/Renderer backends
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
-
-	bool show_demo_window = true;
 
 	MainUI* mainUI = new MainUI();
 	mainUI->SetIsVisible(true);

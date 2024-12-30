@@ -11,7 +11,7 @@ private:
 
 public:
 	BaseUI(const BaseUI* parentUI);
-	~BaseUI();
+	virtual ~BaseUI();
 
 	inline bool GetIsVisible() const { return isVisible; }
 	inline void SetIsVisible(const bool isVisible) { BaseUI::isVisible = isVisible; }
