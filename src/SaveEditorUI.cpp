@@ -33,7 +33,7 @@ void SaveEditorUI::DoRender()
 		ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
 		if (saveData && ImGui::BeginTabBar("Save Slots", tab_bar_flags))
 		{
-			for (int s = 0; s < NUM_SAVE_SLOTS; s++)
+			for (uint8_t s = 0; s < NUM_SAVE_SLOTS; s++)
 			{
 				// Mario A (255 \u0101)###Mario A\0   (27 characters)
 				// "###tabNames[s] is used as tab id, to prevent regenerating
@@ -169,7 +169,7 @@ void SaveEditorUI::DoRender()
 
 						ImGui::TableHeadersRow();
 
-						for (int c = 0; c < COURSE_COUNT; c++)
+						for (uint8_t c = 0; c < COURSE_COUNT; c++)
 						{
 							ImGui::PushID(c);
 
@@ -291,16 +291,16 @@ void SaveEditorUI::DoRender()
 						{
 							ImGui::PushID(s);
 
-							uint8_t value = (saveData->settings[showBackup].CoinScoreAges[s] >> shift) & 0x3;
+							uint8_t ageValue = (saveData->settings[showBackup].CoinScoreAges[s] >> shift) & 0x3;
 
 							ImGui::TableSetColumnIndex(2 + s);
 
 							ImGui::SetNextItemWidth(80);
-							if (ImGui::InputScalar("##CoinAgeCell", ImGuiDataType_U8, &value, &step, NULL, "%u"))
+							if (ImGui::InputScalar("##CoinAgeCell", ImGuiDataType_U8, &ageValue, &step, NULL, "%u"))
 							{
-								if (value > 3) value = 3;
+								if (ageValue > 3) ageValue = 3;
 								saveData->settings[showBackup].CoinScoreAges[s] &= ~(0x3 << shift);
-								saveData->settings[showBackup].CoinScoreAges[s] |= value << shift;
+								saveData->settings[showBackup].CoinScoreAges[s] |= ageValue << shift;
 								saveData->settings[showBackup].UpdateChecksum();
 							}
 

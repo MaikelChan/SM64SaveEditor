@@ -76,7 +76,7 @@ void MainUI::DoRender()
 
 		if (saveData && ImGui::BeginMenu("Tools"))
 		{
-			for (int s = 0; s < NUM_SAVE_SLOTS; s++)
+			for (uint8_t s = 0; s < NUM_SAVE_SLOTS; s++)
 			{
 				if (ImGui::BeginMenu(tabNames[s]))
 				{
