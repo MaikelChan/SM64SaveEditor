@@ -56,7 +56,7 @@ void AboutWindow::DoRender()
 		ImGui::SameLine();
 		ImGui::TextLinkOpenURL("https://github.com/brofield/simpleini");
 
-		ImGui::BulletText("imgui-filebrowser (Commit db5048c):");
+		ImGui::BulletText("imgui-filebrowser (Commit 2029bbd):");
 		ImGui::SameLine();
 		ImGui::TextLinkOpenURL("https://github.com/AirGuanZ/imgui-filebrowser");
 
