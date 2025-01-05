@@ -52,11 +52,11 @@ void AboutWindow::DoRender()
 		ImGui::SameLine();
 		ImGui::TextLinkOpenURL("https://www.glfw.org");
 
-		ImGui::BulletText("simpleini (Commit bfcc0d2):");
+		ImGui::BulletText("simpleini (Commit %s):", SIMPLEINI_COMMIT_HASH);
 		ImGui::SameLine();
 		ImGui::TextLinkOpenURL("https://github.com/brofield/simpleini");
 
-		ImGui::BulletText("imgui-filebrowser (Commit 2029bbd):");
+		ImGui::BulletText("imgui-filebrowser (Commit %s):", IMFILEBROWSER_COMMIT_HASH);
 		ImGui::SameLine();
 		ImGui::TextLinkOpenURL("https://github.com/AirGuanZ/imgui-filebrowser");
 
