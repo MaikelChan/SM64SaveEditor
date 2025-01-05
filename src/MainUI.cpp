@@ -59,7 +59,7 @@ void MainUI::DoRender()
 				fileDialog.Open();
 			}
 
-			if (ImGui::MenuItem("Save"))
+			if (ImGui::MenuItem("Save", NULL, false, IsSaveDataLoaded()))
 			{
 				Save();
 			}
@@ -121,7 +121,7 @@ void MainUI::DoRender()
 			ImGui::EndMenu();
 		}
 
-		if (saveData)
+		if (IsSaveDataLoaded())
 		{
 			std::string fileText = std::string("Current file: ") + currentFileName;
 
@@ -151,7 +151,7 @@ void MainUI::DoRender()
 
 void MainUI::ClearSaveData()
 {
-	if (!saveData) return;
+	if (!IsSaveDataLoaded()) return;
 
 	delete saveData;
 	saveData = nullptr;
@@ -229,7 +229,7 @@ void MainUI::Load()
 
 void MainUI::LoadingProcess() const
 {
-	if (!saveData) return;
+	if (!IsSaveDataLoaded()) return;
 
 	std::string message;
 
@@ -272,7 +272,7 @@ void MainUI::LoadingProcess() const
 
 void MainUI::Save() const
 {
-	if (!saveData) return;
+	if (!IsSaveDataLoaded()) return;
 
 	SavingProcess();
 	EndianSwap();
@@ -292,7 +292,7 @@ void MainUI::Save() const
 
 void MainUI::SavingProcess() const
 {
-	if (!saveData) return;
+	if (!IsSaveDataLoaded()) return;
 
 	for (int s = 0; s < NUM_SAVE_SLOTS; s++)
 	{
@@ -306,7 +306,7 @@ void MainUI::SavingProcess() const
 
 void MainUI::EndianSwap() const
 {
-	if (!saveData) return;
+	if (!IsSaveDataLoaded()) return;
 	if (currentFileType != SaveData::Types::Nintendo64) return;
 
 	for (int s = 0; s < NUM_SAVE_SLOTS; s++)
@@ -340,7 +340,7 @@ void MainUI::EndianSwap() const
 
 void MainUI::CompleteSlot(const uint8_t slotIndex) const
 {
-	if (!saveData) return;
+	if (!IsSaveDataLoaded()) return;
 
 	memset(&saveData->saveSlots[slotIndex][0], 0, SAVE_SLOT_SIZE);
 
@@ -370,7 +370,7 @@ void MainUI::CompleteSlot(const uint8_t slotIndex) const
 
 void MainUI::DeleteSlot(const uint8_t slotIndex) const
 {
-	if (!saveData) return;
+	if (!IsSaveDataLoaded()) return;
 
 	memset(&saveData->saveSlots[slotIndex][0], 0, SAVE_SLOT_SIZE);
 	saveData->saveSlots[slotIndex][0].Magic = SAVE_SLOT_MAGIC_LE;

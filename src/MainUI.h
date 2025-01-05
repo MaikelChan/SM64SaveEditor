@@ -31,6 +31,7 @@ public:
 	MainUI();
 	~MainUI();
 
+	inline bool IsSaveDataLoaded() const { return saveData != nullptr; }
 	inline SaveData* GetSaveData() const { return saveData; }
 	inline float GetWindowOpacity() const { return windowOpacity; }
 
