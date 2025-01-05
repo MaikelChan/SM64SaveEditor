@@ -50,6 +50,16 @@ void SetImGuiStyle()
 
 int main()
 {
+	int major, minor, revision;
+	glfwGetVersion(&major, &minor, &revision);
+
+	if (major != GLFW_VERSION_MAJOR || minor != GLFW_VERSION_MINOR || revision != GLFW_VERSION_REVISION)
+	{
+		printf("GLFW Lib: %i.%i.%i\n", major, minor, revision);
+		printf("GLFW Header: %i.%i.%i\n", GLFW_VERSION_MAJOR, GLFW_VERSION_MINOR, GLFW_VERSION_REVISION);
+		throw std::runtime_error("GLFW versions mismatch!");
+	}
+
 	glfwSetErrorCallback(error_callback);
 
 	if (!glfwInit())
@@ -59,6 +69,20 @@ int main()
 
 	char title[64];
 	snprintf(title, 64, "%s - v%s", WINDOW_TITLE, PROJECT_VER);
+
+	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+
+#if GLFW_VERSION_MAJOR > 3 || (GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 4)
+	if (monitor)
+	{
+		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+		if (mode)
+		{
+			glfwWindowHint(GLFW_POSITION_X, (mode->width >> 1) - (WINDOW_WIDTH >> 1));
+			glfwWindowHint(GLFW_POSITION_Y, (mode->height >> 1) - (WINDOW_HEIGHT >> 1));
+		}
+	}
+#endif
 
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 	glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
@@ -76,7 +100,7 @@ int main()
 
 	glfwMakeContextCurrent(window);
 
-	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+#if !(GLFW_VERSION_MAJOR > 3 || (GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 4))
 	if (monitor)
 	{
 		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
@@ -85,8 +109,8 @@ int main()
 			glfwSetWindowPos(window, (mode->width >> 1) - (WINDOW_WIDTH >> 1), (mode->height >> 1) - (WINDOW_HEIGHT >> 1));
 		}
 	}
+#endif
 
-	//gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 	glfwSwapInterval(1);
 
 	// Imgui

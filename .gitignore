@@ -13,3 +13,7 @@ _deps
 # Visual Studio
 .vs/
 out/
+
+# GLFW
+include/GLFW/
+lib/
