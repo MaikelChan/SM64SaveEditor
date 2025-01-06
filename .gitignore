@@ -14,5 +14,6 @@ _deps
 .vs/
 out/
 
-# Libraries like GLFW
+# GLFW
+include/GLFW/
 lib/
