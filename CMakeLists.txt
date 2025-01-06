@@ -35,6 +35,7 @@ else()
   # On Linux or on Windows with Mingw, having installed the glfw3 dev package or compiled and installed from source,
   # should have also installed "glfw3Config.cmake", which will be used by find_package.
   find_package(glfw3 3.3 REQUIRED)
+  message(STATUS "Using 'glfw3Config.cmake' file located at '${glfw3_DIR}'.")
 endif()
 
 # Include sub-projects.
