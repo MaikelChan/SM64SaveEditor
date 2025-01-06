@@ -18,11 +18,6 @@ configure_file("${CMAKE_CURRENT_LIST_DIR}/src/resources.rc.in" "${CMAKE_CURRENT_
 
 set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_LIST_DIR}/src/resources.rc")
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
-
-find_package(glfw3 3.3 REQUIRED)
-message(STATUS "Found GLFW3 in ${GLFW3_INCLUDE_DIR}")
-
 # Set OpenGL preference. On Linux there may be two gl libraries.
 # Specify with "LEGACY" or "GLVND".
 set(OpenGL_GL_PREFERENCE "GLVND")
@@ -31,7 +26,15 @@ find_package(OpenGL REQUIRED)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
 if (MSVC)
+  # With MSVC on Windows, just put the static glfw3.lib in the lib/ folder
+  if(NOT EXISTS "${CMAKE_SOURCE_DIR}/lib/glfw3.lib")
+    message(SEND_ERROR "glfw3.lib is missing from '${CMAKE_SOURCE_DIR}/lib' folder.")
+  endif()
   link_directories(${CMAKE_SOURCE_DIR}/lib)
+else()
+  # On Linux or on Windows with Mingw, having installed the glfw3 dev package or compiled and installed from source,
+  # should have also installed "glfw3Config.cmake", which will be used by find_package.
+  find_package(glfw3 3.3 REQUIRED)
 endif()
 
 # Include sub-projects.
