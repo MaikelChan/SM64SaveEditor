@@ -18,12 +18,12 @@ configure_file("${CMAKE_CURRENT_LIST_DIR}/src/resources.rc.in" "${CMAKE_CURRENT_
 
 set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_LIST_DIR}/src/resources.rc")
 
+include_directories(${CMAKE_SOURCE_DIR}/include)
+
 # Set OpenGL preference. On Linux there may be two gl libraries.
 # Specify with "LEGACY" or "GLVND".
 set(OpenGL_GL_PREFERENCE "GLVND")
 find_package(OpenGL REQUIRED)
-
-include_directories(${CMAKE_SOURCE_DIR}/include)
 
 if (MSVC)
   # With MSVC on Windows, just put the static glfw3.lib in the lib/ folder
