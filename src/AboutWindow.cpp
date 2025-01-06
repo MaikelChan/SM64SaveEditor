@@ -48,7 +48,7 @@ void AboutWindow::DoRender()
 		ImGui::SameLine();
 		ImGui::TextLinkOpenURL("https://github.com/ocornut/imgui");
 
-		ImGui::BulletText("GLFW %i.%i.%i:", GLFW_VERSION_MAJOR, GLFW_VERSION_MINOR, GLFW_VERSION_REVISION);
+		ImGui::BulletText("GLFW %i.%i.%i (Lib %i.%i.%i):", GLFW_VERSION_MAJOR, GLFW_VERSION_MINOR, GLFW_VERSION_REVISION, glfwMajor, glfwMinor, glfwRevision);
 		ImGui::SameLine();
 		ImGui::TextLinkOpenURL("https://www.glfw.org");
 

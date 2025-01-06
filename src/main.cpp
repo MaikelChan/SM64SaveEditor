@@ -11,6 +11,7 @@
 //#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
+int glfwMajor, glfwMinor, glfwRevision{ 0 };
 GLFWwindow* window = nullptr;
 
 void error_callback(int error, const char* description)
@@ -50,16 +51,7 @@ void SetImGuiStyle()
 
 int main()
 {
-	int major, minor, revision;
-	glfwGetVersion(&major, &minor, &revision);
-
-	if (major != GLFW_VERSION_MAJOR || minor != GLFW_VERSION_MINOR || revision != GLFW_VERSION_REVISION)
-	{
-		printf("GLFW Lib: %i.%i.%i\n", major, minor, revision);
-		printf("GLFW Header: %i.%i.%i\n", GLFW_VERSION_MAJOR, GLFW_VERSION_MINOR, GLFW_VERSION_REVISION);
-		throw std::runtime_error("GLFW versions mismatch!");
-	}
-
+	glfwGetVersion(&glfwMajor, &glfwMinor, &glfwRevision);
 	glfwSetErrorCallback(error_callback);
 
 	if (!glfwInit())
@@ -73,7 +65,11 @@ int main()
 	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 
 #if GLFW_VERSION_MAJOR > 3 || (GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 4)
-	if (monitor)
+	// In case the program is linked against GLFW shared library instead of static,
+	// make sure the user has the correct version installed to use the position flags.
+	const bool hasPositionFlags = (glfwMajor > 3 || (glfwMajor == 3 && glfwMinor >= 4));
+
+	if (hasPositionFlags && monitor)
 	{
 		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 		if (mode)
@@ -82,6 +78,8 @@ int main()
 			glfwWindowHint(GLFW_POSITION_Y, (mode->height >> 1) - (WINDOW_HEIGHT >> 1));
 		}
 	}
+#else
+	const bool hasPositionFlags = false;
 #endif
 
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
@@ -100,8 +98,7 @@ int main()
 
 	glfwMakeContextCurrent(window);
 
-#if !(GLFW_VERSION_MAJOR > 3 || (GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 4))
-	if (monitor)
+	if (!hasPositionFlags && monitor)
 	{
 		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 		if (mode)
@@ -109,7 +106,6 @@ int main()
 			glfwSetWindowPos(window, (mode->width >> 1) - (WINDOW_WIDTH >> 1), (mode->height >> 1) - (WINDOW_HEIGHT >> 1));
 		}
 	}
-#endif
 
 	glfwSwapInterval(1);
 
