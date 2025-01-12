@@ -188,6 +188,9 @@ void SaveEditorUI::DoRender()
 								ImGui::TableSetColumnIndex(2 + st);
 								CheckboxCourseData("##Star", s, showBackup, c, 1 << st);
 
+								if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNone))
+									ImGui::SetTooltip("%s", courseStarNames[c][st]);
+
 								ImGui::PopID();
 							}
 

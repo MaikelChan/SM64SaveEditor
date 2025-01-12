@@ -57,7 +57,7 @@
 #define SAVE_COURSE_FLAG_STAR_100_COIN    (1 << 6)
 #define SAVE_COURSE_FLAG_STAR_CANNON_OPEN (1 << 7)
 
-const char* const courseNames[]
+const char* const courseNames[COURSE_COUNT]
 {
 	"Bob-Omb Battlefield",
 	"Whomp's Fortress",
@@ -92,10 +92,167 @@ const uint8_t courseStarCount[]
 	1, 1, 1, 2, 1, 1, 1, 1, 1                    // Extra courses
 };
 
+const char* const courseStarNames[COURSE_COUNT][MAX_STARS_PER_LEVEL]
+{
+	{   // Bob-omb Battlefield
+		"Big Bob-omb on the Summit",
+		"Footrace with Koopa the Quick",
+		"Shoot to the Island in the Sky",
+		"Find the 8 Red Coins",
+		"Mario Wings to the Sky",
+		"Behind Chain Chomp's Gate",
+		u8"100 Coin \u0101"
+	},
+	{   // Whomp's Fortress
+		"Chip off Whomp's Block",
+		"To the Top of the Fortress",
+		"Shoot into the Wild Blue",
+		"Red Coins on the Floating Isle",
+		"Fall onto the Caged Island",
+		"Blast Away the Wall",
+		u8"100 Coin \u0101"
+	},
+	{   // Jolly Roger Bay
+		"Plunder in the Sunken Ship",
+		"Can the Eel Come out and Play ?",
+		"Treasure of the Ocean Cave",
+		"Red Coins on the Ship Afloat",
+		"Blast to the Stone Pillar",
+		"Through the Jet Stream",
+		u8"100 Coin \u0101"
+	},
+	{   // Cool, Cool Mountain
+		"Slip Slidin' Away",
+		"Li'l Penguin Lost",
+		"Big Penguin Race",
+		"Frosty Slide for 8 Red Coins",
+		"Snowman's Lost his Head",
+		"Wall Kicks will Work",
+		u8"100 Coin \u0101"
+	},
+	{   // Big Boo's Haunt
+		"Go on a Ghost Hunt",
+		"Ride Big Boo's Merry - Go - Round",
+		"Secret of the Haunted Books",
+		"Seek the 8 Red Coins",
+		"Big Boo's Balcony",
+		"Eye to Eye in the Secret Room",
+		u8"100 Coin \u0101"
+	},
+	{	// Hazy Maze Cave
+		"Swimming Beast in the Cavern",
+		"Elevate for 8 Red Coins",
+		"Metal - Head Mario Can Move!",
+		"Navigating the Toxic Maze",
+		"A - Maze - ing Emergency Exit",
+		"Watch for the Rolling Rocks",
+		u8"100 Coin \u0101"
+	},
+	{   // Lethal Lava Land
+		"Boil the Big Bully",
+		"Bully the Bullies",
+		"8 - Coin Puzzle with 15 Pieces",
+		"Red - Hot Log Rolling",
+		"Hot - Foot - It into the Volcano",
+		"Elevator Tour in the Volcano",
+		u8"100 Coin \u0101"
+	},
+	{	// Shifting Sand Land
+		"In the Talons of the Big Bird",
+		"Shining Atop the Pyramid",
+		"Inside the Ancient Pyramid",
+		"Stand Tall on the Four Pillars",
+		"Free Flying for 8 Red Coins",
+		"Pyramid Puzzle",
+		u8"100 Coin \u0101"
+	},
+	{   // Dire, Dire Docks
+		"Board Bowser's Sub",
+		"Chests in the Current",
+		"Pole - Jumping for Red Coins",
+		"Through the Jet Stream",
+		"The Manta Ray's Reward",
+		"Collect the Caps",
+		u8"100 Coin \u0101"
+	},
+	{   // Snowman's Land
+		"Snowman's Big Head",
+		"Chill with the Bully",
+		"In the Deep Freeze",
+		"Whirl from the Freezing Pond",
+		"Shell Shreddin' for 8 Red Coins",
+		"Into the Igloo",
+		u8"100 Coin \u0101"
+	},
+	{	// Wet - Dry World
+		"Shocking Arrow Lifts!",
+		"Top O' The Town",
+		"Secrets in the Shallows & Sky",
+		"Express Elevators–Hurry Up!",
+		"Go to Town for Red Coins",
+		"Quick Race through Downtown",
+		u8"100 Coin \u0101"
+	},
+	{	// Tall, Tall Mountain
+		"Scale the Mountain",
+		"Mystery of the Monkey Cage",
+		"Scary ‘Shrooms, Red Coins",
+		"Mysterious Mountainside",
+		"Breathtaking View from Bridge",
+		"Blast to the Lonely Mushroom",
+		u8"100 Coin \u0101"
+	},
+	{	// Tiny - Huge Island
+		"Pluck the Piranha Flower",
+		"The Tip Top of the Huge Island",
+		"Rematch with Koopa the Quick",
+		"Five Itty Bitty Secrets",
+		"Wiggler's Red Coins",
+		"Make Wiggler Squirm",
+		u8"100 Coin \u0101"
+	},
+	{   // Tick Tock Clock
+		"Roll into the Cage",
+		"The Pit and the Pendulums",
+		"Get a Hand",
+		"Stomp on the Thwomp",
+		"Timed Jumps on Moving Bars",
+		"Stop Time for Red Coins",
+		u8"100 Coin \u0101"
+	},
+	{   // Rainbow Ride
+		"Cruiser Crossing the Rainbow",
+		"The Big House in the Sky",
+		"Coins Amassed in a Maze",
+		"Swingin' in the Breeze",
+		"Tricky Triangles!",
+		"Somewhere over the Rainbow",
+		u8"100 Coin \u0101"
+	},
+	// Bowser in the Dark World
+	{ "Defeat Bowser 1", "", "", "", "", "", "" },
+	// Bowser in the Fire Sea
+	{ "Defeat Bowser 2", "", "", "", "", "", "" },
+	// Bowser in the Sky
+	{ "Defeat Bowser 3", "", "", "", "", "", "" },
+	// Princess's Secret Slide
+	{ "Complete the Secret Slide", "Complete the Secret Slide in under 21s", "", "", "", "", "" },
+	// Cavern of the Metal Cap
+	{ "Get the 8 red coins", "", "", "", "", "", "" },
+	// Tower of the Wing Cap
+	{ "Get the 8 red coins", "", "", "", "", "", "" },
+	// Vanish Cap Under the Moat
+	{ "Get the 8 red coins", "", "", "", "", "", "" },
+	// Winged Mario over the Rainbow
+	{ "Get the 8 red coins", "", "", "", "", "", "" },
+	// Secret Aquarium
+	{ "Get the 8 red coins", "", "", "", "", "", "" }
+};
+
 const bool courseHasCannon[]
 {
 	true, true, true, true, false, false, false, true, false, true, true, true, true, false, true, // Main courses
-	false, false, false, false, false, false, false, true, false                                    // Extra courses
+	false, false, false, false, false, false, false, true, false                                   // Extra courses
 };
 
 struct SettingsData
