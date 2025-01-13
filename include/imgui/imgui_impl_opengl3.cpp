@@ -189,11 +189,6 @@
 #define IMGUI_IMPL_OPENGL_MAY_HAVE_POLYGON_MODE // may have glPolygonMode()
 #endif
 
-// Desktop GL 2.1+ and GL ES 3.0+ have glBindBuffer() with GL_PIXEL_UNPACK_BUFFER target.
-#if !defined(IMGUI_IMPL_OPENGL_ES2)
-#define IMGUI_IMPL_OPENGL_MAY_HAVE_BIND_BUFFER_PIXEL_UNPACK
-#endif
-
 // Desktop GL 3.1+ has GL_PRIMITIVE_RESTART state
 #if !defined(IMGUI_IMPL_OPENGL_ES2) && !defined(IMGUI_IMPL_OPENGL_ES3) && defined(GL_VERSION_3_1)
 #define IMGUI_IMPL_OPENGL_MAY_HAVE_PRIMITIVE_RESTART
@@ -218,6 +213,26 @@
 #define GL_CALL(_CALL)      _CALL   // Call without error check
 #endif
 
+struct VertexAttrib
+{
+    GLboolean enabled;
+    GLint size;
+    GLenum type;
+    GLboolean normalized;
+    GLsizei stride;
+    const void* pointer;
+
+    void InitState()
+    {
+        enabled = GL_FALSE;
+        size = 4;
+        type = GL_FLOAT;
+        normalized = GL_FALSE;
+        stride = 0;
+        pointer = NULL;
+    }
+};
+
 // OpenGL Data
 struct ImGui_ImplOpenGL3_Data
 {
@@ -240,7 +255,7 @@ struct ImGui_ImplOpenGL3_Data
     bool            HasPolygonMode;
     bool            UseBufferSubData;
 
-#if defined(IMGUI_IMPL_OPENGL_USE_VERTEX_ARRAY)
+#ifdef IMGUI_IMPL_OPENGL_USE_VERTEX_ARRAY
     GLuint vertex_array_object;
 #endif
 
@@ -250,7 +265,9 @@ struct ImGui_ImplOpenGL3_Data
 
     void InitState()
     {
+#ifdef IMGUI_IMPL_OPENGL_USE_VERTEX_ARRAY
         vertex_array_object = 0;
+#endif
 
         blendEnabled = GL_FALSE;
         cullFaceEnabled = GL_FALSE;
@@ -267,11 +284,23 @@ struct ImGui_ImplOpenGL3_Data
         viewportY = 0;
         viewportW = -1;
         viewportH = -1;
+        scissorX = 0;
+        scissorY = 0;
+        scissorW = -1;
+        scissorH = -1;
         frontPolygonMode = GL_FILL;
         backPolygonMode = GL_FILL;
         shaderProgram = 0;
         boundTexture2D = 0;
+        boundArrayBuffer = 0;
+        boundElementArrayBuffer = 0;
+        for (uint8_t i = 0; i < 8; i++) vertexAttribs[i].InitState();
+#ifdef IMGUI_IMPL_OPENGL_USE_VERTEX_ARRAY
         boundVao = 0;
+#endif
+#ifdef IMGUI_IMPL_OPENGL_MAY_HAVE_BIND_SAMPLER
+        boundSampler = 0;
+#endif
     }
 
     GLboolean blendEnabled;
@@ -368,6 +397,19 @@ struct ImGui_ImplOpenGL3_Data
         GL_CALL(glViewport(x, y, w, h));
     }
 
+    GLint scissorX, scissorY;
+    GLsizei scissorW, scissorH;
+    void Scissor(const GLint x, const GLint y, const GLsizei w, const GLsizei h)
+    {
+        if (scissorX == x && scissorY == y && scissorW == w && scissorH == h) return;
+        scissorX = x;
+        scissorY = y;
+        scissorW = w;
+        scissorH = h;
+
+        GL_CALL(glScissor(x, y, w, h));
+    }
+
     GLenum frontPolygonMode, backPolygonMode;
     void PolygonMode(const GLenum face, const GLenum mode)
     {
@@ -410,7 +452,7 @@ struct ImGui_ImplOpenGL3_Data
     }
 
     GLuint boundTexture2D;
-    void BindTexture2D(GLuint texture2d)
+    void BindTexture2D(const GLuint texture2d)
     {
         if (boundTexture2D == texture2d) return;
         boundTexture2D = texture2d;
@@ -418,14 +460,74 @@ struct ImGui_ImplOpenGL3_Data
         GL_CALL(glBindTexture(GL_TEXTURE_2D, texture2d));
     }
 
-#if defined(IMGUI_IMPL_OPENGL_USE_VERTEX_ARRAY)
+    GLuint boundArrayBuffer;
+    void BindArrayBuffer(const GLuint buffer)
+    {
+        if (boundArrayBuffer == buffer) return;
+        boundArrayBuffer = buffer;
+
+        GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, buffer));
+    }
+
+    GLuint boundElementArrayBuffer;
+    void BindElementArrayBuffer(const GLuint buffer)
+    {
+        if (boundElementArrayBuffer == buffer) return;
+        boundElementArrayBuffer = buffer;
+
+        GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer));
+    }
+
+    VertexAttrib vertexAttribs[8];
+    void EnableVertexAttribArray(const GLuint index, const GLboolean enable)
+    {
+        // TODO: This is not entirely correct, as it assumes the same VAO is always bound.
+
+        if (vertexAttribs[index].enabled == enable) return;
+        vertexAttribs[index].enabled = enable;
+
+        if (enable) GL_CALL(glEnableVertexAttribArray(index));
+        else GL_CALL(glDisableVertexAttribArray(index));
+    }
+
+    void VertexAttribPointer(const GLuint index, const GLint size, const GLenum type, const GLboolean normalized, const GLsizei stride, const void* pointer)
+    {
+        // TODO: This is not entirely correct, as it assumes the same VAO is always bound.
+
+        if (vertexAttribs[index].size == size &&
+            vertexAttribs[index].type == type &&
+            vertexAttribs[index].normalized == normalized &&
+            vertexAttribs[index].stride == stride &&
+            vertexAttribs[index].pointer == pointer) return;
+
+        vertexAttribs[index].size = size;
+        vertexAttribs[index].type = type;
+        vertexAttribs[index].normalized = normalized;
+        vertexAttribs[index].stride = stride;
+        vertexAttribs[index].pointer = pointer;
+
+        GL_CALL(glVertexAttribPointer(index, size, type, normalized, stride, pointer));
+    }
+
+#ifdef IMGUI_IMPL_OPENGL_USE_VERTEX_ARRAY
     GLuint boundVao;
-    void BindVao(GLuint vao)
+    void BindVao(const GLuint vao)
     {
         if (boundVao == vao) return;
         boundVao = vao;
 
         glBindVertexArray(vao);
+    }
+#endif
+
+#ifdef IMGUI_IMPL_OPENGL_MAY_HAVE_BIND_SAMPLER
+    GLuint boundSampler;
+    void BindSampler(const GLuint sampler)
+    {
+        if (boundSampler == sampler) return;
+        boundSampler = sampler;
+
+        glBindSampler(0, sampler);
     }
 #endif
 };
@@ -436,30 +538,6 @@ static ImGui_ImplOpenGL3_Data* ImGui_ImplOpenGL3_GetBackendData()
 {
     return ImGui::GetCurrentContext() ? (ImGui_ImplOpenGL3_Data*)ImGui::GetIO().BackendRendererUserData : nullptr;
 }
-
-// OpenGL vertex attribute state (for ES 1.0 and ES 2.0 only)
-#ifndef IMGUI_IMPL_OPENGL_USE_VERTEX_ARRAY
-struct ImGui_ImplOpenGL3_VtxAttribState
-{
-    GLint   Enabled, Size, Type, Normalized, Stride;
-    GLvoid* Ptr;
-
-    void GetState(GLint index)
-    {
-        glGetVertexAttribiv(index, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &Enabled);
-        glGetVertexAttribiv(index, GL_VERTEX_ATTRIB_ARRAY_SIZE, &Size);
-        glGetVertexAttribiv(index, GL_VERTEX_ATTRIB_ARRAY_TYPE, &Type);
-        glGetVertexAttribiv(index, GL_VERTEX_ATTRIB_ARRAY_NORMALIZED, &Normalized);
-        glGetVertexAttribiv(index, GL_VERTEX_ATTRIB_ARRAY_STRIDE, &Stride);
-        glGetVertexAttribPointerv(index, GL_VERTEX_ATTRIB_ARRAY_POINTER, &Ptr);
-    }
-    void SetState(GLint index)
-    {
-        glVertexAttribPointer(index, Size, Type, (GLboolean)Normalized, Stride, Ptr);
-        if (Enabled) glEnableVertexAttribArray(index); else glDisableVertexAttribArray(index);
-    }
-};
-#endif
 
 // Functions
 bool    ImGui_ImplOpenGL3_Init(const char* glsl_version)
@@ -629,7 +707,7 @@ static void ImGui_ImplOpenGL3_SetupRenderState(ImDrawData* draw_data, int fb_wid
 
 #ifdef IMGUI_IMPL_OPENGL_MAY_HAVE_BIND_SAMPLER
     if (bd->GlVersion >= 330 || bd->GlProfileIsES3)
-        glBindSampler(0, 0); // We use combined texture/sampler state. Applications using GL 3.3 and GL ES 3.0 may set that otherwise.
+        bd->BindSampler(0); // We use combined texture/sampler state. Applications using GL 3.3 and GL ES 3.0 may set that otherwise.
 #endif
 
 #ifdef IMGUI_IMPL_OPENGL_USE_VERTEX_ARRAY
@@ -637,14 +715,14 @@ static void ImGui_ImplOpenGL3_SetupRenderState(ImDrawData* draw_data, int fb_wid
 #endif
 
     // Bind vertex/index buffers and setup attributes for ImDrawVert
-    GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, bd->VboHandle));
-    GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bd->ElementsHandle));
-    GL_CALL(glEnableVertexAttribArray(bd->AttribLocationVtxPos));
-    GL_CALL(glEnableVertexAttribArray(bd->AttribLocationVtxUV));
-    GL_CALL(glEnableVertexAttribArray(bd->AttribLocationVtxColor));
-    GL_CALL(glVertexAttribPointer(bd->AttribLocationVtxPos,   2, GL_FLOAT,         GL_FALSE, sizeof(ImDrawVert), (GLvoid*)offsetof(ImDrawVert, pos)));
-    GL_CALL(glVertexAttribPointer(bd->AttribLocationVtxUV,    2, GL_FLOAT,         GL_FALSE, sizeof(ImDrawVert), (GLvoid*)offsetof(ImDrawVert, uv)));
-    GL_CALL(glVertexAttribPointer(bd->AttribLocationVtxColor, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(ImDrawVert), (GLvoid*)offsetof(ImDrawVert, col)));
+    bd->BindArrayBuffer(bd->VboHandle);
+    bd->BindElementArrayBuffer(bd->ElementsHandle);
+    bd->EnableVertexAttribArray(bd->AttribLocationVtxPos, GL_TRUE);
+    bd->EnableVertexAttribArray(bd->AttribLocationVtxUV, GL_TRUE);
+    bd->EnableVertexAttribArray(bd->AttribLocationVtxColor, GL_TRUE);
+    bd->VertexAttribPointer(bd->AttribLocationVtxPos, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert), (GLvoid*)offsetof(ImDrawVert, pos));
+    bd->VertexAttribPointer(bd->AttribLocationVtxUV, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert), (GLvoid*)offsetof(ImDrawVert, uv));
+    bd->VertexAttribPointer(bd->AttribLocationVtxColor, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(ImDrawVert), (GLvoid*)offsetof(ImDrawVert, col));
 }
 
 // OpenGL3 Render function.
@@ -723,7 +801,7 @@ void    ImGui_ImplOpenGL3_RenderDrawData(ImDrawData* draw_data)
                     continue;
 
                 // Apply scissor/clipping rectangle (Y is inverted in OpenGL)
-                GL_CALL(glScissor((int)clip_min.x, (int)((float)fb_height - clip_max.y), (int)(clip_max.x - clip_min.x), (int)(clip_max.y - clip_min.y)));
+                bd->Scissor((int)clip_min.x, (int)((float)fb_height - clip_max.y), (int)(clip_max.x - clip_min.x), (int)(clip_max.y - clip_min.y));
 
                 // Bind texture, Draw
                 bd->BindTexture2D((GLuint)(intptr_t)pcmd->GetTexID());
@@ -835,10 +913,7 @@ bool    ImGui_ImplOpenGL3_CreateDeviceObjects()
     GLint last_texture, last_array_buffer;
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
     glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &last_array_buffer);
-#ifdef IMGUI_IMPL_OPENGL_MAY_HAVE_BIND_BUFFER_PIXEL_UNPACK
-    GLint last_pixel_unpack_buffer = 0;
-    if (bd->GlVersion >= 210) { glGetIntegerv(GL_PIXEL_UNPACK_BUFFER_BINDING, &last_pixel_unpack_buffer); glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0); }
-#endif
+
 #ifdef IMGUI_IMPL_OPENGL_USE_VERTEX_ARRAY
     GLint last_vertex_array;
     glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &last_vertex_array);
@@ -1017,10 +1092,8 @@ bool    ImGui_ImplOpenGL3_CreateDeviceObjects()
 
     // Restore modified GL state
     bd->BindTexture2D(last_texture);
-    glBindBuffer(GL_ARRAY_BUFFER, last_array_buffer);
-#ifdef IMGUI_IMPL_OPENGL_MAY_HAVE_BIND_BUFFER_PIXEL_UNPACK
-    if (bd->GlVersion >= 210) { glBindBuffer(GL_PIXEL_UNPACK_BUFFER, last_pixel_unpack_buffer); }
-#endif
+    bd->BindArrayBuffer(last_array_buffer);
+
 #ifdef IMGUI_IMPL_OPENGL_USE_VERTEX_ARRAY
     bd->BindVao(last_vertex_array);
 #endif
