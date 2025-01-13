@@ -144,11 +144,11 @@ int main()
 	//ImGui::StyleColorsDark();
 	SetImGuiStyle();
 
+	GLState glState;
+
 	// Setup Platform/Renderer backends
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	ImGui_ImplOpenGL3_Init("#version 330");
-
-	GLState glState;
+	ImGui_ImplOpenGL3_Init("#version 330", &glState);
 
 	MainUI* mainUI = new MainUI();
 	mainUI->SetIsVisible(true);
@@ -160,7 +160,7 @@ int main()
 
 		// Start the Dear ImGui frame
 		ImGui_ImplGlfw_NewFrame();
-		ImGui_ImplOpenGL3_NewFrame(&glState);
+		ImGui_ImplOpenGL3_NewFrame();
 		ImGui::NewFrame();
 
 		mainUI->Render();
@@ -173,7 +173,7 @@ int main()
 		glState.ClearColor(0.1f * windowOpacity, 0.025f * windowOpacity, 0.05f * windowOpacity, windowOpacity);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData(), &glState);
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		/* Swap front and back buffers */
 
