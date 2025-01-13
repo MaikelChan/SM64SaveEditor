@@ -169,6 +169,9 @@ int main()
 
 		/* Render here */
 
+		// Disable scissor so when clearing the buffer to make sure it clears the whole screen
+		glState.EnableScissorTest(false);
+
 		float windowOpacity = mainUI->GetWindowOpacity();
 		glState.ClearColor(0.1f * windowOpacity, 0.025f * windowOpacity, 0.05f * windowOpacity, windowOpacity);
 		glClear(GL_COLOR_BUFFER_BIT);

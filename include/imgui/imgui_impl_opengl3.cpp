@@ -583,9 +583,6 @@ void    ImGui_ImplOpenGL3_RenderDrawData(ImDrawData* draw_data)
         }
     }
 
-    // Disable scissor so when clearing the buffer it doesn't do it partially
-    bd->glState->EnableScissorTest(false);
-
     (void)bd; // Not all compilation paths use this
 }
 
