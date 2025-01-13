@@ -1,5 +1,6 @@
 #pragma once
 
+#include <unordered_map>
 #include <glad/gl.h>
 
 struct VertexAttrib
@@ -17,6 +18,8 @@ struct VertexAttrib
 class GLState
 {
 private:
+	GLint maxVertexAttribs;
+
 	GLfloat clearColorR, clearColorG, clearColorB, clearColorA;
 	GLboolean blendEnabled;
 	GLboolean cullFaceEnabled;
@@ -38,7 +41,7 @@ private:
 	GLuint boundVao;
 	GLuint boundSampler;
 
-	VertexAttrib* vertexAttribs;
+	std::unordered_map<GLuint, VertexAttrib*> vaos;
 
 public:
 	GLState();

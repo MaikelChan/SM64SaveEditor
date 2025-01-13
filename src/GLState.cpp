@@ -13,6 +13,8 @@ VertexAttrib::VertexAttrib()
 
 GLState::GLState()
 {
+	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxVertexAttribs);
+
 	clearColorR = 0.0f;
 	clearColorG = 0.0f;
 	clearColorB = 0.0f;
@@ -44,15 +46,12 @@ GLState::GLState()
 	boundElementArrayBuffer = 0;
 	boundVao = 0;
 	boundSampler = 0;
-
-	int maxVertexAttribs;
-	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxVertexAttribs);
-	vertexAttribs = new VertexAttrib[maxVertexAttribs];
 }
 
 GLState::~GLState()
 {
-	delete[] vertexAttribs;
+	for (auto vao : vaos) delete[] vao.second;
+	vaos.clear();
 }
 
 void GLState::ClearColor(const GLfloat r, const GLfloat g, const GLfloat b, const GLfloat a)
@@ -229,6 +228,11 @@ void GLState::BindVao(const GLuint vao)
 	if (boundVao == vao) return;
 	boundVao = vao;
 
+	if (vaos.count(vao) == 0)
+	{
+		vaos.insert({ vao , new VertexAttrib[maxVertexAttribs] });
+	}
+
 	glBindVertexArray(vao);
 }
 
@@ -243,7 +247,9 @@ void GLState::BindSampler(const GLuint sampler)
 
 void GLState::EnableVertexAttribArray(const GLuint index, const GLboolean enable)
 {
-	// TODO: This is not entirely correct, as it assumes the same VAO is always bound.
+	// TODO: This doesn't take into account vaos that have been deleted.
+
+	VertexAttrib* vertexAttribs = vaos.at(boundVao);
 
 	if (vertexAttribs[index].enabled == enable) return;
 	vertexAttribs[index].enabled = enable;
@@ -254,7 +260,9 @@ void GLState::EnableVertexAttribArray(const GLuint index, const GLboolean enable
 
 void GLState::VertexAttribPointer(const GLuint index, const GLint size, const GLenum type, const GLboolean normalized, const GLsizei stride, const void* pointer)
 {
-	// TODO: This is not entirely correct, as it assumes the same VAO is always bound.
+	// TODO: This doesn't take into account vaos that have been deleted.
+
+	VertexAttrib* vertexAttribs = vaos.at(boundVao);
 
 	if (vertexAttribs[index].size == size &&
 		vertexAttribs[index].type == type &&
