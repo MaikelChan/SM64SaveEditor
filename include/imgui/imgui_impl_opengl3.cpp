@@ -470,8 +470,8 @@ static void ImGui_ImplOpenGL3_SetupRenderState(ImDrawData* draw_data, int fb_wid
         { (R+L)/(L-R),  (T+B)/(B-T),  0.0f,   1.0f },
     };
     bd->glState->SetShaderProgram(bd->ShaderHandle);
-    glUniform1i(bd->AttribLocationTex, 0);
-    glUniformMatrix4fv(bd->AttribLocationProjMtx, 1, GL_FALSE, &ortho_projection[0][0]);
+    bd->glState->Uniform1i(bd->AttribLocationTex, 0);
+    bd->glState->UniformMatrix4fv(bd->AttribLocationProjMtx, 1, GL_FALSE, &ortho_projection[0][0]);
 
 #ifdef IMGUI_IMPL_OPENGL_MAY_HAVE_BIND_SAMPLER
     if (bd->GlVersion >= 330 || bd->GlProfileIsES3)

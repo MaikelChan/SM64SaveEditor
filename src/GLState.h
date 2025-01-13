@@ -15,6 +15,25 @@ struct VertexAttrib
 	VertexAttrib();
 };
 
+struct VertexArrayObject
+{
+	VertexAttrib* vertexAttribs;
+
+	VertexArrayObject(const GLint vertexAttribCount);
+	~VertexArrayObject();
+};
+
+struct Uniform
+{
+	GLint u_1i{};
+	GLfloat u_matrix4fv[4][4]{};
+};
+
+struct ShaderProgram
+{
+	std::unordered_map<GLint, Uniform> uniforms;
+};
+
 class GLState
 {
 private:
@@ -41,7 +60,8 @@ private:
 	GLuint boundVao;
 	GLuint boundSampler;
 
-	std::unordered_map<GLuint, VertexAttrib*> vaos;
+	std::unordered_map<GLuint, VertexArrayObject*> vertexArrayObjects;
+	std::unordered_map<GLuint, ShaderProgram*> shaderPrograms;
 
 public:
 	GLState();
@@ -68,4 +88,7 @@ public:
 
 	void EnableVertexAttribArray(const GLuint index, const GLboolean enable);
 	void VertexAttribPointer(const GLuint index, const GLint size, const GLenum type, const GLboolean normalized, const GLsizei stride, const void* pointer);
+
+	void Uniform1i(const GLint location, const GLint value);
+	void UniformMatrix4fv(const GLint location, const GLsizei count, const GLboolean transpose, const GLfloat* value);
 };

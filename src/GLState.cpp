@@ -11,6 +11,16 @@ VertexAttrib::VertexAttrib()
 	pointer = 0;
 }
 
+VertexArrayObject::VertexArrayObject(const GLint vertexAttribCount)
+{
+	vertexAttribs = new VertexAttrib[vertexAttribCount];
+}
+
+VertexArrayObject::~VertexArrayObject()
+{
+	delete[] vertexAttribs;
+}
+
 GLState::GLState()
 {
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxVertexAttribs);
@@ -50,8 +60,11 @@ GLState::GLState()
 
 GLState::~GLState()
 {
-	for (auto vao : vaos) delete[] vao.second;
-	vaos.clear();
+	for (auto vao : vertexArrayObjects) delete vao.second;
+	vertexArrayObjects.clear();
+
+	for (auto shaderProgram : shaderPrograms) delete shaderProgram.second;
+	shaderPrograms.clear();
 }
 
 void GLState::ClearColor(const GLfloat r, const GLfloat g, const GLfloat b, const GLfloat a)
@@ -196,6 +209,11 @@ void GLState::SetShaderProgram(const GLuint value)
 	if (shaderProgram == value) return;
 	shaderProgram = value;
 
+	if (shaderPrograms.count(value) == 0)
+	{
+		shaderPrograms.insert(std::make_pair(value, new ShaderProgram()));
+	}
+
 	glUseProgram(value);
 }
 
@@ -228,9 +246,9 @@ void GLState::BindVao(const GLuint vao)
 	if (boundVao == vao) return;
 	boundVao = vao;
 
-	if (vaos.count(vao) == 0)
+	if (vertexArrayObjects.count(vao) == 0)
 	{
-		vaos.insert({ vao , new VertexAttrib[maxVertexAttribs] });
+		vertexArrayObjects.insert(std::make_pair(vao, new VertexArrayObject(maxVertexAttribs)));
 	}
 
 	glBindVertexArray(vao);
@@ -244,15 +262,14 @@ void GLState::BindSampler(const GLuint sampler)
 	glBindSampler(0, sampler);
 }
 
-
 void GLState::EnableVertexAttribArray(const GLuint index, const GLboolean enable)
 {
 	// TODO: This doesn't take into account vaos that have been deleted.
 
-	VertexAttrib* vertexAttribs = vaos.at(boundVao);
+	VertexArrayObject* vao = vertexArrayObjects.at(boundVao);
 
-	if (vertexAttribs[index].enabled == enable) return;
-	vertexAttribs[index].enabled = enable;
+	if (vao->vertexAttribs[index].enabled == enable) return;
+	vao->vertexAttribs[index].enabled = enable;
 
 	if (enable) glEnableVertexAttribArray(index);
 	else glDisableVertexAttribArray(index);
@@ -262,19 +279,55 @@ void GLState::VertexAttribPointer(const GLuint index, const GLint size, const GL
 {
 	// TODO: This doesn't take into account vaos that have been deleted.
 
-	VertexAttrib* vertexAttribs = vaos.at(boundVao);
+	VertexArrayObject* vao = vertexArrayObjects.at(boundVao);
 
-	if (vertexAttribs[index].size == size &&
-		vertexAttribs[index].type == type &&
-		vertexAttribs[index].normalized == normalized &&
-		vertexAttribs[index].stride == stride &&
-		vertexAttribs[index].pointer == pointer) return;
+	if (vao->vertexAttribs[index].size == size &&
+		vao->vertexAttribs[index].type == type &&
+		vao->vertexAttribs[index].normalized == normalized &&
+		vao->vertexAttribs[index].stride == stride &&
+		vao->vertexAttribs[index].pointer == pointer) return;
 
-	vertexAttribs[index].size = size;
-	vertexAttribs[index].type = type;
-	vertexAttribs[index].normalized = normalized;
-	vertexAttribs[index].stride = stride;
-	vertexAttribs[index].pointer = pointer;
+	vao->vertexAttribs[index].size = size;
+	vao->vertexAttribs[index].type = type;
+	vao->vertexAttribs[index].normalized = normalized;
+	vao->vertexAttribs[index].stride = stride;
+	vao->vertexAttribs[index].pointer = pointer;
 
 	glVertexAttribPointer(index, size, type, normalized, stride, pointer);
+}
+
+void GLState::Uniform1i(const GLint location, const GLint value)
+{
+	ShaderProgram* sp = shaderPrograms.at(shaderProgram);
+
+	if (sp->uniforms.count(location) == 0)
+	{
+		Uniform u;
+		sp->uniforms.insert(std::make_pair(location, u));
+	}
+
+	Uniform* uniform = &sp->uniforms.at(location);
+
+	if (uniform->u_1i == value) return;
+	uniform->u_1i = value;
+
+	glUniform1i(location, value);
+}
+
+void GLState::UniformMatrix4fv(const GLint location, const GLsizei count, const GLboolean transpose, const GLfloat* value)
+{
+	ShaderProgram* sp = shaderPrograms.at(shaderProgram);
+
+	if (sp->uniforms.count(location) == 0)
+	{
+		Uniform u;
+		sp->uniforms.insert(std::make_pair(location, u));
+	}
+
+	Uniform* uniform = &sp->uniforms.at(location);
+
+	if (memcmp(value, uniform->u_matrix4fv, sizeof(GLfloat) * 16) == 0) return;
+	memcpy(uniform->u_matrix4fv, value, sizeof(GLfloat) * 16);
+
+	glUniformMatrix4fv(location, count, transpose, value);
 }
