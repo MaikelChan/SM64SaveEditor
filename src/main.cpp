@@ -1,6 +1,7 @@
 ﻿#include "main.h"
 #include "Config.h"
 #include "MainUI.h"
+#include "GLState.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_glfw.h>
@@ -8,7 +9,8 @@
 
 #include "sm64.ttf.h"
 
-//#define GLFW_INCLUDE_NONE
+#define GLFW_INCLUDE_NONE
+#include <glad/gl.h>
 #include <GLFW/glfw3.h>
 
 int glfwMajor, glfwMinor, glfwRevision{ 0 };
@@ -98,6 +100,13 @@ int main()
 
 	glfwMakeContextCurrent(window);
 
+	int version = gladLoadGL(glfwGetProcAddress);
+	if (version == 0)
+	{
+		printf("Failed to initialize OpenGL context.\n");
+		return -1;
+	}
+
 	if (!hasPositionFlags && monitor)
 	{
 		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
@@ -139,6 +148,8 @@ int main()
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 
+	GLState glState;
+
 	MainUI* mainUI = new MainUI();
 	mainUI->SetIsVisible(true);
 
@@ -149,7 +160,7 @@ int main()
 
 		// Start the Dear ImGui frame
 		ImGui_ImplGlfw_NewFrame();
-		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplOpenGL3_NewFrame(&glState);
 		ImGui::NewFrame();
 
 		mainUI->Render();
@@ -159,10 +170,10 @@ int main()
 		/* Render here */
 
 		float windowOpacity = mainUI->GetWindowOpacity();
-		glClearColor(0.1f * windowOpacity, 0.025f * windowOpacity, 0.05f * windowOpacity, windowOpacity);
+		glState.ClearColor(0.1f * windowOpacity, 0.025f * windowOpacity, 0.05f * windowOpacity, windowOpacity);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData(), &glState);
 
 		/* Swap front and back buffers */
 
