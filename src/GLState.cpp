@@ -1,5 +1,6 @@
 #include "GLState.h"
 #include <cstdint>
+#include <stdexcept>
 
 VertexAttrib::VertexAttrib()
 {
@@ -50,10 +51,11 @@ GLState::GLState()
 	scissorH = -1;
 	frontPolygonMode = GL_FILL;
 	backPolygonMode = GL_FILL;
-	shaderProgram = 0;
+	boundShaderProgram = 0;
 	boundTexture2D = 0;
 	boundArrayBuffer = 0;
 	boundElementArrayBuffer = 0;
+	boundPixelUnpackBuffer = 0;
 	boundVao = 0;
 	boundSampler = 0;
 }
@@ -204,19 +206,6 @@ void GLState::PolygonMode(const GLenum face, const GLenum mode)
 	}
 }
 
-void GLState::SetShaderProgram(const GLuint value)
-{
-	if (shaderProgram == value) return;
-	shaderProgram = value;
-
-	if (shaderPrograms.count(value) == 0)
-	{
-		shaderPrograms.insert(std::make_pair(value, new ShaderProgram()));
-	}
-
-	glUseProgram(value);
-}
-
 void GLState::BindTexture2D(const GLuint texture2d)
 {
 	if (boundTexture2D == texture2d) return;
@@ -241,17 +230,12 @@ void GLState::BindElementArrayBuffer(const GLuint buffer)
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
 }
 
-void GLState::BindVao(const GLuint vao)
+void GLState::BindPixelUnpackBuffer(const GLuint buffer)
 {
-	if (boundVao == vao) return;
-	boundVao = vao;
+	if (boundPixelUnpackBuffer == buffer) return;
+	boundPixelUnpackBuffer = buffer;
 
-	if (vertexArrayObjects.count(vao) == 0)
-	{
-		vertexArrayObjects.insert(std::make_pair(vao, new VertexArrayObject(maxVertexAttribs)));
-	}
-
-	glBindVertexArray(vao);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer);
 }
 
 void GLState::BindSampler(const GLuint sampler)
@@ -262,10 +246,48 @@ void GLState::BindSampler(const GLuint sampler)
 	glBindSampler(0, sampler);
 }
 
+void GLState::GenVertexArrays(const GLsizei count, GLuint* arrays)
+{
+	glGenVertexArrays(count, arrays);
+
+	for (GLsizei i = 0; i < count; i++)
+	{
+		if (vertexArrayObjects.count(arrays[i]) > 0)
+		{
+			throw std::runtime_error("VertexArrayObject already exists.");
+		}
+
+		vertexArrayObjects.insert(std::make_pair(arrays[i], new VertexArrayObject(maxVertexAttribs)));
+	}
+}
+
+void GLState::DeleteVertexArrays(const GLsizei count, const GLuint* arrays)
+{
+	for (GLsizei i = 0; i < count; i++)
+	{
+		if (vertexArrayObjects.count(arrays[i]) == 0)
+		{
+			throw std::runtime_error("VertexArrayObject doesn't exist.");
+		}
+
+		VertexArrayObject* vao = vertexArrayObjects.at(arrays[i]);
+		delete vao;
+		vertexArrayObjects.erase(arrays[i]);
+	}
+
+	glDeleteVertexArrays(count, arrays);
+}
+
+void GLState::BindVertexArray(const GLuint vao)
+{
+	if (boundVao == vao) return;
+	boundVao = vao;
+
+	glBindVertexArray(vao);
+}
+
 void GLState::EnableVertexAttribArray(const GLuint index, const GLboolean enable)
 {
-	// TODO: This doesn't take into account vaos that have been deleted.
-
 	VertexArrayObject* vao = vertexArrayObjects.at(boundVao);
 
 	if (vao->vertexAttribs[index].enabled == enable) return;
@@ -277,8 +299,6 @@ void GLState::EnableVertexAttribArray(const GLuint index, const GLboolean enable
 
 void GLState::VertexAttribPointer(const GLuint index, const GLint size, const GLenum type, const GLboolean normalized, const GLsizei stride, const void* pointer)
 {
-	// TODO: This doesn't take into account vaos that have been deleted.
-
 	VertexArrayObject* vao = vertexArrayObjects.at(boundVao);
 
 	if (vao->vertexAttribs[index].size == size &&
@@ -296,9 +316,45 @@ void GLState::VertexAttribPointer(const GLuint index, const GLint size, const GL
 	glVertexAttribPointer(index, size, type, normalized, stride, pointer);
 }
 
+GLuint GLState::CreateProgram()
+{
+	GLuint program = glCreateProgram();
+
+	if (shaderPrograms.count(program) > 0)
+	{
+		throw std::runtime_error("Shader program already exists.");
+	}
+
+	shaderPrograms.insert(std::make_pair(program, new ShaderProgram()));
+
+	return program;
+}
+
+void GLState::DeleteProgram(const GLuint program)
+{
+	if (shaderPrograms.count(program) == 0)
+	{
+		throw std::runtime_error("Shader program doesn't exist.");
+	}
+
+	ShaderProgram* sp = shaderPrograms.at(program);
+	delete sp;
+	shaderPrograms.erase(program);
+
+	glDeleteProgram(program);
+}
+
+void GLState::UseProgram(const GLuint value)
+{
+	if (boundShaderProgram == value) return;
+	boundShaderProgram = value;
+
+	glUseProgram(value);
+}
+
 void GLState::Uniform1i(const GLint location, const GLint value)
 {
-	ShaderProgram* sp = shaderPrograms.at(shaderProgram);
+	ShaderProgram* sp = shaderPrograms.at(boundShaderProgram);
 
 	if (sp->uniforms.count(location) == 0)
 	{
@@ -316,7 +372,7 @@ void GLState::Uniform1i(const GLint location, const GLint value)
 
 void GLState::UniformMatrix4fv(const GLint location, const GLsizei count, const GLboolean transpose, const GLfloat* value)
 {
-	ShaderProgram* sp = shaderPrograms.at(shaderProgram);
+	ShaderProgram* sp = shaderPrograms.at(boundShaderProgram);
 
 	if (sp->uniforms.count(location) == 0)
 	{

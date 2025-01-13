@@ -53,10 +53,11 @@ private:
 	GLint scissorX, scissorY;
 	GLsizei scissorW, scissorH;
 	GLenum frontPolygonMode, backPolygonMode;
-	GLuint shaderProgram;
+	GLuint boundShaderProgram;
 	GLuint boundTexture2D;
 	GLuint boundArrayBuffer;
 	GLuint boundElementArrayBuffer;
+	GLuint boundPixelUnpackBuffer;
 	GLuint boundVao;
 	GLuint boundSampler;
 
@@ -79,16 +80,21 @@ public:
 	void Viewport(const GLint x, const GLint y, const GLsizei w, const GLsizei h);
 	void Scissor(const GLint x, const GLint y, const GLsizei w, const GLsizei h);
 	void PolygonMode(const GLenum face, const GLenum mode);
-	void SetShaderProgram(const GLuint value);
 	void BindTexture2D(const GLuint texture2d);
 	void BindArrayBuffer(const GLuint buffer);
 	void BindElementArrayBuffer(const GLuint buffer);
-	void BindVao(const GLuint vao);
+	void BindPixelUnpackBuffer(const GLuint buffer);
 	void BindSampler(const GLuint sampler);
 
+	void GenVertexArrays(const GLsizei count, GLuint* arrays);
+	void DeleteVertexArrays(const GLsizei count, const GLuint* arrays);
+	void BindVertexArray(const GLuint vao);
 	void EnableVertexAttribArray(const GLuint index, const GLboolean enable);
 	void VertexAttribPointer(const GLuint index, const GLint size, const GLenum type, const GLboolean normalized, const GLsizei stride, const void* pointer);
 
+	GLuint CreateProgram();
+	void DeleteProgram(const GLuint program);
+	void UseProgram(const GLuint value);
 	void Uniform1i(const GLint location, const GLint value);
 	void UniformMatrix4fv(const GLint location, const GLsizei count, const GLboolean transpose, const GLfloat* value);
 };

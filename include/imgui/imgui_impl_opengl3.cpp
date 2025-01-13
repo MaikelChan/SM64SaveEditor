@@ -469,7 +469,7 @@ static void ImGui_ImplOpenGL3_SetupRenderState(ImDrawData* draw_data, int fb_wid
         { 0.0f,         0.0f,        -1.0f,   0.0f },
         { (R+L)/(L-R),  (T+B)/(B-T),  0.0f,   1.0f },
     };
-    bd->glState->SetShaderProgram(bd->ShaderHandle);
+    bd->glState->UseProgram(bd->ShaderHandle);
     bd->glState->Uniform1i(bd->AttribLocationTex, 0);
     bd->glState->UniformMatrix4fv(bd->AttribLocationProjMtx, 1, GL_FALSE, &ortho_projection[0][0]);
 
@@ -479,7 +479,7 @@ static void ImGui_ImplOpenGL3_SetupRenderState(ImDrawData* draw_data, int fb_wid
 #endif
 
 #ifdef IMGUI_IMPL_OPENGL_USE_VERTEX_ARRAY
-    bd->glState->BindVao(bd->vertex_array_object);
+    bd->glState->BindVertexArray(bd->vertex_array_object);
 #endif
 
     // Bind vertex/index buffers and setup attributes for ImDrawVert
@@ -680,7 +680,7 @@ bool    ImGui_ImplOpenGL3_CreateDeviceObjects()
     glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &last_array_buffer);
 #ifdef IMGUI_IMPL_OPENGL_MAY_HAVE_BIND_BUFFER_PIXEL_UNPACK
     GLint last_pixel_unpack_buffer = 0;
-    if (bd->GlVersion >= 210) { glGetIntegerv(GL_PIXEL_UNPACK_BUFFER_BINDING, &last_pixel_unpack_buffer); glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0); }
+    if (bd->GlVersion >= 210) { glGetIntegerv(GL_PIXEL_UNPACK_BUFFER_BINDING, &last_pixel_unpack_buffer); bd->glState->BindPixelUnpackBuffer(0); }
 #endif
 #ifdef IMGUI_IMPL_OPENGL_USE_VERTEX_ARRAY
     GLint last_vertex_array;
@@ -831,7 +831,7 @@ bool    ImGui_ImplOpenGL3_CreateDeviceObjects()
     CheckShader(frag_handle, "fragment shader");
 
     // Link
-    bd->ShaderHandle = glCreateProgram();
+    bd->ShaderHandle = bd->glState->CreateProgram();
     glAttachShader(bd->ShaderHandle, vert_handle);
     glAttachShader(bd->ShaderHandle, frag_handle);
     glLinkProgram(bd->ShaderHandle);
@@ -853,7 +853,7 @@ bool    ImGui_ImplOpenGL3_CreateDeviceObjects()
     glGenBuffers(1, &bd->ElementsHandle);
 
 #ifdef IMGUI_IMPL_OPENGL_USE_VERTEX_ARRAY
-    GL_CALL(glGenVertexArrays(1, &bd->vertex_array_object));
+    bd->glState->GenVertexArrays(1, &bd->vertex_array_object);
 #endif
 
     ImGui_ImplOpenGL3_CreateFontsTexture();
@@ -862,10 +862,10 @@ bool    ImGui_ImplOpenGL3_CreateDeviceObjects()
     bd->glState->BindTexture2D(last_texture);
     bd->glState->BindArrayBuffer(last_array_buffer);
 #ifdef IMGUI_IMPL_OPENGL_MAY_HAVE_BIND_BUFFER_PIXEL_UNPACK
-    if (bd->GlVersion >= 210) { glBindBuffer(GL_PIXEL_UNPACK_BUFFER, last_pixel_unpack_buffer); }
+    if (bd->GlVersion >= 210) { bd->glState->BindPixelUnpackBuffer(last_pixel_unpack_buffer); }
 #endif
 #ifdef IMGUI_IMPL_OPENGL_USE_VERTEX_ARRAY
-    bd->glState->BindVao(last_vertex_array);
+    bd->glState->BindVertexArray(last_vertex_array);
 #endif
 
     return true;
@@ -876,9 +876,9 @@ void    ImGui_ImplOpenGL3_DestroyDeviceObjects()
     ImGui_ImplOpenGL3_Data* bd = ImGui_ImplOpenGL3_GetBackendData();
     if (bd->VboHandle)      { glDeleteBuffers(1, &bd->VboHandle); bd->VboHandle = 0; }
     if (bd->ElementsHandle) { glDeleteBuffers(1, &bd->ElementsHandle); bd->ElementsHandle = 0; }
-    if (bd->ShaderHandle)   { glDeleteProgram(bd->ShaderHandle); bd->ShaderHandle = 0; }
+    if (bd->ShaderHandle)   { bd->glState->DeleteProgram(bd->ShaderHandle); bd->ShaderHandle = 0; }
 #ifdef IMGUI_IMPL_OPENGL_USE_VERTEX_ARRAY
-    if (bd->vertex_array_object) { GL_CALL(glDeleteVertexArrays(1, &bd->vertex_array_object)); bd->vertex_array_object = 0;	}
+    if (bd->vertex_array_object) { bd->glState->DeleteVertexArrays(1, &bd->vertex_array_object); bd->vertex_array_object = 0; }
 #endif
     ImGui_ImplOpenGL3_DestroyFontsTexture();
 }
