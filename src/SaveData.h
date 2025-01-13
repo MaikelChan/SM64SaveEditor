@@ -196,7 +196,7 @@ const char* const courseStarNames[COURSE_COUNT][MAX_STARS_PER_LEVEL]
 	{	// Tall, Tall Mountain
 		"Scale the Mountain",
 		"Mystery of the Monkey Cage",
-		"Scary ‘Shrooms, Red Coins",
+		"Scary 'Shrooms, Red Coins",
 		"Mysterious Mountainside",
 		"Breathtaking View from Bridge",
 		"Blast to the Lonely Mushroom",
