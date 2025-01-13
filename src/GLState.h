@@ -35,12 +35,14 @@ private:
 	GLuint boundTexture2D;
 	GLuint boundArrayBuffer;
 	GLuint boundElementArrayBuffer;
-	VertexAttrib vertexAttribs[8];
 	GLuint boundVao;
 	GLuint boundSampler;
 
+	VertexAttrib* vertexAttribs;
+
 public:
 	GLState();
+	~GLState();
 
 	void ClearColor(const GLfloat r, const GLfloat g, const GLfloat b, const GLfloat a);
 	void EnableBlend(const GLboolean enable);
@@ -58,8 +60,9 @@ public:
 	void BindTexture2D(const GLuint texture2d);
 	void BindArrayBuffer(const GLuint buffer);
 	void BindElementArrayBuffer(const GLuint buffer);
-	void EnableVertexAttribArray(const GLuint index, const GLboolean enable);
-	void VertexAttribPointer(const GLuint index, const GLint size, const GLenum type, const GLboolean normalized, const GLsizei stride, const void* pointer);
 	void BindVao(const GLuint vao);
 	void BindSampler(const GLuint sampler);
+
+	void EnableVertexAttribArray(const GLuint index, const GLboolean enable);
+	void VertexAttribPointer(const GLuint index, const GLint size, const GLenum type, const GLboolean normalized, const GLsizei stride, const void* pointer);
 };

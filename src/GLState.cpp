@@ -42,9 +42,17 @@ GLState::GLState()
 	boundTexture2D = 0;
 	boundArrayBuffer = 0;
 	boundElementArrayBuffer = 0;
-	//for (uint8_t i = 0; i < 8; i++) vertexAttribs[i].InitState();
 	boundVao = 0;
 	boundSampler = 0;
+
+	int maxVertexAttribs;
+	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxVertexAttribs);
+	vertexAttribs = new VertexAttrib[maxVertexAttribs];
+}
+
+GLState::~GLState()
+{
+	delete[] vertexAttribs;
 }
 
 void GLState::ClearColor(const GLfloat r, const GLfloat g, const GLfloat b, const GLfloat a)
@@ -216,6 +224,23 @@ void GLState::BindElementArrayBuffer(const GLuint buffer)
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
 }
 
+void GLState::BindVao(const GLuint vao)
+{
+	if (boundVao == vao) return;
+	boundVao = vao;
+
+	glBindVertexArray(vao);
+}
+
+void GLState::BindSampler(const GLuint sampler)
+{
+	if (boundSampler == sampler) return;
+	boundSampler = sampler;
+
+	glBindSampler(0, sampler);
+}
+
+
 void GLState::EnableVertexAttribArray(const GLuint index, const GLboolean enable)
 {
 	// TODO: This is not entirely correct, as it assumes the same VAO is always bound.
@@ -244,20 +269,4 @@ void GLState::VertexAttribPointer(const GLuint index, const GLint size, const GL
 	vertexAttribs[index].pointer = pointer;
 
 	glVertexAttribPointer(index, size, type, normalized, stride, pointer);
-}
-
-void GLState::BindVao(const GLuint vao)
-{
-	if (boundVao == vao) return;
-	boundVao = vao;
-
-	glBindVertexArray(vao);
-}
-
-void GLState::BindSampler(const GLuint sampler)
-{
-	if (boundSampler == sampler) return;
-	boundSampler = sampler;
-
-	glBindSampler(0, sampler);
 }
