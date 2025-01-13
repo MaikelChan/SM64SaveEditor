@@ -5,9 +5,9 @@
 struct VertexAttrib
 {
 	GLboolean enabled;
+	GLboolean normalized;
 	GLint size;
 	GLenum type;
-	GLboolean normalized;
 	GLsizei stride;
 	const void* pointer;
 
