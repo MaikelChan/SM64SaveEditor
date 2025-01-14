@@ -1,6 +1,5 @@
 ﻿
 file(GLOB_RECURSE SOURCE_FILES 
-	${CMAKE_SOURCE_DIR}/include/glad/*.c
 	${CMAKE_SOURCE_DIR}/include/imgui/*.cpp
 	${CMAKE_CURRENT_LIST_DIR}/*.c
 	${CMAKE_CURRENT_LIST_DIR}/*.cpp
@@ -21,7 +20,12 @@ else()
 endif()
 
 if(MSVC)
-  set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/ENTRY:mainCRTStartup /SUBSYSTEM:WINDOWS")
+  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(SUBSYSTEM "CONSOLE")
+  else()
+    set(SUBSYSTEM "WINDOWS")
+  endif()
+  set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/ENTRY:mainCRTStartup /SUBSYSTEM:${SUBSYSTEM}")
   target_compile_options(${PROJECT_NAME} PRIVATE /W4 /wd4458 /wd4100)
   target_link_libraries(${PROJECT_NAME} ${GLFW_Lib} OpenGL::GL)
 else()

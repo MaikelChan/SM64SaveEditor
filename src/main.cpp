@@ -9,17 +9,64 @@
 
 #include "sm64.ttf.h"
 
-//#define GLFW_INCLUDE_NONE
+#define GLAD_GL_IMPLEMENTATION
 #include <glad/gl.h>
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
 int glfwMajor, glfwMinor, glfwRevision{ 0 };
 GLFWwindow* window = nullptr;
 
+#pragma region Debug
+
 void error_callback(int error, const char* description)
 {
 	fprintf(stderr, "Error: %s\n", description);
 }
+
+#ifndef NDEBUG
+void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* message, const void* userParam)
+{
+	if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
+
+	printf("--------------- OpenGL Message ---------------\n");
+
+	switch (source)
+	{
+		case GL_DEBUG_SOURCE_API:             printf("Source: API, "); break;
+		case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   printf("Source: Window System, "); break;
+		case GL_DEBUG_SOURCE_SHADER_COMPILER: printf("Source: Shader Compiler, "); break;
+		case GL_DEBUG_SOURCE_THIRD_PARTY:     printf("Source: Third Party, "); break;
+		case GL_DEBUG_SOURCE_APPLICATION:     printf("Source: Application, "); break;
+		case GL_DEBUG_SOURCE_OTHER:           printf("Source: Other, "); break;
+	}
+
+	switch (type)
+	{
+		case GL_DEBUG_TYPE_ERROR:               printf("Type: Error, "); break;
+		case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: printf("Type: Deprecated Behaviour, "); break;
+		case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  printf("Type: Undefined Behaviour, "); break;
+		case GL_DEBUG_TYPE_PORTABILITY:         printf("Type: Portability, "); break;
+		case GL_DEBUG_TYPE_PERFORMANCE:         printf("Type: Performance, "); break;
+		case GL_DEBUG_TYPE_MARKER:              printf("Type: Marker, "); break;
+		case GL_DEBUG_TYPE_PUSH_GROUP:          printf("Type: Push Group, "); break;
+		case GL_DEBUG_TYPE_POP_GROUP:           printf("Type: Pop Group, "); break;
+		case GL_DEBUG_TYPE_OTHER:               printf("Type: Other, "); break;
+	}
+
+	switch (severity)
+	{
+		case GL_DEBUG_SEVERITY_HIGH:         printf("Severity: High\n"); break;
+		case GL_DEBUG_SEVERITY_MEDIUM:       printf("Severity: Medium\n"); break;
+		case GL_DEBUG_SEVERITY_LOW:          printf("Severity: Low\n"); break;
+		case GL_DEBUG_SEVERITY_NOTIFICATION: printf("Severity: Notification\n"); break;
+	}
+
+	printf("Debug message (%i): %s\n\n", id, message);
+}
+#endif
+
+#pragma endregion
 
 void CloseMainWindow()
 {
@@ -90,6 +137,9 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#ifndef NDEBUG
+	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+#endif
 	window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, title, NULL, NULL);
 
 	if (!window)
@@ -143,6 +193,13 @@ int main()
 	// Setup Dear ImGui style
 	//ImGui::StyleColorsDark();
 	SetImGuiStyle();
+
+#ifndef NDEBUG
+	if (GLAD_GL_KHR_debug)
+	{
+		glDebugMessageCallback(glDebugOutput, nullptr);
+	}
+#endif
 
 	GLState glState;
 
