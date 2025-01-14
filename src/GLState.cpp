@@ -1,6 +1,7 @@
 #include "GLState.h"
 #include <cstdint>
 #include <stdexcept>
+#include <cstring>
 
 VertexAttrib::VertexAttrib()
 {
