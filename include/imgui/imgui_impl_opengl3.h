@@ -27,10 +27,11 @@
 
 #pragma once
 #include "imgui.h"      // IMGUI_IMPL_API
+#include "../../src/GLState.h"
 #ifndef IMGUI_DISABLE
 
 // Follow "Getting Started" link and check examples/ folder to learn about using backends!
-IMGUI_IMPL_API bool     ImGui_ImplOpenGL3_Init(const char* glsl_version = nullptr);
+IMGUI_IMPL_API bool     ImGui_ImplOpenGL3_Init(const char* glsl_version, GLState* glState);
 IMGUI_IMPL_API void     ImGui_ImplOpenGL3_Shutdown();
 IMGUI_IMPL_API void     ImGui_ImplOpenGL3_NewFrame();
 IMGUI_IMPL_API void     ImGui_ImplOpenGL3_RenderDrawData(ImDrawData* draw_data);
