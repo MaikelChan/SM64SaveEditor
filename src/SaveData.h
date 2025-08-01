@@ -188,7 +188,7 @@ const char* const courseStarNames[COURSE_COUNT][MAX_STARS_PER_LEVEL]
 		"Shocking Arrow Lifts!",
 		"Top O' The Town",
 		"Secrets in the Shallows & Sky",
-		"Express Elevators–Hurry Up!",
+		"Express Elevatorsâ€“Hurry Up!",
 		"Go to Town for Red Coins",
 		"Quick Race through Downtown",
 		u8"100 Coin \u0101"
@@ -230,11 +230,11 @@ const char* const courseStarNames[COURSE_COUNT][MAX_STARS_PER_LEVEL]
 		u8"100 Coin \u0101"
 	},
 	// Bowser in the Dark World
-	{ "Defeat Bowser 1", "", "", "", "", "", "" },
+	{ "8 Red Coins", "", "", "", "", "", "" },
 	// Bowser in the Fire Sea
-	{ "Defeat Bowser 2", "", "", "", "", "", "" },
+	{ "8 Red Coins", "", "", "", "", "", "" },
 	// Bowser in the Sky
-	{ "Defeat Bowser 3", "", "", "", "", "", "" },
+	{ "8 Red Coins", "", "", "", "", "", "" },
 	// Princess's Secret Slide
 	{ "Complete the Secret Slide", "Complete the Secret Slide in under 21s", "", "", "", "", "" },
 	// Cavern of the Metal Cap
