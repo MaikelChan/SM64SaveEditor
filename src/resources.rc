@@ -2,8 +2,8 @@
 GLFW_ICON ICON "../sm64.ico"
 
 1 VERSIONINFO
-FILEVERSION 1,3,0,0
-PRODUCTVERSION 1,3,0,0
+FILEVERSION 1,3,1,0
+PRODUCTVERSION 1,3,1,0
 FILETYPE 1 // VFT_APP
 
 {
@@ -13,12 +13,12 @@ FILETYPE 1 // VFT_APP
 	    {
 		    VALUE "CompanyName", "PacoChan"
 		    VALUE "FileDescription", "A Super Mario 64 save editor compatible with both the Nintendo 64 and PC versions of the game."
-		    VALUE "FileVersion", "1.3.0.0"
+		    VALUE "FileVersion", "1.3.1.0"
 		    VALUE "InternalName", "SM64SaveEditor.exe"
 		    VALUE "LegalCopyright", "PacoChan"
 		    VALUE "OriginalFilename", "SM64SaveEditor.exe"
 		    VALUE "ProductName", "Super Mario 64 - Save Editor"
-		    VALUE "ProductVersion", "1.3.0.0"
+		    VALUE "ProductVersion", "1.3.1.0"
 	    }
     }
     

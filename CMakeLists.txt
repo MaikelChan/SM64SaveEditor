@@ -12,7 +12,7 @@ if (POLICY CMP0141)
   set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
 endif()
 
-project ("SM64SaveEditor" VERSION "1.3.0")
+project ("SM64SaveEditor" VERSION "1.3.1")
 configure_file("${CMAKE_CURRENT_LIST_DIR}/src/Config.h.in" "${CMAKE_CURRENT_LIST_DIR}/src/Config.h")
 configure_file("${CMAKE_CURRENT_LIST_DIR}/src/resources.rc.in" "${CMAKE_CURRENT_LIST_DIR}/src/resources.rc")
 
