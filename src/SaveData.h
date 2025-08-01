@@ -114,7 +114,7 @@ const char* const courseStarNames[COURSE_COUNT][MAX_STARS_PER_LEVEL]
 	},
 	{   // Jolly Roger Bay
 		"Plunder in the Sunken Ship",
-		"Can the Eel Come out and Play ?",
+		"Can the Eel Come out and Play?",
 		"Treasure of the Ocean Cave",
 		"Red Coins on the Ship Afloat",
 		"Blast to the Stone Pillar",
@@ -132,7 +132,7 @@ const char* const courseStarNames[COURSE_COUNT][MAX_STARS_PER_LEVEL]
 	},
 	{   // Big Boo's Haunt
 		"Go on a Ghost Hunt",
-		"Ride Big Boo's Merry - Go - Round",
+		"Ride Big Boo's Merry-Go-Round",
 		"Secret of the Haunted Books",
 		"Seek the 8 Red Coins",
 		"Big Boo's Balcony",
@@ -142,18 +142,18 @@ const char* const courseStarNames[COURSE_COUNT][MAX_STARS_PER_LEVEL]
 	{	// Hazy Maze Cave
 		"Swimming Beast in the Cavern",
 		"Elevate for 8 Red Coins",
-		"Metal - Head Mario Can Move!",
+		"Metal-Head Mario Can Move!",
 		"Navigating the Toxic Maze",
-		"A - Maze - ing Emergency Exit",
+		"A-maze-ing Emergency Exit",
 		"Watch for the Rolling Rocks",
 		u8"100 Coin \u0101"
 	},
 	{   // Lethal Lava Land
 		"Boil the Big Bully",
 		"Bully the Bullies",
-		"8 - Coin Puzzle with 15 Pieces",
-		"Red - Hot Log Rolling",
-		"Hot - Foot - It into the Volcano",
+		"8-Coin Puzzle with 15 Pieces",
+		"Red-Hot Log Rolling",
+		"Hot-Foot-It into the Volcano",
 		"Elevator Tour in the Volcano",
 		u8"100 Coin \u0101"
 	},
@@ -169,7 +169,7 @@ const char* const courseStarNames[COURSE_COUNT][MAX_STARS_PER_LEVEL]
 	{   // Dire, Dire Docks
 		"Board Bowser's Sub",
 		"Chests in the Current",
-		"Pole - Jumping for Red Coins",
+		"Pole-Jumping for Red Coins",
 		"Through the Jet Stream",
 		"The Manta Ray's Reward",
 		"Collect the Caps",
@@ -188,7 +188,7 @@ const char* const courseStarNames[COURSE_COUNT][MAX_STARS_PER_LEVEL]
 		"Shocking Arrow Lifts!",
 		"Top O' The Town",
 		"Secrets in the Shallows & Sky",
-		"Express Elevators–Hurry Up!",
+		"Express Elevators--Hurry Up!",
 		"Go to Town for Red Coins",
 		"Quick Race through Downtown",
 		u8"100 Coin \u0101"

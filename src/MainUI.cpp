@@ -169,7 +169,8 @@ void MainUI::LoadConfig()
 	SI_Error errorCode = ini.LoadFile(CONFIG_FILE_NAME);
 	if (errorCode < 0)
 	{
-		printf("Error converting INI config data to string format. Error code: %i.\n", errorCode);
+		if (errorCode == SI_FILE) printf("The config file \"%s\" is missing or corrupt. Creating a new one.\n", CONFIG_FILE_NAME);
+		else printf("Error loading config file \"%s\". Code: %i.\n", CONFIG_FILE_NAME, errorCode);
 		return;
 	};
 
