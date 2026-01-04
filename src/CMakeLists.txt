@@ -13,12 +13,6 @@ file(GLOB_RECURSE SOURCE_FILES
 # Add source to this project's executable.
 add_executable (${PROJECT_NAME} ${SOURCE_FILES} ${APP_ICON_RESOURCE_WINDOWS})
 
-if(WIN32)
-  set(GLFW_Lib glfw3)
-else()
-  set(GLFW_Lib glfw)
-endif()
-
 if(MSVC)
   if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(SUBSYSTEM "CONSOLE")
@@ -27,11 +21,11 @@ if(MSVC)
   endif()
   set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/ENTRY:mainCRTStartup /SUBSYSTEM:${SUBSYSTEM}")
   target_compile_options(${PROJECT_NAME} PRIVATE /W4 /wd4458 /wd4100)
-  target_link_libraries(${PROJECT_NAME} ${GLFW_Lib} OpenGL::GL)
 else()
   target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Wno-unused-parameter)
-  target_link_libraries(${PROJECT_NAME} ${GLFW_Lib} OpenGL::GL)
 endif()
+
+target_link_libraries(${PROJECT_NAME} PRIVATE SDL3)
 
 # imfilebrowser requires c++17.
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)

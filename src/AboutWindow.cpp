@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 #include <imgui/imgui.h>
-#include <GLFW/glfw3.h>
+#include <SDL3/SDL_version.h>
 
 AboutWindow::AboutWindow(const BaseUI* parentUI) : BaseUI(parentUI)
 {
@@ -48,9 +48,12 @@ void AboutWindow::DoRender()
 		ImGui::SameLine();
 		ImGui::TextLinkOpenURL("https://github.com/ocornut/imgui");
 
-		ImGui::BulletText("GLFW %i.%i.%i (Lib %i.%i.%i):", GLFW_VERSION_MAJOR, GLFW_VERSION_MINOR, GLFW_VERSION_REVISION, glfwMajor, glfwMinor, glfwRevision);
+		int sdlVersion = SDL_GetVersion();
+		const char* backend = GetBackend();
+		if (backend == nullptr) backend = "?";
+		ImGui::BulletText("SDL %i.%i.%i, Lib %i.%i.%i, Backend \"%s\":", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_MICRO_VERSION, SDL_VERSIONNUM_MAJOR(sdlVersion), SDL_VERSIONNUM_MINOR(sdlVersion), SDL_VERSIONNUM_MICRO(sdlVersion), GetBackend());
 		ImGui::SameLine();
-		ImGui::TextLinkOpenURL("https://www.glfw.org");
+		ImGui::TextLinkOpenURL("https://www.libsdl.org");
 
 		ImGui::BulletText("simpleini (Commit %s):", SIMPLEINI_COMMIT_HASH);
 		ImGui::SameLine();

@@ -4,7 +4,6 @@
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 
-extern int glfwMajor, glfwMinor, glfwRevision;
-
 void CloseMainWindow();
 void SetImGuiStyle();
+const char* GetBackend();

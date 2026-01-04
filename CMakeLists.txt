@@ -4,7 +4,7 @@
 # Used features that require certain minimum version:
 # * 3.11: Required for setting GLVND OpenGL preference.
 # * 3.15: Removes the '/W3' MSVC warning flag added by CMake by default, so another warning level can be set with 'target_compile_options' without causing warnings.
-cmake_minimum_required (VERSION 3.15)
+cmake_minimum_required (VERSION 3.19)
 
 # Enable Hot Reload for MSVC compilers if supported.
 if (POLICY CMP0141)
@@ -20,22 +20,17 @@ set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_LIST_DIR}/src/resources.rc")
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
-# Set OpenGL preference. On Linux there may be two gl libraries.
-# Specify with "LEGACY" or "GLVND".
-set(OpenGL_GL_PREFERENCE "GLVND")
-find_package(OpenGL REQUIRED)
-
 if (MSVC)
-  # With MSVC on Windows, just put the static glfw3.lib in the lib/ folder
-  if(NOT EXISTS "${CMAKE_SOURCE_DIR}/lib/glfw3.lib")
-    message(SEND_ERROR "glfw3.lib is missing from '${CMAKE_SOURCE_DIR}/lib' folder.")
+  # With MSVC on Windows, just put the static SDL3.lib in the lib/ folder
+  if(NOT EXISTS "${CMAKE_SOURCE_DIR}/lib/SDL3.lib")
+    message(SEND_ERROR "SDL3.lib is missing from '${CMAKE_SOURCE_DIR}/lib' folder.")
   endif()
   link_directories(${CMAKE_SOURCE_DIR}/lib)
 else()
-  # On Linux or on Windows with Mingw, having installed the glfw3 dev package or compiled and installed from source,
-  # should have also installed "glfw3Config.cmake", which will be used by find_package.
-  find_package(glfw3 3.3 REQUIRED)
-  message(STATUS "Using 'glfw3Config.cmake' file located at '${glfw3_DIR}'.")
+  # On Linux or on Windows with Mingw, having installed the SDL3 dev package or compiled and installed from source,
+  # should have also installed "SDL3Config.cmake", which will be used by find_package.
+  find_package(SDL3 REQUIRED)
+  message(STATUS "Using 'SDL3Config.cmake' file located at '${glfw3_DIR}'.")
 endif()
 
 # Include sub-projects.

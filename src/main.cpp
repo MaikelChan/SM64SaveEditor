@@ -1,77 +1,229 @@
 ﻿#include "main.h"
 #include "Config.h"
 #include "MainUI.h"
-#include "GLState.h"
 
 #include <imgui/imgui.h>
-#include <imgui/imgui_impl_glfw.h>
-#include <imgui/imgui_impl_opengl3.h>
+#include <imgui/imgui_impl_sdl3.h>
+#include <imgui/imgui_impl_sdlgpu3.h>
+
+#include <SDL3/SDL.h>
 
 #include "sm64.ttf.h"
 
-#define GLAD_GL_IMPLEMENTATION
-#include <glad/gl.h>
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
+const char* driverName = nullptr;
+bool isRunning = false;
 
-int glfwMajor, glfwMinor, glfwRevision{ 0 };
-GLFWwindow* window = nullptr;
-
-#pragma region Debug
-
-void error_callback(int error, const char* description)
+int main()
 {
-	fprintf(stderr, "Error: %s\n", description);
-}
+	// Initialize SDL
 
-#ifndef NDEBUG
-void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* message, const void* userParam)
-{
-	if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
-
-	printf("--------------- OpenGL Message ---------------\n");
-
-	switch (source)
+	if (!SDL_Init(SDL_INIT_VIDEO))
 	{
-		case GL_DEBUG_SOURCE_API:             printf("Source: API, "); break;
-		case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   printf("Source: Window System, "); break;
-		case GL_DEBUG_SOURCE_SHADER_COMPILER: printf("Source: Shader Compiler, "); break;
-		case GL_DEBUG_SOURCE_THIRD_PARTY:     printf("Source: Third Party, "); break;
-		case GL_DEBUG_SOURCE_APPLICATION:     printf("Source: Application, "); break;
-		case GL_DEBUG_SOURCE_OTHER:           printf("Source: Other, "); break;
+		printf("Error: SDL_Init(): %s\n", SDL_GetError());
+		return -1;
 	}
 
-	switch (type)
-	{
-		case GL_DEBUG_TYPE_ERROR:               printf("Type: Error, "); break;
-		case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: printf("Type: Deprecated Behaviour, "); break;
-		case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  printf("Type: Undefined Behaviour, "); break;
-		case GL_DEBUG_TYPE_PORTABILITY:         printf("Type: Portability, "); break;
-		case GL_DEBUG_TYPE_PERFORMANCE:         printf("Type: Performance, "); break;
-		case GL_DEBUG_TYPE_MARKER:              printf("Type: Marker, "); break;
-		case GL_DEBUG_TYPE_PUSH_GROUP:          printf("Type: Push Group, "); break;
-		case GL_DEBUG_TYPE_POP_GROUP:           printf("Type: Pop Group, "); break;
-		case GL_DEBUG_TYPE_OTHER:               printf("Type: Other, "); break;
-	}
+	// Window title
 
-	switch (severity)
-	{
-		case GL_DEBUG_SEVERITY_HIGH:         printf("Severity: High\n"); break;
-		case GL_DEBUG_SEVERITY_MEDIUM:       printf("Severity: Medium\n"); break;
-		case GL_DEBUG_SEVERITY_LOW:          printf("Severity: Low\n"); break;
-		case GL_DEBUG_SEVERITY_NOTIFICATION: printf("Severity: Notification\n"); break;
-	}
+	char title[64];
+	snprintf(title, 64, "%s - v%s", WINDOW_TITLE, PROJECT_VER);
 
-	printf("Debug message (%i): %s\n\n", id, message);
-}
+	// Create window
+
+	float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
+	SDL_WindowFlags window_flags = /*SDL_WINDOW_RESIZABLE |*/ SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY;
+	SDL_Window* window = SDL_CreateWindow(title, (int)(WINDOW_WIDTH * main_scale), (int)(WINDOW_HEIGHT * main_scale), window_flags);
+	if (window == nullptr)
+	{
+		printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
+		return -2;
+	}
+	SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+	SDL_ShowWindow(window);
+
+	// Create GPU Device
+
+#if NDEBUG
+	constexpr bool debugEnabled = false;
+#else
+	constexpr bool debugEnabled = true;
 #endif
 
-#pragma endregion
+	SDL_GPUDevice* gpu_device = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL | SDL_GPU_SHADERFORMAT_METALLIB, debugEnabled, nullptr);
+	if (gpu_device == nullptr)
+	{
+		printf("Error: SDL_CreateGPUDevice(): %s\n", SDL_GetError());
+		return -3;
+	}
+
+	driverName = SDL_GetGPUDeviceDriver(gpu_device);
+
+	// Claim window for GPU Device
+
+	if (!SDL_ClaimWindowForGPUDevice(gpu_device, window))
+	{
+		printf("Error: SDL_ClaimWindowForGPUDevice(): %s\n", SDL_GetError());
+		return -4;
+	}
+	SDL_SetGPUSwapchainParameters(gpu_device, window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_VSYNC);
+
+	// Imgui
+
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+	io.IniFilename = NULL;
+
+	ImFontConfig config;
+	config.MergeMode = true;
+
+	ImVector<ImWchar> ranges;
+	ImFontGlyphRangesBuilder builder;
+	builder.AddChar(0x0100); // Coin
+	builder.AddChar(0x0101); // Star
+	builder.BuildRanges(&ranges);
+
+	io.Fonts->AddFontDefault();
+	io.Fonts->AddFontFromMemoryCompressedTTF(sm64_ttf_compressed_data, sm64_ttf_compressed_size, 14, &config, ranges.Data);
+
+	//ImGui::StyleColorsDark();
+	SetImGuiStyle();
+
+	ImGuiStyle& style = ImGui::GetStyle();
+	style.ScaleAllSizes(main_scale);
+	style.FontScaleDpi = main_scale;
+
+	//GLState glState;
+
+	// Setup Platform/Renderer backends
+
+	ImGui_ImplSDL3_InitForSDLGPU(window);
+	ImGui_ImplSDLGPU3_InitInfo init_info = {};
+	init_info.Device = gpu_device;
+	init_info.ColorTargetFormat = SDL_GetGPUSwapchainTextureFormat(gpu_device, window);
+	init_info.MSAASamples = SDL_GPU_SAMPLECOUNT_1;
+	init_info.SwapchainComposition = SDL_GPU_SWAPCHAINCOMPOSITION_SDR;
+	init_info.PresentMode = SDL_GPU_PRESENTMODE_VSYNC;
+	ImGui_ImplSDLGPU3_Init(&init_info);
+
+	MainUI* mainUI = new MainUI();
+	mainUI->SetIsVisible(true);
+
+	isRunning = true;
+
+	while (isRunning)
+	{
+		// Poll events
+
+		SDL_Event event;
+
+		while (SDL_PollEvent(&event))
+		{
+			ImGui_ImplSDL3_ProcessEvent(&event);
+
+			switch (event.type)
+			{
+				case SDL_EVENT_QUIT:
+					isRunning = false;
+					break;
+
+				case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+					if (event.window.windowID == SDL_GetWindowID(window)) isRunning = false;
+					break;
+			}
+		}
+
+		// Do delays while the window is minimized
+
+		if (SDL_GetWindowFlags(window) & SDL_WINDOW_MINIMIZED)
+		{
+			SDL_Delay(10);
+			continue;
+		}
+
+		// Start the Dear ImGui frame
+
+		ImGui_ImplSDLGPU3_NewFrame();
+		ImGui_ImplSDL3_NewFrame();
+		ImGui::NewFrame();
+
+		// Process UI and ImGui
+
+		mainUI->Render();
+
+		ImGui::Render();
+
+		// SDL Rendering
+
+		ImDrawData* draw_data = ImGui::GetDrawData();
+		const bool is_minimized = (draw_data->DisplaySize.x <= 0.0f || draw_data->DisplaySize.y <= 0.0f);
+
+		SDL_GPUCommandBuffer* command_buffer = SDL_AcquireGPUCommandBuffer(gpu_device);
+
+		SDL_GPUTexture* swapchain_texture;
+		SDL_WaitAndAcquireGPUSwapchainTexture(command_buffer, window, &swapchain_texture, nullptr, nullptr);
+
+		if (swapchain_texture != nullptr && !is_minimized)
+		{
+			// This is mandatory: call ImGui_ImplSDLGPU3_PrepareDrawData() to upload the vertex/index buffer!
+			ImGui_ImplSDLGPU3_PrepareDrawData(draw_data, command_buffer);
+
+			// Setup and start a render pass
+			SDL_GPUColorTargetInfo target_info = {};
+			target_info.texture = swapchain_texture;
+			target_info.clear_color = SDL_FColor{ 0.1f, 0.025f, 0.05f, 1.0f };
+			target_info.load_op = SDL_GPU_LOADOP_CLEAR;
+			target_info.store_op = SDL_GPU_STOREOP_STORE;
+			target_info.mip_level = 0;
+			target_info.layer_or_depth_plane = 0;
+			target_info.cycle = false;
+			SDL_GPURenderPass* render_pass = SDL_BeginGPURenderPass(command_buffer, &target_info, 1, nullptr);
+
+			// Render ImGui
+			ImGui_ImplSDLGPU3_RenderDrawData(draw_data, command_buffer, render_pass);
+
+			SDL_EndGPURenderPass(render_pass);
+		}
+
+		// Submit the command buffer
+		SDL_SubmitGPUCommandBuffer(command_buffer);
+
+
+		//// Disable scissor so when clearing the buffer to make sure it clears the whole screen
+		//glState.EnableScissorTest(false);
+
+		//float windowOpacity = mainUI->GetWindowOpacity();
+		//glState.ClearColor(0.1f * windowOpacity, 0.025f * windowOpacity, 0.05f * windowOpacity, windowOpacity);
+		//glClear(GL_COLOR_BUFFER_BIT);
+
+		//ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		///* Swap front and back buffers */
+
+		//glfwSwapBuffers(window);
+	}
+
+	delete mainUI;
+	mainUI = nullptr;
+
+	SDL_WaitForGPUIdle(gpu_device);
+	ImGui_ImplSDL3_Shutdown();
+	ImGui_ImplSDLGPU3_Shutdown();
+	ImGui::DestroyContext();
+
+	SDL_ReleaseWindowFromGPUDevice(gpu_device, window);
+	SDL_DestroyGPUDevice(gpu_device);
+	SDL_DestroyWindow(window);
+	SDL_Quit();
+
+	return 0;
+}
 
 void CloseMainWindow()
 {
-	if (window == nullptr) return;
-	glfwSetWindowShouldClose(window, GLFW_TRUE);
+	isRunning = false;
 }
 
 void SetImGuiStyle()
@@ -98,163 +250,7 @@ void SetImGuiStyle()
 	colors[ImGuiCol_TabDimmedSelected] = ImVec4(0.25f, 0.06f, 0.13f, 1.00f);
 }
 
-int main()
+const char* GetBackend()
 {
-	glfwGetVersion(&glfwMajor, &glfwMinor, &glfwRevision);
-	glfwSetErrorCallback(error_callback);
-
-	if (!glfwInit())
-	{
-		return -1;
-	}
-
-	char title[64];
-	snprintf(title, 64, "%s - v%s", WINDOW_TITLE, PROJECT_VER);
-
-	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-
-#if GLFW_VERSION_MAJOR > 3 || (GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 4)
-	// In case the program is linked against GLFW shared library instead of static,
-	// make sure the user has the correct version installed to use the position flags.
-	const bool hasPositionFlags = (glfwMajor > 3 || (glfwMajor == 3 && glfwMinor >= 4));
-
-	if (hasPositionFlags && monitor)
-	{
-		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-		if (mode)
-		{
-			glfwWindowHint(GLFW_POSITION_X, (mode->width >> 1) - (WINDOW_WIDTH >> 1));
-			glfwWindowHint(GLFW_POSITION_Y, (mode->height >> 1) - (WINDOW_HEIGHT >> 1));
-		}
-	}
-#else
-	const bool hasPositionFlags = false;
-#endif
-
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-	glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
-
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#ifndef NDEBUG
-	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
-#endif
-
-	float main_scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor()); // Valid on GLFW 3.3+ only
-	window = glfwCreateWindow((int)(WINDOW_WIDTH * main_scale), (int)(WINDOW_HEIGHT * main_scale), title, NULL, NULL);
-
-	if (!window)
-	{
-		glfwTerminate();
-		return -1;
-	}
-
-	glfwMakeContextCurrent(window);
-
-	int version = gladLoadGL(glfwGetProcAddress);
-	if (version == 0)
-	{
-		printf("Failed to initialize OpenGL context.\n");
-		return -1;
-	}
-
-	if (!hasPositionFlags && monitor)
-	{
-		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-		if (mode)
-		{
-			glfwSetWindowPos(window, (mode->width >> 1) - (WINDOW_WIDTH >> 1), (mode->height >> 1) - (WINDOW_HEIGHT >> 1));
-		}
-	}
-
-	glfwSwapInterval(1);
-
-	// Imgui
-
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-	io.IniFilename = NULL;
-
-	ImFontConfig config;
-	config.MergeMode = true;
-
-	ImVector<ImWchar> ranges;
-	ImFontGlyphRangesBuilder builder;
-	builder.AddChar(0x0100); // Coin
-	builder.AddChar(0x0101); // Star
-	builder.BuildRanges(&ranges);
-
-	io.Fonts->AddFontDefault();
-	io.Fonts->AddFontFromMemoryCompressedTTF(sm64_ttf_compressed_data, sm64_ttf_compressed_size, 14, &config, ranges.Data);
-
-	// Setup Dear ImGui style
-	//ImGui::StyleColorsDark();
-	SetImGuiStyle();
-
-	// Setup scaling
-	ImGuiStyle& style = ImGui::GetStyle();
-	style.ScaleAllSizes(main_scale);
-	style.FontScaleDpi = main_scale;
-
-#ifndef NDEBUG
-	if (GLAD_GL_KHR_debug)
-	{
-		glDebugMessageCallback(glDebugOutput, nullptr);
-	}
-#endif
-
-	GLState glState;
-
-	// Setup Platform/Renderer backends
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	ImGui_ImplOpenGL3_Init("#version 330"/*, &glState*/);
-
-	MainUI* mainUI = new MainUI();
-	mainUI->SetIsVisible(true);
-
-	while (!glfwWindowShouldClose(window))
-	{
-		/* Poll for and process events */
-		glfwPollEvents();
-
-		// Start the Dear ImGui frame
-		ImGui_ImplGlfw_NewFrame();
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui::NewFrame();
-
-		mainUI->Render();
-
-		ImGui::Render();
-
-		/* Render here */
-
-		// Disable scissor so when clearing the buffer to make sure it clears the whole screen
-		glState.EnableScissorTest(false);
-
-		float windowOpacity = mainUI->GetWindowOpacity();
-		glState.ClearColor(0.1f * windowOpacity, 0.025f * windowOpacity, 0.05f * windowOpacity, windowOpacity);
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-		/* Swap front and back buffers */
-
-		glfwSwapBuffers(window);
-	}
-
-	delete mainUI;
-	mainUI = nullptr;
-
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
-	ImGui::DestroyContext();
-
-	glfwDestroyWindow(window);
-	glfwTerminate();
-
-	return 0;
+	return driverName;
 }
