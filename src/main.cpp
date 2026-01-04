@@ -65,7 +65,13 @@ int main()
 		printf("Error: SDL_ClaimWindowForGPUDevice(): %s\n", SDL_GetError());
 		return -4;
 	}
-	SDL_SetGPUSwapchainParameters(gpu_device, window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_VSYNC);
+
+	// Configure Present mode
+
+	bool supportsMailbox = SDL_WindowSupportsGPUPresentMode(gpu_device, window, SDL_GPU_PRESENTMODE_MAILBOX);
+	SDL_GPUPresentMode presentMode = supportsMailbox ? SDL_GPU_PRESENTMODE_MAILBOX : SDL_GPU_PRESENTMODE_VSYNC;
+	SDL_SetGPUSwapchainParameters(gpu_device, window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, presentMode);
+	SDL_SetGPUAllowedFramesInFlight(gpu_device, 1);
 
 	// Imgui
 
@@ -105,7 +111,7 @@ int main()
 	init_info.ColorTargetFormat = SDL_GetGPUSwapchainTextureFormat(gpu_device, window);
 	init_info.MSAASamples = SDL_GPU_SAMPLECOUNT_1;
 	init_info.SwapchainComposition = SDL_GPU_SWAPCHAINCOMPOSITION_SDR;
-	init_info.PresentMode = SDL_GPU_PRESENTMODE_VSYNC;
+	init_info.PresentMode = presentMode;
 	ImGui_ImplSDLGPU3_Init(&init_info);
 
 	MainUI* mainUI = new MainUI();
