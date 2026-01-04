@@ -186,9 +186,8 @@ int main()
 	builder.AddChar(0x0101); // Star
 	builder.BuildRanges(&ranges);
 
-	/*ImFont* defaultFont =*/ io.Fonts->AddFontDefault();
-	/*ImFont* sm64Font =*/ io.Fonts->AddFontFromMemoryCompressedTTF(sm64_ttf_compressed_data, sm64_ttf_compressed_size, 14, &config, ranges.Data);
-	io.Fonts->Build();
+	io.Fonts->AddFontDefault();
+	io.Fonts->AddFontFromMemoryCompressedTTF(sm64_ttf_compressed_data, sm64_ttf_compressed_size, 14, &config, ranges.Data);
 
 	// Setup Dear ImGui style
 	//ImGui::StyleColorsDark();
@@ -205,7 +204,7 @@ int main()
 
 	// Setup Platform/Renderer backends
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	ImGui_ImplOpenGL3_Init("#version 330", &glState);
+	ImGui_ImplOpenGL3_Init("#version 330"/*, &glState*/);
 
 	MainUI* mainUI = new MainUI();
 	mainUI->SetIsVisible(true);
