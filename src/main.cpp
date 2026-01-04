@@ -140,7 +140,9 @@ int main()
 #ifndef NDEBUG
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #endif
-	window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, title, NULL, NULL);
+
+	float main_scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor()); // Valid on GLFW 3.3+ only
+	window = glfwCreateWindow((int)(WINDOW_WIDTH * main_scale), (int)(WINDOW_HEIGHT * main_scale), title, NULL, NULL);
 
 	if (!window)
 	{
@@ -192,6 +194,11 @@ int main()
 	// Setup Dear ImGui style
 	//ImGui::StyleColorsDark();
 	SetImGuiStyle();
+
+	// Setup scaling
+	ImGuiStyle& style = ImGui::GetStyle();
+	style.ScaleAllSizes(main_scale);
+	style.FontScaleDpi = main_scale;
 
 #ifndef NDEBUG
 	if (GLAD_GL_KHR_debug)
