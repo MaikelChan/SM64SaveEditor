@@ -25,7 +25,7 @@ else()
   target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Wno-unused-parameter)
 endif()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE SDL3)
+target_link_libraries(${PROJECT_NAME} PRIVATE SDL3-static winmm setupapi version imm32)
 
 # imfilebrowser requires c++17.
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)

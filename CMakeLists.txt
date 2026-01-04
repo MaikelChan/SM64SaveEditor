@@ -22,7 +22,7 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 
 if (MSVC)
   # With MSVC on Windows, just put the static SDL3.lib in the lib/ folder
-  if(NOT EXISTS "${CMAKE_SOURCE_DIR}/lib/SDL3.lib")
+  if(NOT EXISTS "${CMAKE_SOURCE_DIR}/lib/SDL3-static.lib")
     message(SEND_ERROR "SDL3.lib is missing from '${CMAKE_SOURCE_DIR}/lib' folder.")
   endif()
   link_directories(${CMAKE_SOURCE_DIR}/lib)
