@@ -246,17 +246,31 @@ void ShowOpenFileDialog(std::filesystem::path defaultLocation, void* userData, S
 {
 	if (window == nullptr) return;
 
-	std::string defaultLocationString = defaultLocation.u8string();
-	if (!defaultLocationString.empty() && defaultLocationString.back() != '\\') defaultLocationString += "\\";
-
 	SDL_PropertiesID props = SDL_CreateProperties();
 
 	SDL_SetPointerProperty(props, SDL_PROP_FILE_DIALOG_FILTERS_POINTER, (void*)openDialogFilters);
 	SDL_SetNumberProperty(props, SDL_PROP_FILE_DIALOG_NFILTERS_NUMBER, OPEN_DIALOG_FILTERS_COUNT);
 	SDL_SetPointerProperty(props, SDL_PROP_FILE_DIALOG_WINDOW_POINTER, window);
-	SDL_SetStringProperty(props, SDL_PROP_FILE_DIALOG_LOCATION_STRING, defaultLocationString.empty() ? nullptr : defaultLocationString.c_str());
 	SDL_SetBooleanProperty(props, SDL_PROP_FILE_DIALOG_MANY_BOOLEAN, false);
 	SDL_SetStringProperty(props, SDL_PROP_FILE_DIALOG_TITLE_STRING, OPEN_DIALOG_TITLE);
+
+	if (defaultLocation.empty())
+	{
+		SDL_SetStringProperty(props, SDL_PROP_FILE_DIALOG_LOCATION_STRING, nullptr);
+	}
+	else
+	{
+		// Make sure the path ends with a slash, or else the File Dialog will treat the last
+		// part of the path as a default file, instead of a folder.
+		defaultLocation += '/';
+
+		// Normalizing it will make sure that there are no repeated slashes, and they will be
+		// converted to the OS preferred format (on Windows / -> \), or else it will not be
+		// considered a valid path and the File Dialog will show the default OS path instead.
+		defaultLocation = defaultLocation.lexically_normal();
+
+		SDL_SetStringProperty(props, SDL_PROP_FILE_DIALOG_LOCATION_STRING, defaultLocation.u8string().c_str());
+	}
 
 	SDL_ShowFileDialogWithProperties(SDL_FILEDIALOG_OPENFILE, callback, userData, props);
 

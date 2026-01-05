@@ -224,7 +224,7 @@ void MainUI::Load(std::filesystem::path filePath)
 		saveData = SaveData::Load(filePath);
 
 		currentFilePath = filePath.parent_path();
-		currentFileName = filePath.filename().string();
+		currentFileName = filePath.filename().u8string();
 		currentFileType = saveData->GetType();
 
 		EndianSwap();
