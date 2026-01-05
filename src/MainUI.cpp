@@ -185,7 +185,7 @@ void MainUI::LoadConfig()
 		return;
 	};
 
-	currentFilePath = ini.GetValue(CONFIG_INI_SECTION, "lastPath", DEFAULT_PATH);
+	currentFilePath = std::filesystem::u8path(ini.GetValue(CONFIG_INI_SECTION, "lastPath", DEFAULT_PATH));
 	windowOpacity = (float)ini.GetDoubleValue(CONFIG_INI_SECTION, "windowOpacity", DEFAULT_OPACITY);
 }
 
@@ -221,7 +221,7 @@ void MainUI::Load(std::filesystem::path filePath)
 
 	try
 	{
-		saveData = SaveData::Load(filePath.string());
+		saveData = SaveData::Load(filePath);
 
 		currentFilePath = filePath.parent_path();
 		currentFileName = filePath.filename().string();
@@ -292,7 +292,7 @@ void MainUI::Save() const
 
 	try
 	{
-		SaveData::Save(currentFilePath.string(), saveData);
+		SaveData::Save(currentFilePath, saveData);
 	}
 	catch (const std::runtime_error& error)
 	{

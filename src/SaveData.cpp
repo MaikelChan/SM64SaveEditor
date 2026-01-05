@@ -9,13 +9,13 @@ SaveData::SaveData()
 	assert(sizeof(SaveData) == SAVE_DATA_SIZE);
 }
 
-SaveData* SaveData::Load(const std::string filePath)
+SaveData* SaveData::Load(const std::filesystem::path filePath)
 {
 	std::ifstream stream = std::ifstream(filePath, std::ios::binary);
 
 	if (!stream || !stream.is_open())
 	{
-		throw std::runtime_error("There was an error trying to open open the file.");
+		throw std::runtime_error("There was an error trying to open the file.");
 		return nullptr;
 	}
 
@@ -47,13 +47,13 @@ SaveData* SaveData::Load(const std::string filePath)
 	return saveData;
 }
 
-void SaveData::Save(const std::string filePath, const SaveData* saveData)
+void SaveData::Save(const std::filesystem::path filePath, const SaveData* saveData)
 {
 	std::ofstream stream = std::ofstream(filePath, std::ios::binary);
 
 	if (!stream || !stream.is_open())
 	{
-		throw std::runtime_error(std::string("Can't open file \"") + filePath + "\".");
+		throw std::runtime_error(std::string("Can't open file \"") + filePath.u8string() + "\".");
 	}
 
 	stream.write((char*)saveData, SAVE_DATA_SIZE);

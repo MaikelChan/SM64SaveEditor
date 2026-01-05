@@ -246,7 +246,7 @@ void ShowOpenFileDialog(std::filesystem::path defaultLocation, void* userData, S
 {
 	if (window == nullptr) return;
 
-	std::string defaultLocationString = defaultLocation.string();
+	std::string defaultLocationString = defaultLocation.u8string();
 	if (!defaultLocationString.empty() && defaultLocationString.back() != '\\') defaultLocationString += "\\";
 
 	SDL_PropertiesID props = SDL_CreateProperties();
