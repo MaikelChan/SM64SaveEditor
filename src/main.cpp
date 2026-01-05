@@ -100,8 +100,6 @@ int main()
 	style.ScaleAllSizes(main_scale);
 	style.FontScaleDpi = main_scale;
 
-	//GLState glState;
-
 	// Setup Platform/Renderer backends
 
 	ImGui_ImplSDL3_InitForSDLGPU(window);
@@ -172,7 +170,6 @@ int main()
 
 		if (swapchain_texture != nullptr && !is_minimized)
 		{
-			// This is mandatory: call ImGui_ImplSDLGPU3_PrepareDrawData() to upload the vertex/index buffer!
 			ImGui_ImplSDLGPU3_PrepareDrawData(draw_data, command_buffer);
 
 			// Setup and start a render pass
@@ -186,28 +183,12 @@ int main()
 			target_info.cycle = false;
 			SDL_GPURenderPass* render_pass = SDL_BeginGPURenderPass(command_buffer, &target_info, 1, nullptr);
 
-			// Render ImGui
 			ImGui_ImplSDLGPU3_RenderDrawData(draw_data, command_buffer, render_pass);
 
 			SDL_EndGPURenderPass(render_pass);
 		}
 
-		// Submit the command buffer
 		SDL_SubmitGPUCommandBuffer(command_buffer);
-
-
-		//// Disable scissor so when clearing the buffer to make sure it clears the whole screen
-		//glState.EnableScissorTest(false);
-
-		//float windowOpacity = mainUI->GetWindowOpacity();
-		//glState.ClearColor(0.1f * windowOpacity, 0.025f * windowOpacity, 0.05f * windowOpacity, windowOpacity);
-		//glClear(GL_COLOR_BUFFER_BIT);
-
-		//ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-		///* Swap front and back buffers */
-
-		//glfwSwapBuffers(window);
 	}
 
 	delete mainUI;
