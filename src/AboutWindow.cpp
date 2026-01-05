@@ -51,7 +51,7 @@ void AboutWindow::DoRender()
 		int sdlVersion = SDL_GetVersion();
 		const char* backend = GetBackend();
 		if (backend == nullptr) backend = "?";
-		ImGui::BulletText("SDL %i.%i.%i, Lib %i.%i.%i, Backend \"%s\":", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_MICRO_VERSION, SDL_VERSIONNUM_MAJOR(sdlVersion), SDL_VERSIONNUM_MINOR(sdlVersion), SDL_VERSIONNUM_MICRO(sdlVersion), GetBackend());
+		ImGui::BulletText("SDL %i.%i.%i (Lib %i.%i.%i, Backend \"%s\"):", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_MICRO_VERSION, SDL_VERSIONNUM_MAJOR(sdlVersion), SDL_VERSIONNUM_MINOR(sdlVersion), SDL_VERSIONNUM_MICRO(sdlVersion), GetBackend());
 		ImGui::SameLine();
 		ImGui::TextLinkOpenURL("https://www.libsdl.org");
 

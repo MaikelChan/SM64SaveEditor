@@ -27,7 +27,6 @@ endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL3-static winmm setupapi version imm32)
 
-# imfilebrowser requires c++17.
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
 
 # TODO: Add tests and install targets if needed.

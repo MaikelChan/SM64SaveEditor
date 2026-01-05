@@ -5,11 +5,13 @@ class SaveEditorUI;
 class PopupDialog;
 class AboutWindow;
 #include "SaveData.h"
+#include <filesystem>
 #include <imgui/imgui.h>
-#include <imfilebrowser.h>
 
 #define CONFIG_FILE_NAME "config.ini"
 #define CONFIG_INI_SECTION "Config"
+#define DEFAULT_PATH ""
+#define DEFAULT_OPACITY 0.9f
 
 class MainUI : public BaseUI
 {
@@ -18,9 +20,7 @@ private:
 	PopupDialog* popupDialog;
 	AboutWindow* aboutWindow;
 
-	ImGui::FileBrowser fileDialog;
-
-	std::string currentFilePath;
+	std::filesystem::path currentFilePath;
 	std::string currentFileName;
 	SaveData::Types currentFileType;
 	SaveData* saveData;
@@ -35,6 +35,8 @@ public:
 	inline SaveData* GetSaveData() const { return saveData; }
 	inline float GetWindowOpacity() const { return windowOpacity; }
 
+	void OpenFileCallback(std::filesystem::path filePath);
+
 protected:
 	virtual void VisibilityChanged(const bool isVisible) override;
 	virtual void DoRender() override;
@@ -45,7 +47,7 @@ private:
 	void LoadConfig();
 	void SaveConfig() const;
 
-	void Load();
+	void Load(std::filesystem::path filePath);
 	void LoadingProcess() const;
 	void Save() const;
 	void SavingProcess() const;

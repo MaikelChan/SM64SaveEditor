@@ -6,10 +6,9 @@
 #include <imgui/imgui_impl_sdl3.h>
 #include <imgui/imgui_impl_sdlgpu3.h>
 
-#include <SDL3/SDL.h>
-
 #include "sm64.ttf.h"
 
+SDL_Window* window = nullptr;
 const char* driverName = nullptr;
 bool isRunning = false;
 
@@ -32,7 +31,7 @@ int main()
 
 	float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
 	SDL_WindowFlags window_flags = /*SDL_WINDOW_RESIZABLE |*/ SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY;
-	SDL_Window* window = SDL_CreateWindow(title, (int)(WINDOW_WIDTH * main_scale), (int)(WINDOW_HEIGHT * main_scale), window_flags);
+	window = SDL_CreateWindow(title, (int)(WINDOW_WIDTH * main_scale), (int)(WINDOW_HEIGHT * main_scale), window_flags);
 	if (window == nullptr)
 	{
 		printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
@@ -222,6 +221,7 @@ int main()
 	SDL_ReleaseWindowFromGPUDevice(gpu_device, window);
 	SDL_DestroyGPUDevice(gpu_device);
 	SDL_DestroyWindow(window);
+	window = nullptr;
 	SDL_Quit();
 
 	return 0;
@@ -259,4 +259,25 @@ void SetImGuiStyle()
 const char* GetBackend()
 {
 	return driverName;
+}
+
+void ShowOpenFileDialog(std::filesystem::path defaultLocation, void* userData, SDL_DialogFileCallback callback)
+{
+	if (window == nullptr) return;
+
+	std::string defaultLocationString = defaultLocation.string();
+	if (!defaultLocationString.empty() && defaultLocationString.back() != '\\') defaultLocationString += "\\";
+
+	SDL_PropertiesID props = SDL_CreateProperties();
+
+	SDL_SetPointerProperty(props, SDL_PROP_FILE_DIALOG_FILTERS_POINTER, (void*)openDialogFilters);
+	SDL_SetNumberProperty(props, SDL_PROP_FILE_DIALOG_NFILTERS_NUMBER, OPEN_DIALOG_FILTERS_COUNT);
+	SDL_SetPointerProperty(props, SDL_PROP_FILE_DIALOG_WINDOW_POINTER, window);
+	SDL_SetStringProperty(props, SDL_PROP_FILE_DIALOG_LOCATION_STRING, defaultLocationString.empty() ? nullptr : defaultLocationString.c_str());
+	SDL_SetBooleanProperty(props, SDL_PROP_FILE_DIALOG_MANY_BOOLEAN, false);
+	SDL_SetStringProperty(props, SDL_PROP_FILE_DIALOG_TITLE_STRING, OPEN_DIALOG_TITLE);
+
+	SDL_ShowFileDialogWithProperties(SDL_FILEDIALOG_OPENFILE, callback, userData, props);
+
+	SDL_DestroyProperties(props);
 }

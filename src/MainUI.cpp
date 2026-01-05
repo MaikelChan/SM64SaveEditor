@@ -18,18 +18,15 @@ MainUI::MainUI() : BaseUI(nullptr)
 	currentFileType = SaveData::Types::NotValid;
 	saveData = nullptr;
 
-	windowOpacity = 0.9f;
-
-	fileDialog.SetTitle("Open a Super Mario 64 save file");
-	fileDialog.SetTypeFilters({ ".eep", ".bin", ".*" });
+	windowOpacity = DEFAULT_OPACITY;
 
 	LoadConfig();
 }
 
 MainUI::~MainUI()
 {
-	ClearSaveData();
 	SaveConfig();
+	ClearSaveData();
 
 	delete saveEditor;
 	saveEditor = nullptr;
@@ -39,6 +36,12 @@ MainUI::~MainUI()
 
 	delete aboutWindow;
 	aboutWindow = nullptr;
+}
+
+void MainUI::OpenFileCallback(std::filesystem::path filePath)
+{
+	MainUI::Load(filePath);
+	MainUI::SaveConfig();
 }
 
 void MainUI::VisibilityChanged(const bool isVisible)
@@ -56,7 +59,25 @@ void MainUI::DoRender()
 		{
 			if (ImGui::MenuItem("Open..."))
 			{
-				fileDialog.Open();
+				auto callback = [](void* userdata, const char* const* filelist, int filter) -> void
+					{
+						if (filelist == nullptr)
+						{
+							printf("Error in OpenFileDialog: %s", SDL_GetError());
+							return;
+						}
+						else if (*filelist == nullptr)
+						{
+							// The user did not select any file.
+							return;
+						}
+
+						MainUI* mainUI = (MainUI*)userdata;
+						std::filesystem::path filePath = std::filesystem::u8path(filelist[0]);
+						mainUI->OpenFileCallback(filePath);
+					};
+
+				ShowOpenFileDialog(currentFilePath, (void*)this, callback);
 			}
 
 			if (ImGui::MenuItem("Save", NULL, false, IsSaveDataLoaded()))
@@ -137,16 +158,6 @@ void MainUI::DoRender()
 	saveEditor->Render();
 	popupDialog->Render();
 	aboutWindow->Render();
-
-	fileDialog.Display();
-
-	if (fileDialog.HasSelected())
-	{
-		Load();
-		SaveConfig();
-
-		fileDialog.ClearSelected();
-	}
 }
 
 void MainUI::ClearSaveData()
@@ -174,8 +185,8 @@ void MainUI::LoadConfig()
 		return;
 	};
 
-	fileDialog.SetDirectory(std::filesystem::u8path(ini.GetValue(CONFIG_INI_SECTION, "lastPath", fileDialog.GetDirectory().u8string().c_str())));
-	windowOpacity = (float)ini.GetDoubleValue(CONFIG_INI_SECTION, "windowOpacity", windowOpacity);
+	currentFilePath = ini.GetValue(CONFIG_INI_SECTION, "lastPath", DEFAULT_PATH);
+	windowOpacity = (float)ini.GetDoubleValue(CONFIG_INI_SECTION, "windowOpacity", DEFAULT_OPACITY);
 }
 
 void MainUI::SaveConfig() const
@@ -185,7 +196,7 @@ void MainUI::SaveConfig() const
 
 	SI_Error errorCode;
 
-	errorCode = ini.SetValue(CONFIG_INI_SECTION, "lastPath", fileDialog.GetDirectory().u8string().c_str());
+	errorCode = ini.SetValue(CONFIG_INI_SECTION, "lastPath", currentFilePath.u8string().c_str());
 	errorCode = ini.SetDoubleValue(CONFIG_INI_SECTION, "windowOpacity", windowOpacity);
 
 	std::string data;
@@ -204,15 +215,16 @@ void MainUI::SaveConfig() const
 	};
 }
 
-void MainUI::Load()
+void MainUI::Load(std::filesystem::path filePath)
 {
 	ClearSaveData();
 
 	try
 	{
-		saveData = SaveData::Load(fileDialog.GetSelected().string().c_str());
-		currentFilePath = fileDialog.GetSelected().string();
-		currentFileName = fileDialog.GetSelected().filename().string();
+		saveData = SaveData::Load(filePath.string());
+
+		currentFilePath = filePath.parent_path();
+		currentFileName = filePath.filename().string();
 		currentFileType = saveData->GetType();
 
 		EndianSwap();
@@ -280,7 +292,7 @@ void MainUI::Save() const
 
 	try
 	{
-		SaveData::Save(currentFilePath.c_str(), saveData);
+		SaveData::Save(currentFilePath.string(), saveData);
 	}
 	catch (const std::runtime_error& error)
 	{
