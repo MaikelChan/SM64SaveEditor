@@ -286,7 +286,7 @@ public:
 		Checksum = CalculateChecksum();
 	}
 
-	inline bool IsValid()
+	inline bool IsValid() const
 	{
 		return Checksum == CalculateChecksum();
 	}
@@ -323,7 +323,7 @@ public:
 		Checksum = CalculateChecksum();
 	}
 
-	inline bool IsValid()
+	inline bool IsValid() const
 	{
 		return Checksum == CalculateChecksum();
 	}
@@ -350,7 +350,7 @@ public:
 		else CourseData[courseIndex] &= ~mask;
 	}
 
-	inline uint8_t GetTotalStars()
+	inline uint8_t GetTotalStars() const
 	{
 		uint8_t count = 0;
 
