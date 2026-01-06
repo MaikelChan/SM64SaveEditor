@@ -38,3 +38,13 @@ endif()
 
 # Transparent windows seems to be problematic on some systems, so disable for now
 #target_compile_definitions(${PROJECT_NAME} PRIVATE SUPPORT_TRANSPARENCY)
+
+# Post build: copy the SDL3.dll to the executable's path
+
+if (WIN32 AND (NOT LINK_SDL3_STATICALLY))
+    add_custom_command(
+        TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E copy $<TARGET_FILE:SDL3::SDL3-shared> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+        VERBATIM
+    )
+endif()
