@@ -18,7 +18,9 @@ MainUI::MainUI() : BaseUI(nullptr)
 	currentFileType = SaveData::Types::NotValid;
 	saveData = nullptr;
 
+#if SUPPORT_TRANSPARENCY
 	windowOpacity = DEFAULT_OPACITY;
+#endif
 
 	LoadConfig();
 }
@@ -125,12 +127,14 @@ void MainUI::DoRender()
 			ImGui::EndMenu();
 		}
 
+#if SUPPORT_TRANSPARENCY
 		if (ImGui::BeginMenu("Settings"))
 		{
 			ImGui::SliderFloat("Window Opacity", &windowOpacity, 0.0f, 1.0f);
 
 			ImGui::EndMenu();
 		}
+#endif
 
 		if (ImGui::BeginMenu("Help"))
 		{
@@ -186,7 +190,9 @@ void MainUI::LoadConfig()
 	};
 
 	currentFilePath = std::filesystem::u8path(ini.GetValue(CONFIG_INI_SECTION, "lastPath", DEFAULT_PATH));
+#if SUPPORT_TRANSPARENCY
 	windowOpacity = (float)ini.GetDoubleValue(CONFIG_INI_SECTION, "windowOpacity", DEFAULT_OPACITY);
+#endif
 }
 
 void MainUI::SaveConfig() const
@@ -197,7 +203,9 @@ void MainUI::SaveConfig() const
 	SI_Error errorCode;
 
 	errorCode = ini.SetValue(CONFIG_INI_SECTION, "lastPath", currentFilePath.u8string().c_str());
+#if SUPPORT_TRANSPARENCY
 	errorCode = ini.SetDoubleValue(CONFIG_INI_SECTION, "windowOpacity", windowOpacity);
+#endif
 
 	std::string data;
 	errorCode = ini.Save(data);

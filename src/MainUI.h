@@ -11,7 +11,9 @@ class AboutWindow;
 #define CONFIG_FILE_NAME "config.ini"
 #define CONFIG_INI_SECTION "Config"
 #define DEFAULT_PATH ""
+#if SUPPORT_TRANSPARENCY
 #define DEFAULT_OPACITY 0.9f
+#endif
 
 class MainUI : public BaseUI
 {
@@ -25,7 +27,9 @@ private:
 	SaveData::Types currentFileType;
 	SaveData* saveData;
 
+#if SUPPORT_TRANSPARENCY
 	float windowOpacity;
+#endif
 
 public:
 	MainUI();
@@ -33,7 +37,9 @@ public:
 
 	inline bool IsSaveDataLoaded() const { return saveData != nullptr; }
 	inline SaveData* GetSaveData() const { return saveData; }
+#if SUPPORT_TRANSPARENCY
 	inline float GetWindowOpacity() const { return windowOpacity; }
+#endif
 
 	void OpenFileCallback(std::filesystem::path filePath);
 

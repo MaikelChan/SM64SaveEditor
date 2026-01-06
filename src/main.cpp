@@ -30,7 +30,11 @@ int main()
 	// Create window
 
 	float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
-	SDL_WindowFlags window_flags = /*SDL_WINDOW_RESIZABLE |*/ SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY;
+#if SUPPORT_TRANSPARENCY
+	SDL_WindowFlags window_flags = SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_TRANSPARENT;
+#else
+	SDL_WindowFlags window_flags = SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY;
+#endif
 	window = SDL_CreateWindow(title, (int)(WINDOW_WIDTH * main_scale), (int)(WINDOW_HEIGHT * main_scale), window_flags);
 	if (window == nullptr)
 	{
@@ -58,6 +62,7 @@ int main()
 	SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_PREFERLOWPOWER_BOOLEAN, true);
 	SDL_GPUDevice* gpu_device = SDL_CreateGPUDeviceWithProperties(props);
 	SDL_DestroyProperties(props);
+
 	if (gpu_device == nullptr)
 	{
 		printf("Error: SDL_CreateGPUDevice(): %s\n", SDL_GetError());
@@ -180,10 +185,16 @@ int main()
 		{
 			ImGui_ImplSDLGPU3_PrepareDrawData(draw_data, command_buffer);
 
+#if SUPPORT_TRANSPARENCY
+			const float windowOpacity2 = mainUI->GetWindowOpacity();
+#else
+			constexpr float windowOpacity = 1.0f;
+#endif
+
 			// Setup and start a render pass
 			SDL_GPUColorTargetInfo target_info = {};
 			target_info.texture = swapchain_texture;
-			target_info.clear_color = SDL_FColor{ 0.1f, 0.025f, 0.05f, 1.0f };
+			target_info.clear_color = SDL_FColor{ 0.1f * windowOpacity, 0.025f * windowOpacity, 0.05f * windowOpacity, windowOpacity };
 			target_info.load_op = SDL_GPU_LOADOP_CLEAR;
 			target_info.store_op = SDL_GPU_STOREOP_STORE;
 			target_info.mip_level = 0;

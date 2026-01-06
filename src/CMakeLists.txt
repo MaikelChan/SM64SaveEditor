@@ -30,4 +30,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE SDL3-static winmm setupapi version
 # C++ 17 to be able to use std::filesystem
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
 
+# Transparent windows seems to be problematic on some systems, so disable for now
+#add_definitions(-DSUPPORT_TRANSPARENCY)
+
 # TODO: Add tests and install targets if needed.
