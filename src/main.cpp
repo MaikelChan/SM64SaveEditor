@@ -48,7 +48,16 @@ int main()
 	constexpr bool debugEnabled = true;
 #endif
 
-	SDL_GPUDevice* gpu_device = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL | SDL_GPU_SHADERFORMAT_METALLIB, debugEnabled, nullptr);
+	SDL_PropertiesID props = SDL_CreateProperties();
+	SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_SPIRV_BOOLEAN, true);
+	SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_DXIL_BOOLEAN, true);
+	SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_MSL_BOOLEAN, true);
+	SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_METALLIB_BOOLEAN, true);
+	SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_DEBUGMODE_BOOLEAN, debugEnabled);
+	SDL_SetStringProperty(props, SDL_PROP_GPU_DEVICE_CREATE_NAME_STRING, "vulkan");
+	SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_PREFERLOWPOWER_BOOLEAN, true);
+	SDL_GPUDevice* gpu_device = SDL_CreateGPUDeviceWithProperties(props);
+	SDL_DestroyProperties(props);
 	if (gpu_device == nullptr)
 	{
 		printf("Error: SDL_CreateGPUDevice(): %s\n", SDL_GetError());
@@ -67,8 +76,7 @@ int main()
 
 	// Configure Present mode
 
-	bool supportsMailbox = SDL_WindowSupportsGPUPresentMode(gpu_device, window, SDL_GPU_PRESENTMODE_MAILBOX);
-	SDL_GPUPresentMode presentMode = supportsMailbox ? SDL_GPU_PRESENTMODE_MAILBOX : SDL_GPU_PRESENTMODE_VSYNC;
+	const SDL_GPUPresentMode presentMode = SDL_GPU_PRESENTMODE_VSYNC;
 	SDL_SetGPUSwapchainParameters(gpu_device, window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, presentMode);
 	SDL_SetGPUAllowedFramesInFlight(gpu_device, 1);
 
