@@ -1,37 +1,72 @@
-﻿# CMakeList.txt : Top-level CMake project file, do global configuration
-# and include sub-projects here.
+﻿
+include(FetchContent)
 
 # Used features that require certain minimum version:
 # * 3.11: Required for setting GLVND OpenGL preference.
 # * 3.15: Removes the '/W3' MSVC warning flag added by CMake by default, so another warning level can be set with 'target_compile_options' without causing warnings.
 cmake_minimum_required (VERSION 3.19)
 
-# Enable Hot Reload for MSVC compilers if supported.
-if (POLICY CMP0141)
-  cmake_policy(SET CMP0141 NEW)
-  set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
+# SDL3 --------------------------------------------------------------------------------------------
+
+set(LINK_SDL3_STATICALLY TRUE)
+
+FetchContent_Declare(
+    SDL3
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+    GIT_TAG release-3.2.30
+    GIT_SHALLOW TRUE
+    GIT_PROGRESS TRUE
+)
+
+if (LINK_SDL3_STATICALLY)
+    set(SDL_SHARED OFF)
+    set(SDL_STATIC ON)
+else()
+    set(SDL_SHARED ON)
+    set(SDL_STATIC OFF)
 endif()
+
+# Subsystems
+
+set(SDL_AUDIO_DEFAULT OFF)
+set(SDL_VIDEO_DEFAULT ON)
+set(SDL_GPU_DEFAULT ON)
+set(SDL_RENDER_DEFAULT OFF)
+set(SDL_CAMERA_DEFAULT OFF)
+set(SDL_JOYSTICK_DEFAULT OFF)
+set(SDL_HAPTIC_DEFAULT OFF)
+set(SDL_HIDAPI_DEFAULT OFF)
+set(SDL_POWER_DEFAULT OFF)
+set(SDL_SENSOR_DEFAULT OFF)
+set(SDL_DIALOG_DEFAULT ON)
+
+# GPU Drivers
+
+set(SDL_OFFSCREEN OFF)
+set(SDL_OPENGL OFF)
+set(SDL_OPENGLES OFF)
+set(SDL_DUMMYVIDEO OFF)
+set(SDL_DIRECTX OFF)
+set(SDL_VULKAN ON)
+
+# Trying to disable D3D12 in SDL GPU, but it doesn't
+# seem work unless modifying SDL's CMakeLists.txt.
+
+#set(SDL_GPU_D3D12 0)
+#unset(SDL_GPU_D3D12)
+
+# Other projects
+
+set(SDL_TEST_LIBRARY OFF)
+set(SDL_TESTS OFF)
+set(SDL_DISABLE_INSTALL OFF)
+set(SDL_DISABLE_INSTALL_DOCS OFF)
+set(SDL_INSTALL_TESTS OFF)
+set(SDL_EXAMPLES OFF)
+
+FetchContent_MakeAvailable(SDL3)
+
+# Main project ------------------------------------------------------------------------------------
 
 project ("SM64SaveEditor" VERSION "1.3.1")
-configure_file("${CMAKE_CURRENT_LIST_DIR}/src/Config.h.in" "${CMAKE_CURRENT_LIST_DIR}/src/Config.h")
-configure_file("${CMAKE_CURRENT_LIST_DIR}/src/resources.rc.in" "${CMAKE_CURRENT_LIST_DIR}/src/resources.rc")
-
-set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_LIST_DIR}/src/resources.rc")
-
-include_directories(${CMAKE_SOURCE_DIR}/include)
-
-if (MSVC)
-  # With MSVC on Windows, just put the static SDL3.lib in the lib/ folder
-  if(NOT EXISTS "${CMAKE_SOURCE_DIR}/lib/SDL3-static.lib")
-    message(SEND_ERROR "SDL3.lib is missing from '${CMAKE_SOURCE_DIR}/lib' folder.")
-  endif()
-  link_directories(${CMAKE_SOURCE_DIR}/lib)
-else()
-  # On Linux or on Windows with Mingw, having installed the SDL3 dev package or compiled and installed from source,
-  # should have also installed "SDL3Config.cmake", which will be used by find_package.
-  find_package(SDL3 REQUIRED)
-  message(STATUS "'SDL3Config.cmake' has been found.")
-endif()
-
-# Include sub-projects.
 add_subdirectory ("src")

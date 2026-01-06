@@ -186,7 +186,7 @@ int main()
 			ImGui_ImplSDLGPU3_PrepareDrawData(draw_data, command_buffer);
 
 #if SUPPORT_TRANSPARENCY
-			const float windowOpacity2 = mainUI->GetWindowOpacity();
+			const float windowOpacity = mainUI->GetWindowOpacity();
 #else
 			constexpr float windowOpacity = 1.0f;
 #endif
