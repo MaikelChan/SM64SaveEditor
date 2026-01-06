@@ -21,16 +21,16 @@ if(MSVC)
   endif()
   set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/ENTRY:mainCRTStartup /SUBSYSTEM:${SUBSYSTEM}")
   target_compile_options(${PROJECT_NAME} PRIVATE /W4 /wd4458 /wd4100)
+  target_link_libraries(${PROJECT_NAME} PRIVATE SDL3-static winmm setupapi version imm32)
 else()
   target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Wno-unused-parameter)
+  target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3)
 endif()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE SDL3-static winmm setupapi version imm32)
+# Transparent windows seems to be problematic on some systems, so disable for now
+#target_compile_definitions(${PROJECT_NAME} PUBLIC SUPPORT_TRANSPARENCY)
 
 # C++ 17 to be able to use std::filesystem
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
-
-# Transparent windows seems to be problematic on some systems, so disable for now
-#add_definitions(-DSUPPORT_TRANSPARENCY)
 
 # TODO: Add tests and install targets if needed.

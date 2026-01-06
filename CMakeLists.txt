@@ -30,7 +30,7 @@ else()
   # On Linux or on Windows with Mingw, having installed the SDL3 dev package or compiled and installed from source,
   # should have also installed "SDL3Config.cmake", which will be used by find_package.
   find_package(SDL3 REQUIRED)
-  message(STATUS "Using 'SDL3Config.cmake' file located at '${glfw3_DIR}'.")
+  message(STATUS "'SDL3Config.cmake' has been found.")
 endif()
 
 # Include sub-projects.
