@@ -29,20 +29,27 @@ int main()
 
 	// Create window
 
-	float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
+	float mainScale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
 #if SUPPORT_TRANSPARENCY
-	SDL_WindowFlags window_flags = SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_TRANSPARENT;
+	SDL_WindowFlags windowFlags = SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_TRANSPARENT;
 #else
-	SDL_WindowFlags window_flags = SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY;
+	SDL_WindowFlags windowFlags = SDL_WINDOW_HIGH_PIXEL_DENSITY;
 #endif
-	window = SDL_CreateWindow(title, (int)(WINDOW_WIDTH * main_scale), (int)(WINDOW_HEIGHT * main_scale), window_flags);
+	SDL_PropertiesID windowProperties = SDL_CreateProperties();
+	SDL_SetStringProperty(windowProperties, SDL_PROP_WINDOW_CREATE_TITLE_STRING, title);
+	SDL_SetNumberProperty(windowProperties, SDL_PROP_WINDOW_CREATE_X_NUMBER, SDL_WINDOWPOS_CENTERED);
+	SDL_SetNumberProperty(windowProperties, SDL_PROP_WINDOW_CREATE_Y_NUMBER, SDL_WINDOWPOS_CENTERED);
+	SDL_SetNumberProperty(windowProperties, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, (int)(WINDOW_WIDTH * mainScale));
+	SDL_SetNumberProperty(windowProperties, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, (int)(WINDOW_HEIGHT * mainScale));
+	SDL_SetNumberProperty(windowProperties, SDL_PROP_WINDOW_CREATE_FLAGS_NUMBER, windowFlags);
+	SDL_Window* window = SDL_CreateWindowWithProperties(windowProperties);
+	SDL_DestroyProperties(windowProperties);
+
 	if (window == nullptr)
 	{
 		printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
 		return -2;
 	}
-	SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-	SDL_ShowWindow(window);
 
 	// Create GPU Device
 
@@ -52,16 +59,16 @@ int main()
 	constexpr bool debugEnabled = true;
 #endif
 
-	SDL_PropertiesID props = SDL_CreateProperties();
-	SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_SPIRV_BOOLEAN, true);
-	SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_DXIL_BOOLEAN, true);
-	SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_MSL_BOOLEAN, true);
-	SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_METALLIB_BOOLEAN, true);
-	SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_DEBUGMODE_BOOLEAN, debugEnabled);
-	SDL_SetStringProperty(props, SDL_PROP_GPU_DEVICE_CREATE_NAME_STRING, "vulkan");
-	SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_PREFERLOWPOWER_BOOLEAN, true);
-	SDL_GPUDevice* gpu_device = SDL_CreateGPUDeviceWithProperties(props);
-	SDL_DestroyProperties(props);
+	SDL_PropertiesID deviceProperties = SDL_CreateProperties();
+	SDL_SetBooleanProperty(deviceProperties, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_SPIRV_BOOLEAN, true);
+	SDL_SetBooleanProperty(deviceProperties, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_DXIL_BOOLEAN, true);
+	SDL_SetBooleanProperty(deviceProperties, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_MSL_BOOLEAN, true);
+	SDL_SetBooleanProperty(deviceProperties, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_METALLIB_BOOLEAN, true);
+	SDL_SetBooleanProperty(deviceProperties, SDL_PROP_GPU_DEVICE_CREATE_DEBUGMODE_BOOLEAN, debugEnabled);
+	SDL_SetStringProperty(deviceProperties, SDL_PROP_GPU_DEVICE_CREATE_NAME_STRING, "vulkan");
+	SDL_SetBooleanProperty(deviceProperties, SDL_PROP_GPU_DEVICE_CREATE_PREFERLOWPOWER_BOOLEAN, true);
+	SDL_GPUDevice* gpu_device = SDL_CreateGPUDeviceWithProperties(deviceProperties);
+	SDL_DestroyProperties(deviceProperties);
 
 	if (gpu_device == nullptr)
 	{
@@ -110,8 +117,8 @@ int main()
 	SetImGuiStyle();
 
 	ImGuiStyle& style = ImGui::GetStyle();
-	style.ScaleAllSizes(main_scale);
-	style.FontScaleDpi = main_scale;
+	style.ScaleAllSizes(mainScale);
+	style.FontScaleDpi = mainScale;
 
 	// Setup Platform/Renderer backends
 
@@ -265,17 +272,17 @@ void ShowOpenFileDialog(std::filesystem::path defaultLocation, void* userData, S
 {
 	if (window == nullptr) return;
 
-	SDL_PropertiesID props = SDL_CreateProperties();
+	SDL_PropertiesID dialogProperties = SDL_CreateProperties();
 
-	SDL_SetPointerProperty(props, SDL_PROP_FILE_DIALOG_FILTERS_POINTER, (void*)openDialogFilters);
-	SDL_SetNumberProperty(props, SDL_PROP_FILE_DIALOG_NFILTERS_NUMBER, OPEN_DIALOG_FILTERS_COUNT);
-	SDL_SetPointerProperty(props, SDL_PROP_FILE_DIALOG_WINDOW_POINTER, window);
-	SDL_SetBooleanProperty(props, SDL_PROP_FILE_DIALOG_MANY_BOOLEAN, false);
-	SDL_SetStringProperty(props, SDL_PROP_FILE_DIALOG_TITLE_STRING, OPEN_DIALOG_TITLE);
+	SDL_SetPointerProperty(dialogProperties, SDL_PROP_FILE_DIALOG_FILTERS_POINTER, (void*)openDialogFilters);
+	SDL_SetNumberProperty(dialogProperties, SDL_PROP_FILE_DIALOG_NFILTERS_NUMBER, OPEN_DIALOG_FILTERS_COUNT);
+	SDL_SetPointerProperty(dialogProperties, SDL_PROP_FILE_DIALOG_WINDOW_POINTER, window);
+	SDL_SetBooleanProperty(dialogProperties, SDL_PROP_FILE_DIALOG_MANY_BOOLEAN, false);
+	SDL_SetStringProperty(dialogProperties, SDL_PROP_FILE_DIALOG_TITLE_STRING, OPEN_DIALOG_TITLE);
 
 	if (defaultLocation.empty())
 	{
-		SDL_SetStringProperty(props, SDL_PROP_FILE_DIALOG_LOCATION_STRING, nullptr);
+		SDL_SetStringProperty(dialogProperties, SDL_PROP_FILE_DIALOG_LOCATION_STRING, nullptr);
 	}
 	else
 	{
@@ -288,10 +295,10 @@ void ShowOpenFileDialog(std::filesystem::path defaultLocation, void* userData, S
 		// considered a valid path and the File Dialog will show the default OS path instead.
 		defaultLocation = defaultLocation.lexically_normal();
 
-		SDL_SetStringProperty(props, SDL_PROP_FILE_DIALOG_LOCATION_STRING, defaultLocation.u8string().c_str());
+		SDL_SetStringProperty(dialogProperties, SDL_PROP_FILE_DIALOG_LOCATION_STRING, defaultLocation.u8string().c_str());
 	}
 
-	SDL_ShowFileDialogWithProperties(SDL_FILEDIALOG_OPENFILE, callback, userData, props);
+	SDL_ShowFileDialogWithProperties(SDL_FILEDIALOG_OPENFILE, callback, userData, dialogProperties);
 
-	SDL_DestroyProperties(props);
+	SDL_DestroyProperties(dialogProperties);
 }
