@@ -10,6 +10,9 @@ cmake_minimum_required (VERSION 3.19)
 
 set(LINK_SDL3_STATICALLY TRUE)
 
+set(FETCHCONTENT_QUIET OFF)
+set(FETCHCONTENT_BASE_DIR ${CMAKE_SOURCE_DIR}/out/)
+
 FetchContent_Declare(
     SDL3
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
