@@ -55,6 +55,14 @@ set(SDL_VULKAN ON)
 #set(SDL_GPU_D3D12 0)
 #unset(SDL_GPU_D3D12)
 
+# Disable Wayland on Linux. Seems that there are still problems,
+# and this way we reduce the size of the executable a bit.
+
+set(SDL_WAYLAND OFF)
+set(SDL_WAYLAND_LIBDECOR OFF)
+set(SDL_WAYLAND_LIBDECOR_SHARED OFF)
+set(SDL_WAYLAND_SHARED OFF)
+
 # Other projects
 
 set(SDL_TEST_LIBRARY OFF)
