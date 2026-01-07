@@ -13,7 +13,8 @@ MainUI::MainUI() : BaseUI(nullptr)
 	aboutWindow = new AboutWindow(this);
 	popupDialog = new PopupDialog(this);
 
-	currentFilePath.clear();
+	lastPath.clear();
+	currentFile.clear();
 	currentFileName.clear();
 	currentFileType = SaveData::Types::NotValid;
 	saveData = nullptr;
@@ -79,7 +80,7 @@ void MainUI::DoRender()
 						mainUI->OpenFileCallback(filePath);
 					};
 
-				ShowOpenFileDialog(currentFilePath, (void*)this, callback);
+				ShowOpenFileDialog(lastPath, (void*)this, callback);
 			}
 
 			if (ImGui::MenuItem("Save", NULL, false, IsSaveDataLoaded()))
@@ -171,7 +172,8 @@ void MainUI::ClearSaveData()
 	delete saveData;
 	saveData = nullptr;
 
-	currentFilePath.clear();
+	lastPath.clear();
+	currentFile.clear();
 	currentFileName.clear();
 	currentFileType = SaveData::Types::NotValid;
 }
@@ -189,7 +191,7 @@ void MainUI::LoadConfig()
 		return;
 	};
 
-	currentFilePath = std::filesystem::u8path(ini.GetValue(CONFIG_INI_SECTION, "lastPath", DEFAULT_PATH));
+	lastPath = std::filesystem::u8path(ini.GetValue(CONFIG_INI_SECTION, "lastPath", DEFAULT_PATH));
 #if SUPPORT_TRANSPARENCY
 	windowOpacity = (float)ini.GetDoubleValue(CONFIG_INI_SECTION, "windowOpacity", DEFAULT_OPACITY);
 #endif
@@ -202,7 +204,7 @@ void MainUI::SaveConfig() const
 
 	SI_Error errorCode;
 
-	errorCode = ini.SetValue(CONFIG_INI_SECTION, "lastPath", currentFilePath.u8string().c_str());
+	errorCode = ini.SetValue(CONFIG_INI_SECTION, "lastPath", lastPath.u8string().c_str());
 #if SUPPORT_TRANSPARENCY
 	errorCode = ini.SetDoubleValue(CONFIG_INI_SECTION, "windowOpacity", windowOpacity);
 #endif
@@ -231,7 +233,8 @@ void MainUI::Load(std::filesystem::path filePath)
 	{
 		saveData = SaveData::Load(filePath);
 
-		currentFilePath = filePath.parent_path();
+		lastPath = filePath.parent_path();
+		currentFile = filePath;
 		currentFileName = filePath.filename().u8string();
 		currentFileType = saveData->GetType();
 
@@ -300,7 +303,7 @@ void MainUI::Save() const
 
 	try
 	{
-		SaveData::Save(currentFilePath, saveData);
+		SaveData::Save(currentFile, saveData);
 	}
 	catch (const std::runtime_error& error)
 	{

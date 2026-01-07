@@ -22,7 +22,8 @@ private:
 	PopupDialog* popupDialog;
 	AboutWindow* aboutWindow;
 
-	std::filesystem::path currentFilePath;
+	std::filesystem::path lastPath;
+	std::filesystem::path currentFile;
 	std::string currentFileName;
 	SaveData::Types currentFileType;
 	SaveData* saveData;
