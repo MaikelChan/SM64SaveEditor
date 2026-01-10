@@ -7,11 +7,11 @@
 #include <fstream>
 #include <SimpleIni.h>
 
-MainUI::MainUI() : BaseUI(nullptr)
+MainUI::MainUI(const Window* window) : BaseUI(window, nullptr)
 {
-	saveEditor = new SaveEditorUI(this);
-	aboutWindow = new AboutWindow(this);
-	popupDialog = new PopupDialog(this);
+	saveEditor = new SaveEditorUI(window, this);
+	aboutWindow = new AboutWindow(window, this);
+	popupDialog = new PopupDialog(window, this);
 
 	lastPath.clear();
 	currentFile.clear();

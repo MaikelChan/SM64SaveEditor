@@ -21,7 +21,7 @@ private:
 	const MainUI* mainUI;
 
 public:
-	SaveEditorUI(const MainUI* mainUI);
+	SaveEditorUI(const Window* window, const MainUI* mainUI);
 	~SaveEditorUI();
 
 protected:

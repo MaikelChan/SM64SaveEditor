@@ -9,7 +9,7 @@ private:
 	char description[64];
 
 public:
-	AboutWindow(const BaseUI* parentUI);
+	AboutWindow(const Window* window, const BaseUI* parentUI);
 	~AboutWindow();
 
 protected:

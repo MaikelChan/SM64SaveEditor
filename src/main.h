@@ -5,8 +5,6 @@
 #include <SDL3/SDL.h>
 
 #define WINDOW_TITLE "Super Mario 64 - Save Editor"
-#define WINDOW_WIDTH 800
-#define WINDOW_HEIGHT 600
 
 #define OPEN_DIALOG_TITLE "Open a Super Mario 64 save file"
 #define OPEN_DIALOG_FILTERS_COUNT 3
@@ -17,6 +15,5 @@ const SDL_DialogFileFilter openDialogFilters[] = {
 };
 
 void CloseMainWindow();
-void SetImGuiStyle();
 const char* GetBackend();
 void ShowOpenFileDialog(std::filesystem::path defaultLocation, void* userData, SDL_DialogFileCallback callback);

@@ -6,7 +6,7 @@
 #include <imgui/imgui.h>
 #include <SDL3/SDL_version.h>
 
-AboutWindow::AboutWindow(const BaseUI* parentUI) : BaseUI(parentUI)
+AboutWindow::AboutWindow(const Window* window, const BaseUI* parentUI) : BaseUI(window, parentUI)
 {
 	snprintf(windowTitle, 64, "About %s", WINDOW_TITLE);
 	snprintf(description, 64, "%s - v%s", WINDOW_TITLE, PROJECT_VER);
