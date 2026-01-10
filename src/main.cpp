@@ -42,7 +42,7 @@ int main()
 	SDL_SetNumberProperty(windowProperties, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, (int)(WINDOW_WIDTH * mainScale));
 	SDL_SetNumberProperty(windowProperties, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, (int)(WINDOW_HEIGHT * mainScale));
 	SDL_SetNumberProperty(windowProperties, SDL_PROP_WINDOW_CREATE_FLAGS_NUMBER, windowFlags);
-	SDL_Window* window = SDL_CreateWindowWithProperties(windowProperties);
+	window = SDL_CreateWindowWithProperties(windowProperties);
 	SDL_DestroyProperties(windowProperties);
 
 	if (window == nullptr)
