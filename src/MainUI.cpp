@@ -1,19 +1,21 @@
 ﻿#include "MainUI.h"
-#include "Window.h"
-#include "Game/SaveEditorUI.h"
-#include "PopupDialog.h"
-#include "AboutWindow.h"
-#include "Utils.h"
+
 #include <fstream>
+
 #include <SimpleIni.h>
 #include <SDL3/SDL.h>
 #include <imgui/imgui.h>
 
-MainUI::MainUI(Window* window) : BaseUI(window, nullptr)
+#include "Window.h"
+#include "Utils.h"
+
+MainUI::MainUI(Window* window) : BaseUI(window, nullptr),
+saveEditorUi(window, this),
+gameMenuUi(window, this, saveEditorUi),
+popupDialogUi(window, this),
+aboutWindowUi(window, this)
 {
-	saveEditor = new SaveEditorUI(window, this);
-	aboutWindow = new AboutWindow(window, this);
-	popupDialog = new PopupDialog(window, this);
+	gameMenuUi.SetIsVisible(true);
 
 	lastPath.clear();
 	currentFile.clear();
@@ -32,15 +34,6 @@ MainUI::~MainUI()
 {
 	SaveConfig();
 	ClearSaveData();
-
-	delete saveEditor;
-	saveEditor = nullptr;
-
-	delete popupDialog;
-	popupDialog = nullptr;
-
-	delete aboutWindow;
-	aboutWindow = nullptr;
 }
 
 void MainUI::OpenFileCallback(std::filesystem::path filePath)
@@ -100,35 +93,7 @@ void MainUI::DoRender()
 			ImGui::EndMenu();
 		}
 
-		if (saveData && ImGui::BeginMenu("Tools"))
-		{
-			for (uint8_t s = 0; s < NUM_SAVE_SLOTS; s++)
-			{
-				if (ImGui::BeginMenu(tabNames[s]))
-				{
-					if (ImGui::MenuItem("100% Complete"))
-					{
-						CompleteSlot(s);
-					}
-
-					if (ImGui::MenuItem("Delete"))
-					{
-						DeleteSlot(s);
-					}
-
-					ImGui::EndMenu();
-				}
-			}
-
-			ImGui::Separator();
-
-			if (ImGui::MenuItem("Show backup data", NULL, saveEditor->showBackup))
-			{
-				saveEditor->showBackup = !saveEditor->showBackup;
-			}
-
-			ImGui::EndMenu();
-		}
+		gameMenuUi.Render();
 
 #if SUPPORT_TRANSPARENCY
 		if (ImGui::BeginMenu("Settings"))
@@ -141,9 +106,9 @@ void MainUI::DoRender()
 
 		if (ImGui::BeginMenu("Help"))
 		{
-			if (ImGui::MenuItem("About...", NULL, aboutWindow->GetIsVisible()))
+			if (ImGui::MenuItem("About...", NULL, aboutWindowUi.GetIsVisible()))
 			{
-				aboutWindow->ToggleIsVisible();
+				aboutWindowUi.ToggleIsVisible();
 			}
 
 			ImGui::EndMenu();
@@ -162,9 +127,9 @@ void MainUI::DoRender()
 
 	//ImGui::ShowDemoWindow();
 
-	saveEditor->Render();
-	popupDialog->Render();
-	aboutWindow->Render();
+	saveEditorUi.Render();
+	popupDialogUi.Render();
+	aboutWindowUi.Render();
 }
 
 void MainUI::ClearSaveData()
@@ -243,17 +208,17 @@ void MainUI::Load(std::filesystem::path filePath)
 		EndianSwap();
 		LoadingProcess();
 
-		saveEditor->showBackup = false;
-		saveEditor->SetIsVisible(true);
+		saveEditorUi.showBackup = false;
+		saveEditorUi.SetIsVisible(true);
 	}
 	catch (const std::runtime_error& error)
 	{
-		popupDialog->SetMessage(MessageTypes::Error, "Error", error.what());
-		popupDialog->SetIsVisible(true);
+		popupDialogUi.SetMessage(MessageTypes::Error, "Error", error.what());
+		popupDialogUi.SetIsVisible(true);
 	}
 }
 
-void MainUI::LoadingProcess() const
+void MainUI::LoadingProcess()
 {
 	if (!IsSaveDataLoaded()) return;
 
@@ -291,12 +256,12 @@ void MainUI::LoadingProcess() const
 
 	if (!message.empty())
 	{
-		popupDialog->SetMessage(MessageTypes::Warning, "Load warnings", message);
-		popupDialog->SetIsVisible(true);
+		popupDialogUi.SetMessage(MessageTypes::Warning, "Load warnings", message);
+		popupDialogUi.SetIsVisible(true);
 	}
 }
 
-void MainUI::Save() const
+void MainUI::Save()
 {
 	if (!IsSaveDataLoaded()) return;
 
@@ -309,8 +274,8 @@ void MainUI::Save() const
 	}
 	catch (const std::runtime_error& error)
 	{
-		popupDialog->SetMessage(MessageTypes::Error, "Error", error.what());
-		popupDialog->SetIsVisible(true);
+		popupDialogUi.SetMessage(MessageTypes::Error, "Error", error.what());
+		popupDialogUi.SetIsVisible(true);
 	}
 
 	EndianSwap();
@@ -362,43 +327,4 @@ void MainUI::EndianSwap() const
 		saveData->settings[cp].Magic = Swap16(saveData->settings[cp].Magic);
 		saveData->settings[cp].Checksum = Swap16(saveData->settings[cp].Checksum);
 	}
-}
-
-void MainUI::CompleteSlot(const uint8_t slotIndex) const
-{
-	if (!IsSaveDataLoaded()) return;
-
-	memset(&saveData->saveSlots[slotIndex][0], 0, SAVE_SLOT_SIZE);
-
-	saveData->saveSlots[slotIndex][0].Flags = 0x1f10ffcf;
-
-	for (int c = 0; c < COURSE_COUNT; c++)
-	{
-		for (int st = 0; st < courseStarCount[c]; st++)
-		{
-			saveData->saveSlots[slotIndex][0].CourseData[c] |= (1 << st);
-		}
-
-		if (courseHasCannon[c])
-		{
-			saveData->saveSlots[slotIndex][0].CourseData[c + 1] |= SAVE_COURSE_FLAG_STAR_CANNON_OPEN;
-		}
-	}
-
-	for (int c = 0; c < COURSE_STAGES_COUNT; c++)
-	{
-		saveData->saveSlots[slotIndex][0].CourseCoinScores[c] = 100;
-	}
-
-	saveData->saveSlots[slotIndex][0].Magic = SAVE_SLOT_MAGIC_LE;
-	saveData->saveSlots[slotIndex][0].UpdateChecksum();
-}
-
-void MainUI::DeleteSlot(const uint8_t slotIndex) const
-{
-	if (!IsSaveDataLoaded()) return;
-
-	memset(&saveData->saveSlots[slotIndex][0], 0, SAVE_SLOT_SIZE);
-	saveData->saveSlots[slotIndex][0].Magic = SAVE_SLOT_MAGIC_LE;
-	saveData->saveSlots[slotIndex][0].UpdateChecksum();
 }

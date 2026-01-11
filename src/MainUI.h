@@ -3,11 +3,12 @@
 #include <filesystem>
 
 #include "BaseUI.h"
-#include "Game/SaveData.h"
 
-class SaveEditorUI;
-class PopupDialog;
-class AboutWindow;
+#include "AboutWindow.h"
+#include "PopupDialog.h"
+#include "Game/GameMenuUI.h"
+#include "Game/SaveData.h"
+#include "Game/SaveEditorUI.h"
 
 #define CONFIG_FILE_NAME "config.ini"
 #define CONFIG_INI_SECTION "Config"
@@ -19,9 +20,10 @@ class AboutWindow;
 class MainUI : public BaseUI
 {
 private:
-	SaveEditorUI* saveEditor;
-	PopupDialog* popupDialog;
-	AboutWindow* aboutWindow;
+	SaveEditorUI saveEditorUi;
+	GameMenuUI gameMenuUi;
+	PopupDialog popupDialogUi;
+	AboutWindow aboutWindowUi;
 
 	std::filesystem::path lastPath;
 	std::filesystem::path currentFile;
@@ -56,11 +58,8 @@ private:
 	void SaveConfig() const;
 
 	void Load(std::filesystem::path filePath);
-	void LoadingProcess() const;
-	void Save() const;
+	void LoadingProcess();
+	void Save();
 	void SavingProcess() const;
 	void EndianSwap() const;
-
-	void CompleteSlot(const uint8_t slotIndex) const;
-	void DeleteSlot(const uint8_t slotIndex) const;
 };
