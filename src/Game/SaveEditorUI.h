@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include "BaseUI.h"
+#include "../BaseUI.h"
 class MainUI;
 
 const char* const tabNames[]

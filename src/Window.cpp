@@ -237,7 +237,7 @@ void Window::Terminate()
 	isRunning = false;
 }
 
-void Window::ShowOpenFileDialog(std::filesystem::path defaultLocation, void* userData, SDL_DialogFileCallback callback)
+void Window::ShowOpenFileDialog(std::filesystem::path defaultLocation, void* userData, SDL_DialogFileCallback callback) const
 {
 	if (window == nullptr) return;
 

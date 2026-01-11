@@ -1,11 +1,13 @@
 ﻿#include "MainUI.h"
 #include "Window.h"
-#include "SaveEditorUI.h"
+#include "Game/SaveEditorUI.h"
 #include "PopupDialog.h"
 #include "AboutWindow.h"
 #include "Utils.h"
 #include <fstream>
 #include <SimpleIni.h>
+#include <SDL3/SDL.h>
+#include <imgui/imgui.h>
 
 MainUI::MainUI(Window* window) : BaseUI(window, nullptr)
 {

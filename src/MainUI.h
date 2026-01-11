@@ -1,12 +1,13 @@
 #pragma once
 
+#include <filesystem>
+
 #include "BaseUI.h"
+#include "Game/SaveData.h"
+
 class SaveEditorUI;
 class PopupDialog;
 class AboutWindow;
-#include "SaveData.h"
-#include <filesystem>
-#include <imgui/imgui.h>
 
 #define CONFIG_FILE_NAME "config.ini"
 #define CONFIG_INI_SECTION "Config"

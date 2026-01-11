@@ -1,9 +1,19 @@
-﻿#include "Window.h"
+﻿#if !NDEBUG
+// Test leaks with _CrtDumpMemoryLeaks()
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#endif
+
+#include <SDL3/SDL.h>
+#include <imgui/imgui.h>
+
+#include "Window.h"
 #include "MainUI.h"
 
-#include "sm64.ttf.h"
+#include "Game/sm64.ttf.h"
 
-int main()
+int RunMain()
 {
 	const SDL_DialogFileFilter openDialogFilters[] =
 	{
@@ -71,5 +81,29 @@ int main()
 	catch (const std::runtime_error& error)
 	{
 		printf("%s\n", error.what());
+		return -1;
 	}
+
+	return 0;
+}
+
+int main()
+{
+	// Run everything in RunMain so when the function exits, all the destructors,
+	// including those of objects with automatic storage duration like std::string are called.
+	// That will prevent _CrtDumpMemoryLeaks() from having some false positives.
+
+	int result = RunMain();
+
+#if !NDEBUG
+	// Cause an intentional leak to check if the leak detector is working
+
+	char* leakTest = new char[10];
+	snprintf(leakTest, 10, "%s", "LEAK TEST");
+
+	_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG);
+	_CrtDumpMemoryLeaks();
+#endif
+
+	return result;
 }

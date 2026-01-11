@@ -55,6 +55,5 @@ public:
 	void Run(BaseUI& ui);
 	void Terminate();
 
-
-	void ShowOpenFileDialog(std::filesystem::path defaultLocation, void* userData, SDL_DialogFileCallback callback);
+	void ShowOpenFileDialog(std::filesystem::path defaultLocation, void* userData, SDL_DialogFileCallback callback) const;
 };

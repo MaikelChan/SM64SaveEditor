@@ -1,6 +1,7 @@
 ﻿#include "SaveEditorUI.h"
-#include "MainUI.h"
+#include "../MainUI.h"
 #include "SaveData.h"
+#include <imgui/imgui.h>
 
 SaveEditorUI::SaveEditorUI(Window* window, const MainUI* mainUI) : BaseUI(window, mainUI)
 {
