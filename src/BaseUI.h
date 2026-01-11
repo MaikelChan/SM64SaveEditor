@@ -5,7 +5,7 @@ class Window;
 class BaseUI
 {
 protected:
-	const Window* window;
+	Window* window;
 	const BaseUI* parentUI;
 	bool isVisible;
 
@@ -13,7 +13,7 @@ private:
 	bool previousIsVisible;
 
 public:
-	BaseUI(const Window* window, const BaseUI* parentUI);
+	BaseUI(Window* window, const BaseUI* parentUI);
 	virtual ~BaseUI();
 
 	inline bool GetIsVisible() const { return isVisible; }

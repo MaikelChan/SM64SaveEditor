@@ -1,5 +1,5 @@
-﻿#include "main.h"
-#include "MainUI.h"
+﻿#include "MainUI.h"
+#include "Window.h"
 #include "SaveEditorUI.h"
 #include "PopupDialog.h"
 #include "AboutWindow.h"
@@ -7,7 +7,7 @@
 #include <fstream>
 #include <SimpleIni.h>
 
-MainUI::MainUI(const Window* window) : BaseUI(window, nullptr)
+MainUI::MainUI(Window* window) : BaseUI(window, nullptr)
 {
 	saveEditor = new SaveEditorUI(window, this);
 	aboutWindow = new AboutWindow(window, this);
@@ -80,7 +80,7 @@ void MainUI::DoRender()
 						mainUI->OpenFileCallback(filePath);
 					};
 
-				ShowOpenFileDialog(lastPath, (void*)this, callback);
+				window->ShowOpenFileDialog(lastPath, (void*)this, callback);
 			}
 
 			if (ImGui::MenuItem("Save", NULL, false, IsSaveDataLoaded()))
@@ -92,7 +92,7 @@ void MainUI::DoRender()
 
 			if (ImGui::MenuItem("Quit"))
 			{
-				CloseMainWindow();
+				window->Terminate();
 			}
 
 			ImGui::EndMenu();

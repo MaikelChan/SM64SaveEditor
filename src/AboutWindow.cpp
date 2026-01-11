@@ -1,15 +1,15 @@
 #include "AboutWindow.h"
-#include "main.h"
+#include "Window.h"
 #include "Config.h"
 
 #include <stdio.h>
 #include <imgui/imgui.h>
 #include <SDL3/SDL_version.h>
 
-AboutWindow::AboutWindow(const Window* window, const BaseUI* parentUI) : BaseUI(window, parentUI)
+AboutWindow::AboutWindow(Window* window, const BaseUI* parentUI) : BaseUI(window, parentUI)
 {
-	snprintf(windowTitle, 64, "About %s", WINDOW_TITLE);
-	snprintf(description, 64, "%s - v%s", WINDOW_TITLE, PROJECT_VER);
+	const char* title = window->GetParams().title.c_str();
+	snprintf(windowTitle, 64, "About %s - v%s", title, PROJECT_VER);
 }
 
 AboutWindow::~AboutWindow()
@@ -36,11 +36,14 @@ void AboutWindow::DoRender()
 
 	if (ImGui::BeginPopupModal(windowTitle, &isVisible, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse))
 	{
-		ImGui::SeparatorText(description);
-		ImGui::Text("By PacoChan.");
+		const WindowParams& params = window->GetParams();
+
+		ImGui::Text(params.description.c_str());
+		ImGui::NewLine();
+		ImGui::Text("By %s:", params.author.c_str());
 		ImGui::SameLine();
-		ImGui::TextLinkOpenURL("https://pacochan.net/software/sm64-save-editor/");
-		ImGui::Text("\nThis save editor is compatible with the Nintendo 64 version and the PC port.\n\n");
+		ImGui::TextLinkOpenURL(params.url.c_str());
+		ImGui::NewLine();
 
 		ImGui::SeparatorText("Libraries");
 
@@ -49,9 +52,8 @@ void AboutWindow::DoRender()
 		ImGui::TextLinkOpenURL("https://github.com/ocornut/imgui");
 
 		int sdlVersion = SDL_GetVersion();
-		const char* backend = GetBackend();
-		if (backend == nullptr) backend = "?";
-		ImGui::BulletText("SDL %i.%i.%i (Lib %i.%i.%i, Backend \"%s\"):", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_MICRO_VERSION, SDL_VERSIONNUM_MAJOR(sdlVersion), SDL_VERSIONNUM_MINOR(sdlVersion), SDL_VERSIONNUM_MICRO(sdlVersion), GetBackend());
+		const std::string& driverName = window->GetDriverName();
+		ImGui::BulletText("SDL %i.%i.%i (Lib %i.%i.%i, Backend \"%s\"):", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_MICRO_VERSION, SDL_VERSIONNUM_MAJOR(sdlVersion), SDL_VERSIONNUM_MINOR(sdlVersion), SDL_VERSIONNUM_MICRO(sdlVersion), driverName.c_str());
 		ImGui::SameLine();
 		ImGui::TextLinkOpenURL("https://www.libsdl.org");
 

@@ -2,7 +2,7 @@
 #include "MainUI.h"
 #include "SaveData.h"
 
-SaveEditorUI::SaveEditorUI(const Window* window, const MainUI* mainUI) : BaseUI(window, mainUI)
+SaveEditorUI::SaveEditorUI(Window* window, const MainUI* mainUI) : BaseUI(window, mainUI)
 {
 	SaveEditorUI::mainUI = mainUI;
 	showBackup = false;

@@ -33,7 +33,7 @@ private:
 #endif
 
 public:
-	MainUI(const Window* window);
+	MainUI(Window* window);
 	~MainUI();
 
 	inline bool IsSaveDataLoaded() const { return saveData != nullptr; }

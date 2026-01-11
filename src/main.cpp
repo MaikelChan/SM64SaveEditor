@@ -1,19 +1,27 @@
-﻿#include "main.h"
-#include "Window.h"
-#include "Config.h"
+﻿#include "Window.h"
 #include "MainUI.h"
 
 #include "sm64.ttf.h"
 
 int main()
 {
-	char title[64];
-	snprintf(title, 64, "%s - v%s", "Super Mario 64 - Save Editor", PROJECT_VER);
+	const SDL_DialogFileFilter openDialogFilters[] =
+	{
+		{ "EEP Saves (*.eep)", "eep" },
+		{ "BIN Saves (*.bin)", "bin" },
+		{ "All files (*.*)", "*" }
+	};
 
 	WindowParams windowParams = {};
-	windowParams.title = title;
+	windowParams.title = "Super Mario 64 - Save Editor";
+	windowParams.description = "This is a Super Mario 64 cross-platform save editor.\nIt is compatible with saves of the Nintendo 64 version and the PC port.";
+	windowParams.author = "PacoChan";
+	windowParams.url = "https://pacochan.net/software/sm64-save-editor/";
 	windowParams.initialWidth = 800;
 	windowParams.initialHeight = 600;
+	windowParams.openDialogTitle = "Open a Super Mario 64 save file";
+	windowParams.openDialogFiltersCount = SDL_arraysize(openDialogFilters);
+	windowParams.openDialogFilters = openDialogFilters;
 	windowParams.configureStyleCallback = [](ImVec4* colors)
 		{
 			ImGui::StyleColorsDark();
@@ -55,83 +63,13 @@ int main()
 
 	try
 	{
-		Window window(&windowParams);
+		Window window(windowParams);
 
 		MainUI mainUi(&window);
-		window.Run(&mainUi);
+		window.Run(mainUi);
 	}
 	catch (const std::runtime_error& error)
 	{
 		printf("%s\n", error.what());
 	}
 }
-
-
-void CloseMainWindow()
-{
-
-}
-
-void SetImGuiStyle()
-{
-
-}
-
-const char* GetBackend()
-{
-	return "driverName";
-}
-
-void ShowOpenFileDialog(std::filesystem::path defaultLocation, void* userData, SDL_DialogFileCallback callback)
-{
-
-}
-
-
-//
-//void CloseMainWindow()
-//{
-//	isRunning = false;
-//}
-//
-
-//
-//const char* GetBackend()
-//{
-//	return driverName;
-//}
-//
-//void ShowOpenFileDialog(std::filesystem::path defaultLocation, void* userData, SDL_DialogFileCallback callback)
-//{
-//	if (window == nullptr) return;
-//
-//	SDL_PropertiesID dialogProperties = SDL_CreateProperties();
-//
-//	SDL_SetPointerProperty(dialogProperties, SDL_PROP_FILE_DIALOG_FILTERS_POINTER, (void*)openDialogFilters);
-//	SDL_SetNumberProperty(dialogProperties, SDL_PROP_FILE_DIALOG_NFILTERS_NUMBER, OPEN_DIALOG_FILTERS_COUNT);
-//	SDL_SetPointerProperty(dialogProperties, SDL_PROP_FILE_DIALOG_WINDOW_POINTER, window);
-//	SDL_SetBooleanProperty(dialogProperties, SDL_PROP_FILE_DIALOG_MANY_BOOLEAN, false);
-//	SDL_SetStringProperty(dialogProperties, SDL_PROP_FILE_DIALOG_TITLE_STRING, OPEN_DIALOG_TITLE);
-//
-//	if (defaultLocation.empty())
-//	{
-//		SDL_SetStringProperty(dialogProperties, SDL_PROP_FILE_DIALOG_LOCATION_STRING, nullptr);
-//	}
-//	else
-//	{
-//		// Make sure the path ends with a slash, or else the File Dialog will treat the last
-//		// part of the path as a default file, instead of a folder.
-//		defaultLocation += '/';
-//
-//		// Normalizing it will make sure that there are no repeated slashes, and they will be
-//		// converted to the OS preferred format (on Windows / -> \), or else it will not be
-//		// considered a valid path and the File Dialog will show the default OS path instead.
-//		defaultLocation = defaultLocation.lexically_normal();
-//
-//		SDL_SetStringProperty(dialogProperties, SDL_PROP_FILE_DIALOG_LOCATION_STRING, defaultLocation.u8string().c_str());
-//	}
-//
-//	SDL_ShowFileDialogWithProperties(SDL_FILEDIALOG_OPENFILE, callback, userData, dialogProperties);
-//
-//	SDL_DestroyProperties(dialogProperties);
-//}

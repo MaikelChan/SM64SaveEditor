@@ -2,14 +2,12 @@
 
 #include <stdexcept>
 
-#include <SDL3/SDL.h>
-
 #include <imgui/imgui_impl_sdl3.h>
 #include <imgui/imgui_impl_sdlgpu3.h>
 
 #include "BaseUI.h"
 
-Window::Window(WindowParams* params)
+Window::Window(const WindowParams& params) : params(params)
 {
 	// Initialize SDL
 
@@ -27,11 +25,11 @@ Window::Window(WindowParams* params)
 	SDL_WindowFlags windowFlags = SDL_WINDOW_HIGH_PIXEL_DENSITY;
 #endif
 	SDL_PropertiesID windowProperties = SDL_CreateProperties();
-	SDL_SetStringProperty(windowProperties, SDL_PROP_WINDOW_CREATE_TITLE_STRING, params->title.c_str());
+	SDL_SetStringProperty(windowProperties, SDL_PROP_WINDOW_CREATE_TITLE_STRING, params.title.c_str());
 	SDL_SetNumberProperty(windowProperties, SDL_PROP_WINDOW_CREATE_X_NUMBER, SDL_WINDOWPOS_CENTERED);
 	SDL_SetNumberProperty(windowProperties, SDL_PROP_WINDOW_CREATE_Y_NUMBER, SDL_WINDOWPOS_CENTERED);
-	SDL_SetNumberProperty(windowProperties, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, (int)(params->initialWidth * mainScale));
-	SDL_SetNumberProperty(windowProperties, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, (int)(params->initialHeight * mainScale));
+	SDL_SetNumberProperty(windowProperties, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, (int)(params.initialWidth * mainScale));
+	SDL_SetNumberProperty(windowProperties, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, (int)(params.initialHeight * mainScale));
 	SDL_SetNumberProperty(windowProperties, SDL_PROP_WINDOW_CREATE_FLAGS_NUMBER, windowFlags);
 	window = SDL_CreateWindowWithProperties(windowProperties);
 	SDL_DestroyProperties(windowProperties);
@@ -91,14 +89,14 @@ Window::Window(WindowParams* params)
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 	io.IniFilename = NULL;
 
-	if (params->configureStyleCallback)
+	if (params.configureStyleCallback)
 	{
-		params->configureStyleCallback(ImGui::GetStyle().Colors);
+		params.configureStyleCallback(ImGui::GetStyle().Colors);
 	}
 
-	if (params->configureFontsCallback)
+	if (params.configureFontsCallback)
 	{
-		params->configureFontsCallback(io.Fonts);
+		params.configureFontsCallback(io.Fonts);
 	}
 
 	ImGuiStyle& style = ImGui::GetStyle();
@@ -141,9 +139,9 @@ Window::~Window()
 	SDL_Quit();
 }
 
-void Window::Run(BaseUI* ui)
+void Window::Run(BaseUI& ui)
 {
-	ui->SetIsVisible(true);
+	ui.SetIsVisible(true);
 
 	isRunning = true;
 
@@ -173,7 +171,7 @@ void Window::Run(BaseUI* ui)
 
 		if (SDL_GetWindowFlags(window) & SDL_WINDOW_MINIMIZED)
 		{
-			SDL_Delay(10);
+			SDL_Delay(33);
 			continue;
 		}
 
@@ -185,7 +183,7 @@ void Window::Run(BaseUI* ui)
 
 		// Process UI and ImGui
 
-		ui->Render();
+		ui.Render();
 
 		ImGui::Render();
 
@@ -237,4 +235,38 @@ void Window::Run(BaseUI* ui)
 void Window::Terminate()
 {
 	isRunning = false;
+}
+
+void Window::ShowOpenFileDialog(std::filesystem::path defaultLocation, void* userData, SDL_DialogFileCallback callback)
+{
+	if (window == nullptr) return;
+
+	SDL_PropertiesID dialogProperties = SDL_CreateProperties();
+	SDL_SetPointerProperty(dialogProperties, SDL_PROP_FILE_DIALOG_FILTERS_POINTER, (void*)params.openDialogFilters);
+	SDL_SetNumberProperty(dialogProperties, SDL_PROP_FILE_DIALOG_NFILTERS_NUMBER, params.openDialogFiltersCount);
+	SDL_SetPointerProperty(dialogProperties, SDL_PROP_FILE_DIALOG_WINDOW_POINTER, window);
+	SDL_SetBooleanProperty(dialogProperties, SDL_PROP_FILE_DIALOG_MANY_BOOLEAN, false);
+	SDL_SetStringProperty(dialogProperties, SDL_PROP_FILE_DIALOG_TITLE_STRING, params.openDialogTitle.c_str());
+
+	if (defaultLocation.empty())
+	{
+		SDL_SetStringProperty(dialogProperties, SDL_PROP_FILE_DIALOG_LOCATION_STRING, nullptr);
+	}
+	else
+	{
+		// Make sure the path ends with a slash, or else the File Dialog will treat the last
+		// part of the path as a default file, instead of a folder.
+		defaultLocation += '/';
+
+		// Normalizing it will make sure that there are no repeated slashes, and they will be
+		// converted to the OS preferred format (on Windows / -> \), or else it will not be
+		// considered a valid path and the File Dialog will show the default OS path instead.
+		defaultLocation = defaultLocation.lexically_normal();
+
+		SDL_SetStringProperty(dialogProperties, SDL_PROP_FILE_DIALOG_LOCATION_STRING, defaultLocation.u8string().c_str());
+	}
+
+	SDL_ShowFileDialogWithProperties(SDL_FILEDIALOG_OPENFILE, callback, userData, dialogProperties);
+
+	SDL_DestroyProperties(dialogProperties);
 }

@@ -1,7 +1,7 @@
 #include "BaseUI.h"
 #include <stdio.h>
 
-BaseUI::BaseUI(const Window* window, const BaseUI* parentUI)
+BaseUI::BaseUI(Window* window, const BaseUI* parentUI)
 {
 	BaseUI::window = window;
 	BaseUI::parentUI = parentUI;

@@ -1,7 +1,7 @@
 #include "PopupDialog.h"
 #include <imgui/imgui.h>
 
-PopupDialog::PopupDialog(const Window* window, const BaseUI* parentUI) : BaseUI(window, parentUI)
+PopupDialog::PopupDialog(Window* window, const BaseUI* parentUI) : BaseUI(window, parentUI)
 {
 	type = MessageTypes::Normal;
 	title = "";
