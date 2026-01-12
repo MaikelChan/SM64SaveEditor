@@ -1,6 +1,7 @@
 #pragma once
 
 #include "BaseUI.h"
+
 #include <string>
 
 enum class MessageTypes { Normal, Warning, Error };
@@ -13,10 +14,10 @@ private:
 	std::string message;
 
 public:
-	PopupDialog(Window* window, const BaseUI* parentUI);
+	PopupDialog(Window* window, BaseUI* parentUi);
 	~PopupDialog();
 
-	void SetMessage(const MessageTypes type, std::string title, std::string message);
+	void SetMessage(const MessageTypes type, const std::string title, const std::string message);
 
 protected:
 	virtual void VisibilityChanged(const bool isVisible) override;

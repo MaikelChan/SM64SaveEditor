@@ -1,10 +1,9 @@
 #include "BaseUI.h"
-#include <stdio.h>
 
-BaseUI::BaseUI(Window* window, const BaseUI* parentUI)
+BaseUI::BaseUI(Window* window, BaseUI* parentUi)
 {
-	BaseUI::window = window;
-	BaseUI::parentUI = parentUI;
+	this->window = window;
+	this->parentUi = parentUi;
 
 	isVisible = false;
 	previousIsVisible = false;

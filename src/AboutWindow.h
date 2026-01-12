@@ -8,7 +8,7 @@ private:
 	char windowTitle[64];
 
 public:
-	AboutWindow(Window* window, const BaseUI* parentUI);
+	AboutWindow(Window* window, BaseUI* parentUi);
 	~AboutWindow();
 
 protected:

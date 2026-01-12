@@ -10,11 +10,11 @@ class SaveEditorUI;
 class GameMenuUI : public BaseUI
 {
 private:
-	const MainUI* mainUi;
-	SaveEditorUI& saveEditorUi;
+	MainUI* mainUi;
+	SaveEditorUI* saveEditorUi;
 
 public:
-	GameMenuUI(Window* window, const MainUI* parentUI, SaveEditorUI& saveEditorUI);
+	GameMenuUI(Window* window, BaseUI* parentUi, SaveEditorUI* saveEditorUi);
 	~GameMenuUI();
 
 protected:

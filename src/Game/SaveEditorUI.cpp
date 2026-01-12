@@ -3,9 +3,9 @@
 #include "SaveData.h"
 #include <imgui/imgui.h>
 
-SaveEditorUI::SaveEditorUI(Window* window, const MainUI* mainUI) : BaseUI(window, mainUI)
+SaveEditorUI::SaveEditorUI(Window* window, BaseUI* parentUi) : BaseUI(window, parentUi)
 {
-	SaveEditorUI::mainUI = mainUI;
+	mainUi = (MainUI*)parentUi;
 	showBackup = false;
 }
 
@@ -23,7 +23,7 @@ void SaveEditorUI::DoRender()
 {
 	BaseUI::DoRender();
 
-	SaveData* saveData = mainUI->GetSaveData();
+	SaveData* saveData = mainUi->GetSaveData();
 
 	const ImGuiViewport* viewport = ImGui::GetMainViewport();
 	ImGui::SetNextWindowPos(viewport->WorkPos);
@@ -329,7 +329,7 @@ void SaveEditorUI::DoRender()
 
 bool SaveEditorUI::CheckboxSaveFlags(const char* label, const uint8_t saveSlot, const uint8_t copyIndex, const uint32_t flag) const
 {
-	SaveData* saveData = mainUI->GetSaveData();
+	SaveData* saveData = mainUi->GetSaveData();
 
 	bool value = saveData->saveSlots[saveSlot][copyIndex].GetFlag(flag);
 
@@ -344,7 +344,7 @@ bool SaveEditorUI::CheckboxSaveFlags(const char* label, const uint8_t saveSlot, 
 
 bool SaveEditorUI::CheckboxCourseData(const char* label, const uint8_t saveSlot, const uint8_t copyIndex, const uint8_t courseIndex, const uint8_t flag) const
 {
-	SaveData* saveData = mainUI->GetSaveData();
+	SaveData* saveData = mainUi->GetSaveData();
 
 	bool value = saveData->saveSlots[saveSlot][copyIndex].GetCourseDataFlag(courseIndex, flag);
 

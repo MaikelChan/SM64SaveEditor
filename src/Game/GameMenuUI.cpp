@@ -8,10 +8,10 @@
 #include "SaveEditorUI.h"
 #include "SaveData.h"
 
-GameMenuUI::GameMenuUI(Window* window, const MainUI* mainUi, SaveEditorUI& saveEditorUI) : BaseUI(window, mainUi),
-saveEditorUi(saveEditorUI)
+GameMenuUI::GameMenuUI(Window* window, BaseUI* parentUi, SaveEditorUI* saveEditorUi) : BaseUI(window, parentUi)
 {
-	this->mainUi = mainUi;
+	this->mainUi = (MainUI*)parentUi;
+	this->saveEditorUi = saveEditorUi;
 }
 
 GameMenuUI::~GameMenuUI()
@@ -48,9 +48,9 @@ void GameMenuUI::DoRender()
 
 		ImGui::Separator();
 
-		if (ImGui::MenuItem("Show backup data", NULL, saveEditorUi.showBackup))
+		if (ImGui::MenuItem("Show backup data", NULL, saveEditorUi->showBackup))
 		{
-			saveEditorUi.showBackup = !saveEditorUi.showBackup;
+			saveEditorUi->showBackup = !saveEditorUi->showBackup;
 		}
 
 		ImGui::EndMenu();
@@ -60,8 +60,6 @@ void GameMenuUI::DoRender()
 
 void GameMenuUI::CompleteSlot(const uint8_t slotIndex) const
 {
-	if (!mainUi->IsSaveDataLoaded()) return;
-
 	SaveData* saveData = mainUi->GetSaveData();
 
 	memset(&saveData->saveSlots[slotIndex][0], 0, SAVE_SLOT_SIZE);
@@ -92,8 +90,6 @@ void GameMenuUI::CompleteSlot(const uint8_t slotIndex) const
 
 void GameMenuUI::DeleteSlot(const uint8_t slotIndex) const
 {
-	if (!mainUi->IsSaveDataLoaded()) return;
-
 	SaveData* saveData = mainUi->GetSaveData();
 
 	memset(&saveData->saveSlots[slotIndex][0], 0, SAVE_SLOT_SIZE);

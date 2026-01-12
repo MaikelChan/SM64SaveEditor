@@ -11,7 +11,7 @@
 
 MainUI::MainUI(Window* window) : BaseUI(window, nullptr),
 saveEditorUi(window, this),
-gameMenuUi(window, this, saveEditorUi),
+gameMenuUi(window, this, &saveEditorUi),
 popupDialogUi(window, this),
 aboutWindowUi(window, this)
 {
@@ -93,7 +93,10 @@ void MainUI::DoRender()
 			ImGui::EndMenu();
 		}
 
-		gameMenuUi.Render();
+		if (IsSaveDataLoaded())
+		{
+			gameMenuUi.Render();
+		}
 
 #if SUPPORT_TRANSPARENCY
 		if (ImGui::BeginMenu("Settings"))

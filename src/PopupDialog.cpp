@@ -1,11 +1,12 @@
 #include "PopupDialog.h"
+
 #include <imgui/imgui.h>
 
-PopupDialog::PopupDialog(Window* window, const BaseUI* parentUI) : BaseUI(window, parentUI)
+PopupDialog::PopupDialog(Window* window, BaseUI* parentUi) : BaseUI(window, parentUi)
 {
 	type = MessageTypes::Normal;
-	title = "";
-	message = "";
+	title.clear();
+	message.clear();
 }
 
 PopupDialog::~PopupDialog()
@@ -13,7 +14,7 @@ PopupDialog::~PopupDialog()
 
 }
 
-void PopupDialog::SetMessage(const MessageTypes type, std::string title, std::string message)
+void PopupDialog::SetMessage(const MessageTypes type, const std::string title, const std::string message)
 {
 	PopupDialog::type = type;
 	PopupDialog::title = title;

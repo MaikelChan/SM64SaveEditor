@@ -1,7 +1,9 @@
 #pragma once
 
 #include <cstdint>
+
 #include "../BaseUI.h"
+
 class MainUI;
 
 const char* const tabNames[]
@@ -18,10 +20,10 @@ public:
 	bool showBackup;
 
 private:
-	const MainUI* mainUI;
+	MainUI* mainUi;
 
 public:
-	SaveEditorUI(Window* window, const MainUI* mainUI);
+	SaveEditorUI(Window* window, BaseUI* parentUi);
 	~SaveEditorUI();
 
 protected:
