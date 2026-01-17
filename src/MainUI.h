@@ -53,10 +53,9 @@ protected:
 
 private:
 	void ClearSaveData();
+	void LoadSaveData(const std::filesystem::path filePath);
+	void SaveSaveData();
 
 	void LoadConfig();
 	void SaveConfig() const;
-
-	void Load(const std::filesystem::path filePath);
-	void Save();
 };

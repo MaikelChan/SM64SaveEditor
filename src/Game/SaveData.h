@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include <filesystem>
+#include <string>
 
 #define SAVE_DATA_SIZE 0x200
 
@@ -379,17 +379,19 @@ public:
 	SettingsData settings[NUM_COPIES] = {};
 
 	enum class Types { NotValid, BigEndian, LittleEndian };
+	struct InitializationResult
+	{
+		Types type;
+		std::string message;
+	};
 
 	SaveData();
 
-	static Types Load(const std::filesystem::path filePath, SaveData* saveData);
-	static void Save(const std::filesystem::path filePath, const SaveData* saveData, const SaveData::Types type);
-
-	void EndianSwap();
+	InitializationResult CheckAndInitialize();
+	void PrepareForSaving(const Types type);
 
 private:
 	Types CalculateType() const;
-
-	void CheckValidityAndFix();
-	void FillMagicAndBackupData();
+	void EndianSwap();
+	std::string CheckValidityAndFix();
 };

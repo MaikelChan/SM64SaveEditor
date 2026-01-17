@@ -38,7 +38,7 @@ MainUI::~MainUI()
 
 void MainUI::OpenFileCallback(std::filesystem::path filePath)
 {
-	MainUI::Load(filePath);
+	MainUI::LoadSaveData(filePath);
 	MainUI::SaveConfig();
 }
 
@@ -80,7 +80,7 @@ void MainUI::DoRender()
 
 			if (ImGui::MenuItem("Save", NULL, false, IsSaveDataLoaded()))
 			{
-				Save();
+				SaveSaveData();
 			}
 
 			ImGui::Separator();
@@ -148,6 +148,89 @@ void MainUI::ClearSaveData()
 	currentFileType = SaveData::Types::NotValid;
 }
 
+void MainUI::LoadSaveData(const std::filesystem::path filePath)
+{
+	ClearSaveData();
+
+	std::ifstream stream = std::ifstream(filePath, std::ios::binary);
+
+	if (!stream || !stream.is_open())
+	{
+		popupDialogUi.SetMessage(MessageTypes::Error, "Error", "There was an error trying to open the file.");
+		popupDialogUi.SetIsVisible(true);
+
+		return;
+	}
+
+	stream.seekg(0, std::ios_base::end);
+	size_t size = stream.tellg();
+
+	if (size < SAVE_DATA_SIZE)
+	{
+		stream.close();
+
+		popupDialogUi.SetMessage(MessageTypes::Error, "Error", "The selected file is not a valid Super Mario 64 save file.");
+		popupDialogUi.SetIsVisible(true);
+
+		return;
+	}
+
+	SaveData* newSaveData = new SaveData();
+
+	stream.seekg(0, std::ios_base::beg);
+	stream.read((char*)newSaveData, SAVE_DATA_SIZE);
+	stream.close();
+
+	SaveData::InitializationResult result = newSaveData->CheckAndInitialize();
+	if (result.type == SaveData::Types::NotValid)
+	{
+		delete newSaveData;
+		newSaveData = nullptr;
+
+		popupDialogUi.SetMessage(MessageTypes::Error, "Error", result.message);
+		popupDialogUi.SetIsVisible(true);
+
+		return;
+	}
+
+	currentFileType = result.type;
+	saveData = newSaveData;
+
+	lastPath = filePath.parent_path();
+	currentFile = filePath;
+	currentFileName = filePath.filename().u8string();
+
+	saveEditorUi.showBackup = false;
+	saveEditorUi.SetIsVisible(true);
+
+	if (!result.message.empty())
+	{
+		popupDialogUi.SetMessage(MessageTypes::Warning, "Warnings", result.message);
+		popupDialogUi.SetIsVisible(true);
+	}
+}
+
+void MainUI::SaveSaveData()
+{
+	if (!IsSaveDataLoaded()) return;
+
+	std::ofstream stream = std::ofstream(currentFile, std::ios::binary);
+
+	if (!stream || !stream.is_open())
+	{
+		popupDialogUi.SetMessage(MessageTypes::Error, "Error", std::string("Can't save file \"") + currentFile.u8string() + "\".");
+		popupDialogUi.SetIsVisible(true);
+
+		return;
+	}
+
+	SaveData saveDataCopy = SaveData(*saveData);
+	saveDataCopy.PrepareForSaving(currentFileType);
+
+	stream.write((char*)&saveDataCopy, SAVE_DATA_SIZE);
+	stream.close();
+}
+
 void MainUI::LoadConfig()
 {
 	CSimpleIniA ini;
@@ -193,45 +276,4 @@ void MainUI::SaveConfig() const
 	{
 		printf("Error saving INI file to %s. Error code: %i.\n", CONFIG_FILE_NAME, errorCode);
 	};
-}
-
-void MainUI::Load(const std::filesystem::path filePath)
-{
-	ClearSaveData();
-
-	try
-	{
-		saveData = new SaveData();
-		currentFileType = SaveData::Load(filePath, saveData);
-
-		lastPath = filePath.parent_path();
-		currentFile = filePath;
-		currentFileName = filePath.filename().u8string();
-
-		saveEditorUi.showBackup = false;
-		saveEditorUi.SetIsVisible(true);
-	}
-	catch (const std::runtime_error& error)
-	{
-		delete saveData;
-		saveData = nullptr;
-
-		popupDialogUi.SetMessage(MessageTypes::Error, "Error", error.what());
-		popupDialogUi.SetIsVisible(true);
-	}
-}
-
-void MainUI::Save()
-{
-	if (!IsSaveDataLoaded()) return;
-
-	try
-	{
-		SaveData::Save(currentFile, saveData, currentFileType);
-	}
-	catch (const std::runtime_error& error)
-	{
-		popupDialogUi.SetMessage(MessageTypes::Error, "Error", error.what());
-		popupDialogUi.SetIsVisible(true);
-	}
 }
