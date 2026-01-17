@@ -36,7 +36,7 @@ struct WindowParams
 class Window
 {
 private:
-	const WindowParams params;
+	const WindowParams& params;
 
 	SDL_Window* window = nullptr;
 	SDL_GPUDevice* gpuDevice = nullptr;
