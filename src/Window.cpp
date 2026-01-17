@@ -1,6 +1,6 @@
 #include "Window.h"
 
-#include <stdexcept>
+#include <exception>
 
 #include <imgui/imgui_impl_sdl3.h>
 #include <imgui/imgui_impl_sdlgpu3.h>

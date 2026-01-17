@@ -1,10 +1,10 @@
 #include "AboutWindow.h"
-#include "Window.h"
-#include "Config.h"
 
-#include <stdio.h>
 #include <imgui/imgui.h>
 #include <SDL3/SDL_version.h>
+
+#include "Window.h"
+#include "Config.h"
 
 AboutWindow::AboutWindow(Window* window, BaseUI* parentUi) : BaseUI(window, parentUi)
 {

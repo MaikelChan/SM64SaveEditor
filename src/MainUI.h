@@ -26,10 +26,11 @@ private:
 	AboutWindow aboutWindowUi;
 
 	std::filesystem::path lastPath;
+
 	std::filesystem::path currentFile;
 	std::string currentFileName;
 	SaveData::Types currentFileType;
-	SaveData* saveData;
+	SaveData* currentSaveData;
 
 #if SUPPORT_TRANSPARENCY
 	float windowOpacity;
@@ -39,8 +40,8 @@ public:
 	MainUI(Window* window);
 	~MainUI();
 
-	inline bool IsSaveDataLoaded() const { return saveData != nullptr; }
-	inline SaveData* GetSaveData() const { return saveData; }
+	inline bool IsSaveDataLoaded() const { return currentSaveData != nullptr; }
+	inline SaveData* GetSaveData() const { return currentSaveData; }
 #if SUPPORT_TRANSPARENCY
 	inline float GetWindowOpacity() const { return windowOpacity; }
 #endif

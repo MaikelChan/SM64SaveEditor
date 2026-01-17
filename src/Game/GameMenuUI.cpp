@@ -1,12 +1,10 @@
 #include "GameMenuUI.h"
 
-#include <cstdint>
-
 #include <imgui/imgui.h>
 
 #include "../MainUI.h"
-#include "SaveEditorUI.h"
 #include "SaveData.h"
+#include "SaveEditorUI.h"
 
 GameMenuUI::GameMenuUI(Window* window, BaseUI* parentUi, SaveEditorUI* saveEditorUi) : BaseUI(window, parentUi)
 {

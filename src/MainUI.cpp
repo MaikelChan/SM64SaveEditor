@@ -3,11 +3,9 @@
 #include <fstream>
 
 #include <SimpleIni.h>
-#include <SDL3/SDL.h>
 #include <imgui/imgui.h>
 
 #include "Window.h"
-#include "Utils.h"
 
 MainUI::MainUI(Window* window) : BaseUI(window, nullptr),
 saveEditorUi(window, this),
@@ -18,10 +16,11 @@ aboutWindowUi(window, this)
 	gameMenuUi.SetIsVisible(true);
 
 	lastPath.clear();
+
 	currentFile.clear();
 	currentFileName.clear();
 	currentFileType = SaveData::Types::NotValid;
-	saveData = nullptr;
+	currentSaveData = nullptr;
 
 #if SUPPORT_TRANSPARENCY
 	windowOpacity = DEFAULT_OPACITY;
@@ -139,8 +138,8 @@ void MainUI::ClearSaveData()
 {
 	if (!IsSaveDataLoaded()) return;
 
-	delete saveData;
-	saveData = nullptr;
+	delete currentSaveData;
+	currentSaveData = nullptr;
 
 	lastPath.clear();
 	currentFile.clear();
@@ -194,7 +193,7 @@ void MainUI::LoadSaveData(const std::filesystem::path filePath)
 	}
 
 	currentFileType = result.type;
-	saveData = newSaveData;
+	currentSaveData = newSaveData;
 
 	lastPath = filePath.parent_path();
 	currentFile = filePath;
@@ -224,7 +223,7 @@ void MainUI::SaveSaveData()
 		return;
 	}
 
-	SaveData saveDataCopy = SaveData(*saveData);
+	SaveData saveDataCopy = SaveData(*currentSaveData);
 	saveDataCopy.PrepareForSaving(currentFileType);
 
 	stream.write((char*)&saveDataCopy, SAVE_DATA_SIZE);
