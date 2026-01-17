@@ -378,12 +378,18 @@ public:
 	SaveSlot saveSlots[NUM_SAVE_SLOTS][NUM_COPIES] = {};
 	SettingsData settings[NUM_COPIES] = {};
 
-	enum class Types { NotValid, PC, Nintendo64 };
+	enum class Types { NotValid, BigEndian, LittleEndian };
 
 	SaveData();
 
-	static SaveData* Load(const std::filesystem::path filePath);
-	static void Save(const std::filesystem::path filePath, const SaveData* saveData);
+	static Types Load(const std::filesystem::path filePath, SaveData* saveData);
+	static void Save(const std::filesystem::path filePath, const SaveData* saveData, const SaveData::Types type);
 
-	Types GetType() const;
+	void EndianSwap();
+
+private:
+	Types CalculateType() const;
+
+	void CheckValidityAndFix();
+	void FillMagicAndBackupData();
 };

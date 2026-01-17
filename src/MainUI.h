@@ -57,9 +57,6 @@ private:
 	void LoadConfig();
 	void SaveConfig() const;
 
-	void Load(std::filesystem::path filePath);
-	void LoadingProcess();
+	void Load(const std::filesystem::path filePath);
 	void Save();
-	void SavingProcess() const;
-	void EndianSwap() const;
 };
