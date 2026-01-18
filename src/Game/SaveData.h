@@ -388,7 +388,8 @@ public:
 	SaveData();
 
 	InitializationResult CheckAndInitialize();
-	void PrepareForSaving(const Types type);
+	void BeginSaving(const Types type);
+	void FinishSaving(const Types type);
 
 private:
 	Types CalculateType() const;

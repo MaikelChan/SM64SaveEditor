@@ -27,7 +27,7 @@ SaveData::InitializationResult SaveData::CheckAndInitialize()
 	return { type, warnings };
 }
 
-void SaveData::PrepareForSaving(const Types type)
+void SaveData::BeginSaving(const Types type)
 {
 	for (int s = 0; s < NUM_SAVE_SLOTS; s++)
 	{
@@ -38,6 +38,11 @@ void SaveData::PrepareForSaving(const Types type)
 	settings[0].Magic = SETTINGS_DATA_MAGIC_LE;
 	std::copy(&settings[0], &settings[0] + 1, &settings[1]);
 
+	if (type == SaveData::Types::BigEndian) EndianSwap();
+}
+
+void SaveData::FinishSaving(const Types type)
+{
 	if (type == SaveData::Types::BigEndian) EndianSwap();
 }
 

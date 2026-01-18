@@ -223,11 +223,12 @@ void MainUI::SaveSaveData()
 		return;
 	}
 
-	SaveData saveDataCopy = SaveData(*currentSaveData);
-	saveDataCopy.PrepareForSaving(currentFileType);
+	currentSaveData->BeginSaving(currentFileType);
 
-	stream.write((char*)&saveDataCopy, SAVE_DATA_SIZE);
+	stream.write((char*)currentSaveData, SAVE_DATA_SIZE);
 	stream.close();
+
+	currentSaveData->FinishSaving(currentFileType);
 }
 
 void MainUI::LoadConfig()
