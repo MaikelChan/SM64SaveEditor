@@ -32,11 +32,11 @@ void SaveData::PrepareForSaving(const Types type)
 	for (int s = 0; s < NUM_SAVE_SLOTS; s++)
 	{
 		saveSlots[s][0].Magic = SAVE_SLOT_MAGIC_LE;
-		memcpy(&saveSlots[s][1], &saveSlots[s][0], SAVE_SLOT_SIZE);
+		std::copy(&saveSlots[s][0], &saveSlots[s][0] + 1, &saveSlots[s][1]);
 	}
 
 	settings[0].Magic = SETTINGS_DATA_MAGIC_LE;
-	memcpy(&settings[1], &settings[0], SETTINGS_DATA_SIZE);
+	std::copy(&settings[0], &settings[0] + 1, &settings[1]);
 
 	if (type == SaveData::Types::BigEndian) EndianSwap();
 }
@@ -99,7 +99,7 @@ std::string SaveData::CheckValidityAndFix()
 
 		if (saveSlots[s][1].IsValid())
 		{
-			memcpy(&saveSlots[s][0], &saveSlots[s][1], SAVE_SLOT_SIZE);
+			std::copy(&saveSlots[s][1], &saveSlots[s][1] + 1, &saveSlots[s][0]);
 			message += std::string("Save slot \"") + std::to_string(s) + "\" is corrupted, but valid data has been restored from the backup data.\n\n";
 		}
 		else
@@ -113,7 +113,7 @@ std::string SaveData::CheckValidityAndFix()
 	{
 		if (settings[1].IsValid())
 		{
-			memcpy(&settings[0], &settings[1], SETTINGS_DATA_SIZE);
+			std::copy(&settings[1], &settings[1] + 1, &settings[0]);
 			message += "Settings data is corrupted, but valid data has been restored from the backup data.\n\n";
 		}
 		else
