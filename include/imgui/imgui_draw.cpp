@@ -3115,7 +3115,9 @@ static void         Decode85(const unsigned char* src, unsigned char* dst)
     }
 }
 #ifndef IMGUI_DISABLE_DEFAULT_FONT
+#ifndef IMGUI_DISABLE_PIXEL_FONT
 static const char* GetDefaultCompressedFontDataProggyClean(int* out_size);
+#endif
 static const char* GetDefaultCompressedFontDataProggyForever(int* out_size);
 #endif
 
@@ -3140,7 +3142,7 @@ ImFont* ImFontAtlas::AddFontDefault(const ImFontConfig* font_cfg)
 // If you want a similar font which may be better scaled, consider using AddFontDefaultVector().
 ImFont* ImFontAtlas::AddFontDefaultBitmap(const ImFontConfig* font_cfg_template)
 {
-#ifndef IMGUI_DISABLE_DEFAULT_FONT
+#if !defined(IMGUI_DISABLE_DEFAULT_FONT) && !defined(IMGUI_DISABLE_PIXEL_FONT)
     ImFontConfig font_cfg = font_cfg_template ? *font_cfg_template : ImFontConfig();
     if (!font_cfg_template)
         font_cfg.PixelSnapH = true; // Prevents sub-integer scaling factors at lower-level layers.
@@ -6293,6 +6295,8 @@ static unsigned int stb_decompress(unsigned char *output, const unsigned char *i
 
 #ifndef IMGUI_DISABLE_DEFAULT_FONT
 
+#ifndef IMGUI_DISABLE_PIXEL_FONT
+
 // File: 'ProggyClean.ttf' (41208 bytes)
 // Exported using binary_to_compressed_c.exe -u8 "ProggyClean.ttf" proggy_clean_ttf
 static const unsigned int proggy_clean_ttf_compressed_size = 9583;
@@ -6471,6 +6475,8 @@ static const char* GetDefaultCompressedFontDataProggyClean(int* out_size)
     *out_size = proggy_clean_ttf_compressed_size;
     return (const char*)proggy_clean_ttf_compressed_data;
 }
+
+#endif
 
 //-----------------------------------------------------------------------------
 // [SECTION] Default font data (ProggyForever-Regular-minimal.ttf)
