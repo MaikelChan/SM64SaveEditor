@@ -58,15 +58,18 @@ int RunMain()
 		};
 	windowParams.configureFontsCallback = [](ImFontAtlas* fontAtlas)
 		{
-			ImFontConfig config1;
-			config1.MergeMode = false;
-			config1.OversampleH = 2;
-			config1.OversampleV = 2;
+			ImFontConfig configVector;
+			configVector.MergeMode = false;
+			configVector.OversampleH = 2;
+			configVector.OversampleV = 2;
+			configVector.RasterizerMultiply = 1.5f;
 
-			ImFontConfig config2;
-			config2.MergeMode = true;
-			config2.OversampleH = 2;
-			config2.OversampleV = 2;
+			ImFontConfig configSm64;
+			configSm64.MergeMode = true;
+			configSm64.OversampleH = 2;
+			configSm64.OversampleV = 2;
+			configSm64.SizePixels = 18;
+			configSm64.GlyphOffset = ImVec2(0.0f, 1.0f);
 
 			//ImVector<ImWchar> ranges;
 			//ImFontGlyphRangesBuilder builder;
@@ -74,8 +77,8 @@ int RunMain()
 			//builder.AddChar(0x0101); // Star
 			//builder.BuildRanges(&ranges);
 
-			fontAtlas->AddFontDefaultVector(&config1);
-			fontAtlas->AddFontFromMemoryCompressedTTF(sm64_ttf_compressed_data, sm64_ttf_compressed_size, 0.0f, &config2);
+			fontAtlas->AddFontDefaultVector(&configVector);
+			fontAtlas->AddFontFromMemoryCompressedTTF(sm64_ttf_compressed_data, sm64_ttf_compressed_size, 0.0f, &configSm64);
 		};
 
 	try
