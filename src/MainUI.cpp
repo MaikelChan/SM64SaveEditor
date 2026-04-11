@@ -5,6 +5,8 @@
 #include <SimpleIni.h>
 #include <imgui/imgui.h>
 
+#include "Game/SaveFile.h"
+#include "Game/SaveData.h"
 #include "Window.h"
 
 MainUI::MainUI(Window* window) : BaseUI(window, nullptr),

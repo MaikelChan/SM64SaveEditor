@@ -3,7 +3,9 @@
 #include <imgui/imgui.h>
 
 #include "../MainUI.h"
+#include "../Window.h"
 #include "SaveData.h"
+#include "SaveFile.h"
 
 SaveEditorUI::SaveEditorUI(Window* window, BaseUI* parentUi) : BaseUI(window, parentUi)
 {
@@ -16,16 +18,22 @@ SaveEditorUI::~SaveEditorUI()
 
 }
 
-void SaveEditorUI::VisibilityChanged(const bool isVisible)
+void SaveEditorUI::VisibilityChanged(const bool _isVisible)
 {
-	BaseUI::VisibilityChanged(isVisible);
+	BaseUI::VisibilityChanged(_isVisible);
 }
 
 void SaveEditorUI::DoRender()
 {
 	BaseUI::DoRender();
 
-	SaveData* saveData = mainUi->GetSaveData();
+	if (!mainUi->IsSaveFileLoaded())
+	{
+		window->SetTaskbarProgress(0.0f);
+		return;
+	}
+
+	SaveData* saveData = mainUi->GetSaveFile()->GetSaveData();
 
 	const ImGuiViewport* viewport = ImGui::GetMainViewport();
 	ImGui::SetNextWindowPos(viewport->WorkPos);
@@ -49,7 +57,16 @@ void SaveEditorUI::DoRender()
 				{
 					if (showBackup) ImGui::BeginDisabled();
 					bool fileExists = CheckboxSaveFlags("File Exists", s, showBackup, SAVE_FLAG_FILE_EXISTS);
-					if (!fileExists) ImGui::BeginDisabled();
+
+					if (fileExists)
+					{
+						window->SetTaskbarProgress((float)stars / (float)TOTAL_STARS);
+					}
+					else
+					{
+						window->SetTaskbarProgress(0.0f);
+						ImGui::BeginDisabled();
+					}
 
 					ImGui::SameLine();
 					PrintChecksum(saveData->saveSlots[s][showBackup].Checksum);
@@ -331,7 +348,7 @@ void SaveEditorUI::DoRender()
 
 bool SaveEditorUI::CheckboxSaveFlags(const char* label, const uint8_t saveSlot, const uint8_t copyIndex, const uint32_t flag) const
 {
-	SaveData* saveData = mainUi->GetSaveData();
+	SaveData* saveData = mainUi->GetSaveFile()->GetSaveData();
 
 	bool value = saveData->saveSlots[saveSlot][copyIndex].GetFlag(flag);
 
@@ -346,7 +363,7 @@ bool SaveEditorUI::CheckboxSaveFlags(const char* label, const uint8_t saveSlot, 
 
 bool SaveEditorUI::CheckboxCourseData(const char* label, const uint8_t saveSlot, const uint8_t copyIndex, const uint8_t courseIndex, const uint8_t flag) const
 {
-	SaveData* saveData = mainUi->GetSaveData();
+	SaveData* saveData = mainUi->GetSaveFile()->GetSaveData();
 
 	bool value = saveData->saveSlots[saveSlot][copyIndex].GetCourseDataFlag(courseIndex, flag);
 

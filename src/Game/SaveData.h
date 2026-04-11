@@ -3,6 +3,14 @@
 #include <cstdint>
 #include <string>
 
+enum class SaveDataTypes { NotValid, BigEndian, LittleEndian };
+
+struct SaveDataInitializationResult
+{
+	SaveDataTypes type;
+	std::string message;
+};
+
 #define SAVE_DATA_SIZE 0x200
 
 #define NUM_SAVE_SLOTS 4
@@ -19,6 +27,7 @@
 #define SETTINGS_DATA_MAGIC_BE 0x4948
 #define SETTINGS_DATA_SIZE 0x20
 
+#define TOTAL_STARS 120
 #define MAX_STARS_PER_LEVEL 7
 
 #define SAVE_FLAG_FILE_EXISTS             (1 << 0)
@@ -378,21 +387,7 @@ public:
 	SaveSlot saveSlots[NUM_SAVE_SLOTS][NUM_COPIES] = {};
 	SettingsData settings[NUM_COPIES] = {};
 
-	enum class Types { NotValid, BigEndian, LittleEndian };
-	struct InitializationResult
-	{
-		Types type;
-		std::string message;
-	};
-
 	SaveData();
 
-	InitializationResult CheckAndInitialize();
-	void BeginSaving(const Types type);
-	void FinishSaving(const Types type);
-
-private:
-	Types CalculateType() const;
 	void EndianSwap();
-	std::string CheckValidityAndFix();
 };

@@ -4,6 +4,7 @@
 
 #include "../MainUI.h"
 #include "SaveData.h"
+#include "SaveFile.h"
 #include "SaveEditorUI.h"
 
 GameMenuUI::GameMenuUI(Window* window, BaseUI* parentUi, SaveEditorUI* saveEditorUi) : BaseUI(window, parentUi)
@@ -16,13 +17,13 @@ GameMenuUI::~GameMenuUI()
 {
 }
 
-void GameMenuUI::VisibilityChanged(const bool isVisible)
+void GameMenuUI::VisibilityChanged(const bool _isVisible)
 {
 }
 
 void GameMenuUI::DoRender()
 {
-	SaveData* saveData = mainUi->GetSaveData();
+	SaveData* saveData = mainUi->GetSaveFile()->GetSaveData();
 
 	if (saveData && ImGui::BeginMenu("Tools"))
 	{
@@ -58,7 +59,7 @@ void GameMenuUI::DoRender()
 
 void GameMenuUI::CompleteSlot(const uint8_t slotIndex) const
 {
-	SaveData* saveData = mainUi->GetSaveData();
+	SaveData* saveData = mainUi->GetSaveFile()->GetSaveData();
 
 	memset(&saveData->saveSlots[slotIndex][0], 0, SAVE_SLOT_SIZE);
 
@@ -88,7 +89,7 @@ void GameMenuUI::CompleteSlot(const uint8_t slotIndex) const
 
 void GameMenuUI::DeleteSlot(const uint8_t slotIndex) const
 {
-	SaveData* saveData = mainUi->GetSaveData();
+	SaveData* saveData = mainUi->GetSaveFile()->GetSaveData();
 
 	memset(&saveData->saveSlots[slotIndex][0], 0, SAVE_SLOT_SIZE);
 	saveData->saveSlots[slotIndex][0].Magic = SAVE_SLOT_MAGIC_LE;

@@ -27,8 +27,8 @@ public:
 	~SaveEditorUI();
 
 protected:
-	virtual void VisibilityChanged(const bool isVisible) override;
-	virtual void DoRender() override;
+	void VisibilityChanged(const bool _isVisible) override;
+	void DoRender() override;
 
 private:
 	bool CheckboxSaveFlags(const char* label, const uint8_t saveSlot, const uint8_t copyIndex, const uint32_t flag) const;
