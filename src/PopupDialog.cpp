@@ -14,18 +14,18 @@ PopupDialog::~PopupDialog()
 
 }
 
-void PopupDialog::SetMessage(const MessageTypes type, const std::string title, const std::string message)
+void PopupDialog::SetMessage(const MessageTypes _type, const std::string _title, const std::string _message)
 {
-	PopupDialog::type = type;
-	PopupDialog::title = title;
-	PopupDialog::message = message;
+	type = _type;
+	title = _title;
+	message = _message;
 }
 
-void PopupDialog::VisibilityChanged(const bool isVisible)
+void PopupDialog::VisibilityChanged(const bool _isVisible)
 {
-	BaseUI::VisibilityChanged(isVisible);
+	BaseUI::VisibilityChanged(_isVisible);
 
-	if (isVisible)
+	if (_isVisible)
 	{
 		ImGui::OpenPopup(title.c_str());
 	}

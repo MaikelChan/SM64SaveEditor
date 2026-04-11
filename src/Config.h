@@ -1,10 +1,9 @@
 #pragma once
 
-#define PROJECT_NAME "SM64SaveEditor"
-#define PROJECT_VER  "1.3.1"
-#define PROJECT_VER_MAJOR "1"
-#define PROJECT_VER_MINOR "3"
-#define PTOJECT_VER_PATCH "1"
+constexpr const char* PROJECT_NAME = "SM64SaveEditor";
+constexpr const char* PROJECT_VER = "1.3.1";
+constexpr const char* PROJECT_VER_MAJOR = "1";
+constexpr const char* PROJECT_VER_MINOR = "3";
+constexpr const char* PTOJECT_VER_PATCH = "1";
 
-#define IMFILEBROWSER_COMMIT_HASH "2029bbd"
-#define SIMPLEINI_COMMIT_HASH "18fd1db"
+constexpr const char* SIMPLEINI_COMMIT_HASH = "18fd1db";

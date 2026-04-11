@@ -1,15 +1,14 @@
 #include "AboutWindow.h"
 
 #include <imgui/imgui.h>
-#include <SDL3/SDL_version.h>
 
-#include "Window.h"
 #include "Config.h"
+#include "Window.h"
 
 AboutWindow::AboutWindow(Window* window, BaseUI* parentUi) : BaseUI(window, parentUi)
 {
 	const char* title = window->GetParams().title.c_str();
-	snprintf(windowTitle, 64, "About %s - v%s", title, PROJECT_VER);
+	snprintf(windowTitle, 64, "About %s", title);
 }
 
 AboutWindow::~AboutWindow()
@@ -17,11 +16,11 @@ AboutWindow::~AboutWindow()
 
 }
 
-void AboutWindow::VisibilityChanged(const bool isVisible)
+void AboutWindow::VisibilityChanged(const bool _isVisible)
 {
-	BaseUI::VisibilityChanged(isVisible);
+	BaseUI::VisibilityChanged(_isVisible);
 
-	if (isVisible)
+	if (_isVisible)
 	{
 		ImGui::OpenPopup(windowTitle);
 	}
@@ -38,7 +37,7 @@ void AboutWindow::DoRender()
 	{
 		const WindowParams& params = window->GetParams();
 
-		ImGui::Text(params.description.c_str());
+		ImGui::Text("%s", params.description.c_str());
 		ImGui::NewLine();
 		ImGui::Text("By %s:", params.author.c_str());
 		ImGui::SameLine();
@@ -51,11 +50,9 @@ void AboutWindow::DoRender()
 		ImGui::SameLine();
 		ImGui::TextLinkOpenURL("https://github.com/ocornut/imgui");
 
-		int sdlVersion = SDL_GetVersion();
-		const std::string& driverName = window->GetDriverName();
-		ImGui::BulletText("SDL %i.%i.%i (Lib %i.%i.%i, Backend \"%s\"):", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_MICRO_VERSION, SDL_VERSIONNUM_MAJOR(sdlVersion), SDL_VERSIONNUM_MINOR(sdlVersion), SDL_VERSIONNUM_MICRO(sdlVersion), driverName.c_str());
+		ImGui::BulletText("%s", window->GetBackendInfo());
 		ImGui::SameLine();
-		ImGui::TextLinkOpenURL("https://www.libsdl.org");
+		ImGui::TextLinkOpenURL(window->GetBackendUrl());
 
 		ImGui::BulletText("simpleini (Commit %s):", SIMPLEINI_COMMIT_HASH);
 		ImGui::SameLine();

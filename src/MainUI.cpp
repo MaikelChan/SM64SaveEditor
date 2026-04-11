@@ -15,12 +15,8 @@ aboutWindowUi(window, this)
 {
 	gameMenuUi.SetIsVisible(true);
 
-	lastPath.clear();
-
-	currentFile.clear();
-	currentFileName.clear();
-	currentFileType = SaveData::Types::NotValid;
-	currentSaveData = nullptr;
+	recentFiles.clear();
+	currentSaveFile = nullptr;
 
 #if SUPPORT_TRANSPARENCY
 	windowOpacity = DEFAULT_OPACITY;
@@ -41,9 +37,9 @@ void MainUI::OpenFileCallback(std::filesystem::path filePath)
 	MainUI::SaveConfig();
 }
 
-void MainUI::VisibilityChanged(const bool isVisible)
+void MainUI::VisibilityChanged(const bool _isVisible)
 {
-	BaseUI::VisibilityChanged(isVisible);
+	BaseUI::VisibilityChanged(_isVisible);
 }
 
 void MainUI::DoRender()
@@ -56,28 +52,33 @@ void MainUI::DoRender()
 		{
 			if (ImGui::MenuItem("Open..."))
 			{
-				auto callback = [](void* userdata, const char* const* filelist, int filter) -> void
-					{
-						if (filelist == nullptr)
-						{
-							printf("Error in OpenFileDialog: %s", SDL_GetError());
-							return;
-						}
-						else if (*filelist == nullptr)
-						{
-							// The user did not select any file.
-							return;
-						}
+				std::filesystem::path lastPath = DEFAULT_PATH;
+				if (recentFiles.size() > 0) lastPath = recentFiles[0].parent_path();
 
-						MainUI* mainUI = (MainUI*)userdata;
-						std::filesystem::path filePath = std::filesystem::u8path(filelist[0]);
-						mainUI->OpenFileCallback(filePath);
-					};
-
-				window->ShowOpenFileDialog(lastPath, (void*)this, callback);
+				FileDialogParams* params = new FileDialogParams();
+				params->ui = this;
+				params->defaultLocation = lastPath;
+				params->callback = OpenFileDialogCallback;
+				window->ShowOpenFileDialog(params);
 			}
 
-			if (ImGui::MenuItem("Save", NULL, false, IsSaveDataLoaded()))
+			if (ImGui::BeginMenu("Open recent"))
+			{
+				for (uint8_t f = 0; f < recentFiles.size(); f++)
+				{
+					if (ImGui::MenuItem(recentFiles[f].u8string().c_str()))
+					{
+						if (!recentFiles[f].empty())
+						{
+							OpenFileCallback(recentFiles[f]);
+						}
+					}
+				}
+
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::MenuItem("Save", NULL, false, IsSaveFileLoaded()))
 			{
 				SaveSaveData();
 			}
@@ -92,7 +93,7 @@ void MainUI::DoRender()
 			ImGui::EndMenu();
 		}
 
-		if (IsSaveDataLoaded())
+		if (IsSaveFileLoaded())
 		{
 			gameMenuUi.Render();
 		}
@@ -116,9 +117,9 @@ void MainUI::DoRender()
 			ImGui::EndMenu();
 		}
 
-		if (IsSaveDataLoaded())
+		if (IsSaveFileLoaded())
 		{
-			std::string fileText = std::string("Current file: ") + currentFileName;
+			std::string fileText = std::string("Current file: ") + currentSaveFile->GetFileName();
 
 			ImGui::SetCursorPosX(ImGui::GetWindowWidth() - ImGui::CalcTextSize(fileText.c_str()).x - 32);
 			ImGui::Text("%s", fileText.c_str());
@@ -136,15 +137,13 @@ void MainUI::DoRender()
 
 void MainUI::ClearSaveData()
 {
-	if (!IsSaveDataLoaded()) return;
+	if (!IsSaveFileLoaded()) return;
 
-	delete currentSaveData;
-	currentSaveData = nullptr;
+	saveEditorUi.SetIsVisible(false);
+	window->SetTaskbarProgress(0.0f);
 
-	lastPath.clear();
-	currentFile.clear();
-	currentFileName.clear();
-	currentFileType = SaveData::Types::NotValid;
+	delete currentSaveFile;
+	currentSaveFile = nullptr;
 }
 
 void MainUI::LoadSaveData(const std::filesystem::path filePath)
@@ -168,67 +167,69 @@ void MainUI::LoadSaveData(const std::filesystem::path filePath)
 	{
 		stream.close();
 
-		popupDialogUi.SetMessage(MessageTypes::Error, "Error", "The selected file is not a valid Super Mario 64 save file.");
+		popupDialogUi.SetMessage(MessageTypes::Error, "Error", "The selected file is not a valid save file.");
 		popupDialogUi.SetIsVisible(true);
 
 		return;
 	}
 
-	SaveData* newSaveData = new SaveData();
+	SaveFile* newSaveFile = new SaveFile();
 
 	stream.seekg(0, std::ios_base::beg);
-	stream.read((char*)newSaveData, SAVE_DATA_SIZE);
+	std::string result = newSaveFile->Read(stream, size);
 	stream.close();
 
-	SaveData::InitializationResult result = newSaveData->CheckAndInitialize();
-	if (result.type == SaveData::Types::NotValid)
+	if (newSaveFile->GetFileType() == SaveFileTypes::NotValid)
 	{
-		delete newSaveData;
-		newSaveData = nullptr;
+		delete newSaveFile;
+		newSaveFile = nullptr;
 
-		popupDialogUi.SetMessage(MessageTypes::Error, "Error", result.message);
+		popupDialogUi.SetMessage(MessageTypes::Error, "Error", result);
 		popupDialogUi.SetIsVisible(true);
 
 		return;
 	}
 
-	currentFileType = result.type;
-	currentSaveData = newSaveData;
+	newSaveFile->SetFilePath(filePath);
 
-	lastPath = filePath.parent_path();
-	currentFile = filePath;
-	currentFileName = filePath.filename().u8string();
+	currentSaveFile = newSaveFile;
 
-	saveEditorUi.showBackup = false;
+	for (uint8_t f = 0; f < recentFiles.size(); f++)
+	{
+		if (recentFiles[f].compare(filePath) == 0)
+		{
+			recentFiles.erase(recentFiles.begin() + f);
+		}
+	}
+
+	recentFiles.insert(recentFiles.begin(), filePath);
+	if (recentFiles.size() > MAX_RECENT_FILES) recentFiles.resize(MAX_RECENT_FILES);
+
 	saveEditorUi.SetIsVisible(true);
 
-	if (!result.message.empty())
+	if (!result.empty())
 	{
-		popupDialogUi.SetMessage(MessageTypes::Warning, "Warnings", result.message);
+		popupDialogUi.SetMessage(MessageTypes::Warning, "Warnings", result);
 		popupDialogUi.SetIsVisible(true);
 	}
 }
 
 void MainUI::SaveSaveData()
 {
-	if (!IsSaveDataLoaded()) return;
+	if (!IsSaveFileLoaded()) return;
 
-	std::ofstream stream = std::ofstream(currentFile, std::ios::binary);
+	std::ofstream stream = std::ofstream(currentSaveFile->GetFilePath(), std::ios::binary);
 
 	if (!stream || !stream.is_open())
 	{
-		popupDialogUi.SetMessage(MessageTypes::Error, "Error", std::string("Can't save file \"") + currentFile.u8string() + "\".");
+		popupDialogUi.SetMessage(MessageTypes::Error, "Error", std::string("Can't save file \"") + currentSaveFile->GetFilePath().u8string() + "\".");
 		popupDialogUi.SetIsVisible(true);
 
 		return;
 	}
 
-	currentSaveData->BeginSaving(currentFileType);
-
-	stream.write((char*)currentSaveData, SAVE_DATA_SIZE);
+	currentSaveFile->Write(stream);
 	stream.close();
-
-	currentSaveData->FinishSaving(currentFileType);
 }
 
 void MainUI::LoadConfig()
@@ -244,10 +245,21 @@ void MainUI::LoadConfig()
 		return;
 	};
 
-	lastPath = std::filesystem::u8path(ini.GetValue(CONFIG_INI_SECTION, "lastPath", DEFAULT_PATH));
 #if SUPPORT_TRANSPARENCY
-	windowOpacity = (float)ini.GetDoubleValue(CONFIG_INI_SECTION, "windowOpacity", DEFAULT_OPACITY);
+	windowOpacity = (float)ini.GetDoubleValue(CONFIG_INI_SECTION, CONFIG_WINDOW_OPACITY, DEFAULT_OPACITY);
 #endif
+
+	recentFiles.clear();
+	for (uint8_t f = 0; f < MAX_RECENT_FILES; f++)
+	{
+		char key[16];
+		snprintf(key, 16, CONFIG_RECENT_FILE, f);
+
+		std::filesystem::path filePath = std::filesystem::u8path(ini.GetValue(CONFIG_INI_SECTION, key, DEFAULT_PATH));
+		if (filePath.empty()) continue;
+
+		recentFiles.push_back(filePath);
+	}
 }
 
 void MainUI::SaveConfig() const
@@ -257,10 +269,16 @@ void MainUI::SaveConfig() const
 
 	SI_Error errorCode;
 
-	errorCode = ini.SetValue(CONFIG_INI_SECTION, "lastPath", lastPath.u8string().c_str());
 #if SUPPORT_TRANSPARENCY
-	errorCode = ini.SetDoubleValue(CONFIG_INI_SECTION, "windowOpacity", windowOpacity);
+	errorCode = ini.SetDoubleValue(CONFIG_INI_SECTION, CONFIG_WINDOW_OPACITY, windowOpacity);
 #endif
+
+	for (uint8_t f = 0; f < recentFiles.size(); f++)
+	{
+		char key[16];
+		snprintf(key, 16, CONFIG_RECENT_FILE, f);
+		errorCode = ini.SetValue(CONFIG_INI_SECTION, key, recentFiles[f].u8string().c_str());
+	}
 
 	std::string data;
 	errorCode = ini.Save(data);
@@ -276,4 +294,30 @@ void MainUI::SaveConfig() const
 	{
 		printf("Error saving INI file to %s. Error code: %i.\n", CONFIG_FILE_NAME, errorCode);
 	};
+}
+
+void MainUI::OpenFileDialogCallback(const FileDialogParams* fileDialogParams, const std::filesystem::path filePath, const char* error)
+{
+	MainUI* mainUi = (MainUI*)fileDialogParams->ui;
+	delete fileDialogParams;
+
+	if (error != nullptr)
+	{
+		char errorText[256];
+		snprintf(errorText, 256, "Error in OpenFileDialog: %s", error);
+
+		mainUi->popupDialogUi.SetMessage(MessageTypes::Error, "Error", errorText);
+		mainUi->popupDialogUi.SetIsVisible(true);
+
+		return;
+	}
+	else
+	{
+		if (filePath.empty())
+		{
+			return;
+		}
+
+		mainUi->OpenFileCallback(filePath);
+	}
 }

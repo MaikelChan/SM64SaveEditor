@@ -1,36 +1,36 @@
-﻿#if !NDEBUG
+﻿#if defined(_MSC_VER) && !defined(NDEBUG)
 // Test leaks with _CrtDumpMemoryLeaks()
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>
 #endif
 
-#include <SDL3/SDL.h>
 #include <imgui/imgui.h>
 
-#include "Window.h"
+#include "Config.h"
 #include "MainUI.h"
+#include "WindowSDL.h"
 
 #include "Game/sm64.ttf.h"
 
-int RunMain()
+static int RunMain()
 {
-	const SDL_DialogFileFilter openDialogFilters[] =
+	const FileDialogFilter openDialogFilters[] =
 	{
-		{ "EEP Saves (*.eep)", "eep" },
-		{ "BIN Saves (*.bin)", "bin" },
+		{ "N64 Saves (*.eep; *.sav; *.bin)", "eep;sav;bin" },
 		{ "All files (*.*)", "*" }
 	};
 
 	WindowParams windowParams = {};
-	windowParams.title = "Super Mario 64 - Save Editor";
+	windowParams.title = std::string("Super Mario 64 - Save Editor - v") + PROJECT_VER;
 	windowParams.description = "This is a Super Mario 64 cross-platform save editor.\nIt is compatible with saves of the Nintendo 64 version and the PC port.";
 	windowParams.author = "PacoChan";
 	windowParams.url = "https://pacochan.net/software/sm64-save-editor/";
 	windowParams.initialWidth = 800;
 	windowParams.initialHeight = 600;
+	windowParams.backgroundColor = ImVec4(0.1f, 0.025f, 0.05f, 1.0f);
 	windowParams.openDialogTitle = "Open a Super Mario 64 save file";
-	windowParams.openDialogFiltersCount = SDL_arraysize(openDialogFilters);
+	windowParams.openDialogFiltersCount = sizeof(openDialogFilters) / sizeof(openDialogFilters[0]);
 	windowParams.openDialogFilters = openDialogFilters;
 	windowParams.configureStyleCallback = [](ImVec4* colors)
 		{
@@ -83,7 +83,7 @@ int RunMain()
 
 	try
 	{
-		Window window(windowParams);
+		WindowSDL window(windowParams);
 
 		MainUI mainUi(&window);
 		window.Run(mainUi);
@@ -105,7 +105,7 @@ int main()
 
 	int result = RunMain();
 
-#if !NDEBUG
+#if defined(_MSC_VER) && !defined(NDEBUG)
 	// Cause an intentional leak to check if the leak detector is working
 
 	char* leakTest = new char[10];

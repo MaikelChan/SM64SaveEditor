@@ -27,7 +27,7 @@ void BaseUI::Render()
 	DoRender();
 }
 
-void BaseUI::VisibilityChanged(const bool isVisible)
+void BaseUI::VisibilityChanged(const bool _isVisible)
 {
 
 }

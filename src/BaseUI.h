@@ -17,12 +17,12 @@ public:
 	virtual ~BaseUI();
 
 	inline bool GetIsVisible() const { return isVisible; }
-	inline void SetIsVisible(const bool isVisible) { BaseUI::isVisible = isVisible; }
+	inline void SetIsVisible(const bool _isVisible) { isVisible = _isVisible; }
 	inline void ToggleIsVisible() { isVisible = !isVisible; }
 
 	void Render();
 
 protected:
-	virtual void VisibilityChanged(const bool isVisible);
-	virtual void DoRender();
+	virtual void VisibilityChanged(const bool _isVisible) = 0;
+	virtual void DoRender() = 0;
 };

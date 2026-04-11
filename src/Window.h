@@ -2,19 +2,32 @@
 
 #include <cstdint>
 #include <filesystem>
-#include <functional>
 #include <string>
 
-#include <SDL3/SDL.h>
+#include <imgui/imgui.h>
 
-struct SDL_Window;
-struct SDL_GPUDevice;
-struct SDL_DialogFileFilter;
-
-struct ImVec4;
 struct ImFontAtlas;
 
 class BaseUI;
+
+struct FileDialogParams;
+typedef void (*FileDialogCallback)(const FileDialogParams* fileDialogParams, const std::filesystem::path filePath, const char* error);
+
+struct FileDialogFilter
+{
+	const char* name;
+	const char* pattern;
+};
+
+struct FileDialogParams
+{
+	BaseUI* ui;
+	std::filesystem::path defaultLocation;
+	FileDialogCallback callback;
+};
+
+typedef void (*ConfigureStyleCallback)(ImVec4* colors);
+typedef void (*ConfigureFontsCallback)(ImFontAtlas* fontAtlas);
 
 struct WindowParams
 {
@@ -25,35 +38,39 @@ struct WindowParams
 
 	int32_t initialWidth;
 	int32_t initialHeight;
+	ImVec4 backgroundColor;
 	std::string openDialogTitle;
 	int32_t openDialogFiltersCount;
-	const SDL_DialogFileFilter* openDialogFilters;
+	const FileDialogFilter* openDialogFilters;
 
-	std::function<void(ImVec4* colors)> configureStyleCallback;
-	std::function<void(ImFontAtlas* fontAtlas)> configureFontsCallback;
+	ConfigureStyleCallback configureStyleCallback;
+	ConfigureFontsCallback configureFontsCallback;
 };
 
 class Window
 {
-private:
+protected:
 	const WindowParams& params;
-
-	SDL_Window* window = nullptr;
-	SDL_GPUDevice* gpuDevice = nullptr;
-	bool windowClaimed = false;
-
-	std::string driverName;
 	bool isRunning = false;
+
+	float currentWindowScale = -1.0f;
 
 public:
 	Window(const WindowParams& params);
-	~Window();
+	virtual ~Window();
 
 	const WindowParams& GetParams() const { return params; }
-	const std::string& GetDriverName() const { return driverName; }
+	inline float GetWindowScale() const { return currentWindowScale; }
 
-	void Run(BaseUI& ui);
+	virtual const char* GetBackendInfo() const = 0;
+	virtual const char* GetBackendUrl() const = 0;
+
+	virtual void Run(BaseUI& ui) = 0;
 	void Terminate();
 
-	void ShowOpenFileDialog(std::filesystem::path defaultLocation, void* userData, SDL_DialogFileCallback callback) const;
+	virtual void ShowOpenFileDialog(const FileDialogParams* fileDialogParams) const = 0;
+	virtual void SetTaskbarProgress(const float value) = 0;
+
+protected:
+	void SetupImGui(const bool initialize, const float windowScale);
 };
