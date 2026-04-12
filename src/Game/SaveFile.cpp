@@ -43,6 +43,11 @@ std::string SaveFile::Read(std::ifstream& stream, const size_t streamSize)
 			break;
 		}
 
+		case SaveFileTypes::LittleEndian:
+		{
+			break;
+		}
+
 		default:
 		{
 			throw std::runtime_error("SaveFile type " + std::to_string((int)fileType) + " not implemented.");

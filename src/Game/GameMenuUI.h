@@ -23,5 +23,6 @@ protected:
 
 private:
 	void CompleteSlot(const uint8_t slotIndex) const;
+	void CopySlot(const uint8_t originSlotIndex, const uint8_t destinationSlotIndex) const;
 	void DeleteSlot(const uint8_t slotIndex) const;
 };

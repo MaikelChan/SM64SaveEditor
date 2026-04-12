@@ -36,6 +36,26 @@ void GameMenuUI::DoRender()
 					CompleteSlot(s);
 				}
 
+				ImGui::Separator();
+
+				if (ImGui::BeginMenu("Copy"))
+				{
+					for (uint8_t ds = 0; ds < NUM_SAVE_SLOTS; ds++)
+					{
+						if (s == ds) continue;
+
+						char menuName[27];
+						snprintf(menuName, 27, "To %s", tabNames[ds]);
+
+						if (ImGui::MenuItem(menuName))
+						{
+							CopySlot(s, ds);
+						}
+					}
+
+					ImGui::EndMenu();
+				}
+
 				if (ImGui::MenuItem("Delete"))
 				{
 					DeleteSlot(s);
@@ -84,6 +104,13 @@ void GameMenuUI::CompleteSlot(const uint8_t slotIndex) const
 
 	saveData->saveSlots[slotIndex][0].Magic = SAVE_SLOT_MAGIC_LE;
 	saveData->saveSlots[slotIndex][0].UpdateChecksum();
+}
+
+void GameMenuUI::CopySlot(const uint8_t originSlotIndex, const uint8_t destinationSlotIndex) const
+{
+	SaveData* saveData = mainUi->GetSaveFile()->GetSaveData();
+
+	std::copy(&saveData->saveSlots[originSlotIndex][0], &saveData->saveSlots[originSlotIndex][0] + 1, &saveData->saveSlots[destinationSlotIndex][0]);
 }
 
 void GameMenuUI::DeleteSlot(const uint8_t slotIndex) const
