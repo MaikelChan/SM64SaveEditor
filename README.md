@@ -4,7 +4,7 @@ This is a Super Mario 64 cross-platform save editor. It is compatible with saves
 
 ## Requirements
 
-The program runs on Windows and Linux and requires a GPU compatible with OpenGL 3.3.
+The program runs on Windows and Linux and requires a GPU compatible with Vulkan or Direct3D 12.
 
 ## Features
 
