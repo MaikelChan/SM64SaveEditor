@@ -56,7 +56,6 @@ void GameMenuUI::DoRender()
 	}
 }
 
-
 void GameMenuUI::CompleteSlot(const uint8_t slotIndex) const
 {
 	SaveData* saveData = mainUi->GetSaveFile()->GetSaveData();

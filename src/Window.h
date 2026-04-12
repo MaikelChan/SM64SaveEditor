@@ -15,15 +15,15 @@ typedef void (*FileDialogCallback)(const FileDialogParams* fileDialogParams, con
 
 struct FileDialogFilter
 {
-	const char* name;
-	const char* pattern;
+	const char* name = nullptr;
+	const char* pattern = nullptr;
 };
 
 struct FileDialogParams
 {
-	BaseUI* ui;
-	std::filesystem::path defaultLocation;
-	FileDialogCallback callback;
+	BaseUI* ui = nullptr;
+	std::filesystem::path defaultLocation = {};
+	FileDialogCallback callback = {};
 };
 
 typedef void (*ConfigureStyleCallback)(ImVec4* colors);
