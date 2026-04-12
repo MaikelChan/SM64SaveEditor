@@ -42,6 +42,7 @@ set(SDL_HIDAPI_DEFAULT OFF)
 set(SDL_POWER_DEFAULT OFF)
 set(SDL_SENSOR_DEFAULT OFF)
 set(SDL_DIALOG_DEFAULT ON)
+set(SDL_TRAY_DEFAULT OFF)
 
 # GPU Drivers
 
@@ -79,5 +80,5 @@ FetchContent_MakeAvailable(SDL3)
 
 # Main project ------------------------------------------------------------------------------------
 
-project ("SM64SaveEditor" VERSION "1.3.1")
+project ("SM64SaveEditor" VERSION "1.4.0")
 add_subdirectory ("src")
