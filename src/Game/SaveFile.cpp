@@ -123,14 +123,20 @@ SaveFileTypes SaveFile::CalculateType(SaveData* saveData)
 {
 	if (saveData == nullptr) return SaveFileTypes::NotValid;
 
-	if ((saveData->saveSlots[0][0].Magic == SAVE_SLOT_MAGIC_LE || saveData->saveSlots[0][1].Magic == SAVE_SLOT_MAGIC_LE) &&
-		(saveData->settings[0].Magic == SETTINGS_DATA_MAGIC_LE || saveData->settings[1].Magic == SETTINGS_DATA_MAGIC_LE))
+	bool hasLeSlot = (saveData->saveSlots[0][0].Magic == SAVE_SLOT_MAGIC_LE || saveData->saveSlots[0][1].Magic == SAVE_SLOT_MAGIC_LE);
+	bool hasLeSettings = (saveData->settings[0].Magic == SETTINGS_DATA_MAGIC_LE || saveData->settings[1].Magic == SETTINGS_DATA_MAGIC_LE);
+
+	bool hasBeSlot = (saveData->saveSlots[0][0].Magic == SAVE_SLOT_MAGIC_BE || saveData->saveSlots[0][1].Magic == SAVE_SLOT_MAGIC_BE);
+	bool hasBeSettings = (saveData->settings[0].Magic == SETTINGS_DATA_MAGIC_BE || saveData->settings[1].Magic == SETTINGS_DATA_MAGIC_BE);
+
+	bool hasNoSettings = (saveData->settings[0].Magic == 0 && saveData->settings[1].Magic == 0);
+
+	if (hasLeSlot && (hasLeSettings || hasNoSettings))
 	{
 		return SaveFileTypes::LittleEndian;
 	}
 
-	if ((saveData->saveSlots[0][0].Magic == SAVE_SLOT_MAGIC_BE || saveData->saveSlots[0][1].Magic == SAVE_SLOT_MAGIC_BE) &&
-		(saveData->settings[0].Magic == SETTINGS_DATA_MAGIC_BE || saveData->settings[1].Magic == SETTINGS_DATA_MAGIC_BE))
+	if (hasBeSlot && (hasBeSettings || hasNoSettings))
 	{
 		return SaveFileTypes::BigEndian;
 	}
