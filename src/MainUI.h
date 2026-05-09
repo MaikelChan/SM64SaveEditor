@@ -38,20 +38,12 @@ private:
 
 	SaveFile* currentSaveFile;
 
-#if SUPPORT_TRANSPARENCY
-	float windowOpacity;
-#endif
-
 public:
 	MainUI(Window* window);
 	~MainUI();
 
 	inline bool IsSaveFileLoaded() const { return currentSaveFile != nullptr; }
 	inline SaveFile* GetSaveFile() const { return currentSaveFile; }
-
-#if SUPPORT_TRANSPARENCY
-	inline float GetWindowOpacity() const { return windowOpacity; }
-#endif
 
 	void OpenFileCallback(std::filesystem::path filePath);
 

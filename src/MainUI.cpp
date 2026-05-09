@@ -20,10 +20,6 @@ aboutWindowUi(window, this)
 	recentFiles.clear();
 	currentSaveFile = nullptr;
 
-#if SUPPORT_TRANSPARENCY
-	windowOpacity = DEFAULT_OPACITY;
-#endif
-
 	LoadConfig();
 }
 
@@ -103,7 +99,11 @@ void MainUI::DoRender()
 #if SUPPORT_TRANSPARENCY
 		if (ImGui::BeginMenu("Settings"))
 		{
-			ImGui::SliderFloat("Window Opacity", &windowOpacity, 0.0f, 1.0f);
+			float windowOpacity = window->GetOpacity();
+			if (ImGui::SliderFloat("Window Opacity", &windowOpacity, 0.0f, 1.0f))
+			{
+				window->SetOpacity(windowOpacity);
+			}
 
 			ImGui::EndMenu();
 		}
@@ -248,7 +248,7 @@ void MainUI::LoadConfig()
 	};
 
 #if SUPPORT_TRANSPARENCY
-	windowOpacity = (float)ini.GetDoubleValue(CONFIG_INI_SECTION, CONFIG_WINDOW_OPACITY, DEFAULT_OPACITY);
+	window->SetOpacity((float)ini.GetDoubleValue(CONFIG_INI_SECTION, CONFIG_WINDOW_OPACITY, DEFAULT_OPACITY));
 #endif
 
 	recentFiles.clear();
@@ -272,7 +272,7 @@ void MainUI::SaveConfig() const
 	SI_Error errorCode;
 
 #if SUPPORT_TRANSPARENCY
-	errorCode = ini.SetDoubleValue(CONFIG_INI_SECTION, CONFIG_WINDOW_OPACITY, windowOpacity);
+	errorCode = ini.SetDoubleValue(CONFIG_INI_SECTION, CONFIG_WINDOW_OPACITY, window->GetOpacity());
 #endif
 
 	for (uint8_t f = 0; f < recentFiles.size(); f++)

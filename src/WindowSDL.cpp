@@ -201,16 +201,10 @@ void WindowSDL::Run(BaseUI& ui)
 		{
 			ImGui_ImplSDLGPU3_PrepareDrawData(draw_data, command_buffer);
 
-#if SUPPORT_TRANSPARENCY
-			const float windowOpacity = mainUI->GetWindowOpacity();
-#else
-			constexpr float windowOpacity = 1.0f;
-#endif
-
 			// Setup and start a render pass
 			SDL_GPUColorTargetInfo target_info = {};
 			target_info.texture = swapchain_texture;
-			target_info.clear_color = SDL_FColor{ params.backgroundColor.x * windowOpacity, params.backgroundColor.y * windowOpacity, params.backgroundColor.z * windowOpacity, windowOpacity };
+			target_info.clear_color = SDL_FColor{ params.backgroundColor.x * opacity, params.backgroundColor.y * opacity, params.backgroundColor.z * opacity, opacity };
 			target_info.load_op = SDL_GPU_LOADOP_CLEAR;
 			target_info.store_op = SDL_GPU_STOREOP_STORE;
 			target_info.mip_level = 0;

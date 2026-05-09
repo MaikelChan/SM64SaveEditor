@@ -54,6 +54,9 @@ protected:
 	bool isRunning = false;
 
 	float currentWindowScale = -1.0f;
+#if SUPPORT_TRANSPARENCY
+	float opacity = 1.0f;
+#endif
 
 public:
 	Window(const WindowParams& params);
@@ -61,6 +64,14 @@ public:
 
 	const WindowParams& GetParams() const { return params; }
 	inline float GetWindowScale() const { return currentWindowScale; }
+
+#if SUPPORT_TRANSPARENCY
+	inline float GetOpacity() const { return opacity; }
+	inline void SetOpacity(float _opacity) { opacity = _opacity; }
+#else
+	inline float GetOpacity() const { return 1.0f; }
+	inline void SetOpacity(float _opacity) {}
+#endif
 
 	virtual const char* GetBackendInfo() const = 0;
 	virtual const char* GetBackendUrl() const = 0;
