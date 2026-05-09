@@ -11,9 +11,9 @@ SaveData::SaveData()
 
 void SaveData::EndianSwap()
 {
-	for (int s = 0; s < NUM_SAVE_SLOTS; s++)
+	for (uint8_t s = 0; s < NUM_SAVE_SLOTS; s++)
 	{
-		for (int cp = 0; cp < NUM_COPIES; cp++)
+		for (uint8_t cp = 0; cp < NUM_COPIES; cp++)
 		{
 			saveSlots[s][cp].CapPos[0] = Utils::Swap16(saveSlots[s][cp].CapPos[0]);
 			saveSlots[s][cp].CapPos[1] = Utils::Swap16(saveSlots[s][cp].CapPos[1]);
@@ -26,9 +26,9 @@ void SaveData::EndianSwap()
 		}
 	}
 
-	for (int cp = 0; cp < NUM_COPIES; cp++)
+	for (uint8_t cp = 0; cp < NUM_COPIES; cp++)
 	{
-		for (int s = 0; s < NUM_SAVE_SLOTS; s++)
+		for (uint8_t s = 0; s < NUM_SAVE_SLOTS; s++)
 		{
 			settings[cp].CoinScoreAges[s] = Utils::Swap32(settings[cp].CoinScoreAges[s]);
 		}

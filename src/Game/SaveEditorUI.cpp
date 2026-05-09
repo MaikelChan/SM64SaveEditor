@@ -310,7 +310,7 @@ void SaveEditorUI::DoRender()
 						const ImU8 step = 1;
 						int shift = c * 2;
 
-						for (int s = 0; s < NUM_SAVE_SLOTS; s++)
+						for (uint8_t s = 0; s < NUM_SAVE_SLOTS; s++)
 						{
 							ImGui::PushID(s);
 

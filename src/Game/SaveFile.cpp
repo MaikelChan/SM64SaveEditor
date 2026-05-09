@@ -58,7 +58,7 @@ std::string SaveFile::Read(std::ifstream& stream, const size_t streamSize)
 
 	std::string warningMessages;
 
-	for (int s = 0; s < NUM_SAVE_SLOTS; s++)
+	for (uint8_t s = 0; s < NUM_SAVE_SLOTS; s++)
 	{
 		if (newSaveData->saveSlots[s][0].IsValid()) continue;
 
@@ -69,7 +69,6 @@ std::string SaveFile::Read(std::ifstream& stream, const size_t streamSize)
 		}
 		else
 		{
-			newSaveData->saveSlots[s][0].UpdateChecksum();
 			warningMessages += std::string("Save slot \"") + std::to_string(s) + "\" is corrupted along with its backup. Data might be completely wrong.\n\n";
 		}
 	}
@@ -83,9 +82,22 @@ std::string SaveFile::Read(std::ifstream& stream, const size_t streamSize)
 		}
 		else
 		{
-			newSaveData->settings[0].UpdateChecksum();
 			warningMessages += "Settings data is corrupted along with its backup. Data might be completely wrong.\n\n";
 		}
+	}
+
+	// Write the magic in all slots in case that data is uninitialized, which can happen in ports like SM64 Coop DX
+
+	for (uint8_t cp = 0; cp < NUM_COPIES; cp++)
+	{
+		for (uint8_t s = 0; s < NUM_SAVE_SLOTS; s++)
+		{
+			newSaveData->saveSlots[s][cp].Magic = SAVE_SLOT_MAGIC_LE;
+			newSaveData->saveSlots[s][cp].UpdateChecksum();
+		}
+
+		newSaveData->settings[cp].Magic = SETTINGS_DATA_MAGIC_LE;
+		newSaveData->settings[cp].UpdateChecksum();
 	}
 
 	// Assign references to the loaded data before finishing
@@ -97,15 +109,13 @@ std::string SaveFile::Read(std::ifstream& stream, const size_t streamSize)
 
 void SaveFile::Write(std::ofstream& stream)
 {
-	// Refresh all checksums
+	// Make a copy of all data to their backup slots
 
-	for (int s = 0; s < NUM_SAVE_SLOTS; s++)
+	for (uint8_t s = 0; s < NUM_SAVE_SLOTS; s++)
 	{
-		saveData->saveSlots[s][0].Magic = SAVE_SLOT_MAGIC_LE;
 		std::copy(&saveData->saveSlots[s][0], &saveData->saveSlots[s][0] + 1, &saveData->saveSlots[s][1]);
 	}
 
-	saveData->settings[0].Magic = SETTINGS_DATA_MAGIC_LE;
 	std::copy(&saveData->settings[0], &saveData->settings[0] + 1, &saveData->settings[1]);
 
 	// Do the saving
@@ -123,18 +133,21 @@ SaveFileTypes SaveFile::CalculateType(SaveData* saveData)
 {
 	if (saveData == nullptr) return SaveFileTypes::NotValid;
 
-	bool hasLeSlot = (saveData->saveSlots[0][0].Magic == SAVE_SLOT_MAGIC_LE || saveData->saveSlots[0][1].Magic == SAVE_SLOT_MAGIC_LE);
+	// First PC port handles saves exactly like N64, initializing all slots and settings on boot, but in little endian.
+	// But other ports like SM64 Coop DX, don't initialize anything. When a slot is saved, the save file will only contain data for that slot.
+	// So we can't just check the first slot, as it might be all zeroes if the player chose another slot.
+	// Also, SM64 Coop DX has its own settings file, so the settings slot is never initialized.
 
-	if (hasLeSlot)
+	for (uint8_t cp = 0; cp < NUM_COPIES; cp++)
 	{
-		return SaveFileTypes::LittleEndian;
-	}
+		for (uint8_t s = 0; s < NUM_SAVE_SLOTS; s++)
+		{
+			if (saveData->saveSlots[s][cp].Magic == SAVE_SLOT_MAGIC_BE) return SaveFileTypes::BigEndian;
+			if (saveData->saveSlots[s][cp].Magic == SAVE_SLOT_MAGIC_LE) return SaveFileTypes::LittleEndian;
+		}
 
-	bool hasBeSlot = (saveData->saveSlots[0][0].Magic == SAVE_SLOT_MAGIC_BE || saveData->saveSlots[0][1].Magic == SAVE_SLOT_MAGIC_BE);
-
-	if (hasBeSlot)
-	{
-		return SaveFileTypes::BigEndian;
+		if (saveData->settings[cp].Magic == SETTINGS_DATA_MAGIC_BE) return SaveFileTypes::BigEndian;
+		if (saveData->settings[cp].Magic == SETTINGS_DATA_MAGIC_LE) return SaveFileTypes::LittleEndian;
 	}
 
 	return SaveFileTypes::NotValid;
