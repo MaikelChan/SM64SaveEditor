@@ -11,60 +11,60 @@ struct SaveDataInitializationResult
 	std::string message;
 };
 
-constexpr const uint16_t SAVE_DATA_SIZE = 0x200;
+constexpr uint16_t SAVE_DATA_SIZE = 0x200;
 
-constexpr const uint8_t NUM_SAVE_SLOTS = 4;
-constexpr const uint8_t NUM_COPIES = 2;
-constexpr const uint8_t COURSE_COUNT = 24;
-constexpr const uint8_t COURSE_STAGES_COUNT = 15;
-constexpr const uint8_t COURSE_STAGES_COUNT_INTERNAL = 38; // This is the actual game's number of levels, including unused ones.
+constexpr uint8_t NUM_SAVE_SLOTS = 4;
+constexpr uint8_t NUM_COPIES = 2;
+constexpr uint8_t COURSE_COUNT = 24;
+constexpr uint8_t COURSE_STAGES_COUNT = 15;
+constexpr uint8_t COURSE_STAGES_COUNT_INTERNAL = 38; // This is the actual game's number of levels, including unused ones.
 
-constexpr const uint16_t SAVE_SLOT_MAGIC_LE = 0x4441;
-constexpr const uint16_t SAVE_SLOT_MAGIC_BE = 0x4144;
-constexpr const uint8_t SAVE_SLOT_SIZE = 0x38;
+constexpr uint16_t SAVE_SLOT_MAGIC_LE = 0x4441;
+constexpr uint16_t SAVE_SLOT_MAGIC_BE = 0x4144;
+constexpr uint8_t SAVE_SLOT_SIZE = 0x38;
 
-constexpr const uint16_t SETTINGS_DATA_MAGIC_LE = 0x4849;
-constexpr const uint16_t SETTINGS_DATA_MAGIC_BE = 0x4948;
-constexpr const uint8_t SETTINGS_DATA_SIZE = 0x20;
+constexpr uint16_t SETTINGS_DATA_MAGIC_LE = 0x4849;
+constexpr uint16_t SETTINGS_DATA_MAGIC_BE = 0x4948;
+constexpr uint8_t SETTINGS_DATA_SIZE = 0x20;
 
-constexpr const uint8_t TOTAL_STARS = 120;
-constexpr const uint8_t MAX_STARS_PER_LEVEL = 7;
+constexpr uint8_t TOTAL_STARS = 120;
+constexpr uint8_t MAX_STARS_PER_LEVEL = 7;
 
-constexpr const uint32_t SAVE_FLAG_FILE_EXISTS = (1 << 0);
-constexpr const uint32_t SAVE_FLAG_HAVE_WING_CAP = (1 << 1);
-constexpr const uint32_t SAVE_FLAG_HAVE_METAL_CAP = (1 << 2);
-constexpr const uint32_t SAVE_FLAG_HAVE_VANISH_CAP = (1 << 3);
-constexpr const uint32_t SAVE_FLAG_HAVE_KEY_1 = (1 << 4);
-constexpr const uint32_t SAVE_FLAG_HAVE_KEY_2 = (1 << 5);
-constexpr const uint32_t SAVE_FLAG_UNLOCKED_BASEMENT_DOOR = (1 << 6);
-constexpr const uint32_t SAVE_FLAG_UNLOCKED_UPSTAIRS_DOOR = (1 << 7);
-constexpr const uint32_t SAVE_FLAG_DDD_MOVED_BACK = (1 << 8);
-constexpr const uint32_t SAVE_FLAG_MOAT_DRAINED = (1 << 9);
-constexpr const uint32_t SAVE_FLAG_UNLOCKED_PSS_DOOR = (1 << 10);
-constexpr const uint32_t SAVE_FLAG_UNLOCKED_WF_DOOR = (1 << 11);
-constexpr const uint32_t SAVE_FLAG_UNLOCKED_CCM_DOOR = (1 << 12);
-constexpr const uint32_t SAVE_FLAG_UNLOCKED_JRB_DOOR = (1 << 13);
-constexpr const uint32_t SAVE_FLAG_UNLOCKED_BITDW_DOOR = (1 << 14);
-constexpr const uint32_t SAVE_FLAG_UNLOCKED_BITFS_DOOR = (1 << 15);
-constexpr const uint32_t SAVE_FLAG_CAP_ON_GROUND = (1 << 16);
-constexpr const uint32_t SAVE_FLAG_CAP_ON_KLEPTO = (1 << 17);
-constexpr const uint32_t SAVE_FLAG_CAP_ON_UKIKI = (1 << 18);
-constexpr const uint32_t SAVE_FLAG_CAP_ON_MR_BLIZZARD = (1 << 19);
-constexpr const uint32_t SAVE_FLAG_UNLOCKED_50_STAR_DOOR = (1 << 20);
-constexpr const uint32_t SAVE_FLAG_COLLECTED_TOAD_STAR_1 = (1 << 24);
-constexpr const uint32_t SAVE_FLAG_COLLECTED_TOAD_STAR_2 = (1 << 25);
-constexpr const uint32_t SAVE_FLAG_COLLECTED_TOAD_STAR_3 = (1 << 26);
-constexpr const uint32_t SAVE_FLAG_COLLECTED_MIPS_STAR_1 = (1 << 27);
-constexpr const uint32_t SAVE_FLAG_COLLECTED_MIPS_STAR_2 = (1 << 28);
+constexpr uint32_t SAVE_FLAG_FILE_EXISTS = (1 << 0);
+constexpr uint32_t SAVE_FLAG_HAVE_WING_CAP = (1 << 1);
+constexpr uint32_t SAVE_FLAG_HAVE_METAL_CAP = (1 << 2);
+constexpr uint32_t SAVE_FLAG_HAVE_VANISH_CAP = (1 << 3);
+constexpr uint32_t SAVE_FLAG_HAVE_KEY_1 = (1 << 4);
+constexpr uint32_t SAVE_FLAG_HAVE_KEY_2 = (1 << 5);
+constexpr uint32_t SAVE_FLAG_UNLOCKED_BASEMENT_DOOR = (1 << 6);
+constexpr uint32_t SAVE_FLAG_UNLOCKED_UPSTAIRS_DOOR = (1 << 7);
+constexpr uint32_t SAVE_FLAG_DDD_MOVED_BACK = (1 << 8);
+constexpr uint32_t SAVE_FLAG_MOAT_DRAINED = (1 << 9);
+constexpr uint32_t SAVE_FLAG_UNLOCKED_PSS_DOOR = (1 << 10);
+constexpr uint32_t SAVE_FLAG_UNLOCKED_WF_DOOR = (1 << 11);
+constexpr uint32_t SAVE_FLAG_UNLOCKED_CCM_DOOR = (1 << 12);
+constexpr uint32_t SAVE_FLAG_UNLOCKED_JRB_DOOR = (1 << 13);
+constexpr uint32_t SAVE_FLAG_UNLOCKED_BITDW_DOOR = (1 << 14);
+constexpr uint32_t SAVE_FLAG_UNLOCKED_BITFS_DOOR = (1 << 15);
+constexpr uint32_t SAVE_FLAG_CAP_ON_GROUND = (1 << 16);
+constexpr uint32_t SAVE_FLAG_CAP_ON_KLEPTO = (1 << 17);
+constexpr uint32_t SAVE_FLAG_CAP_ON_UKIKI = (1 << 18);
+constexpr uint32_t SAVE_FLAG_CAP_ON_MR_BLIZZARD = (1 << 19);
+constexpr uint32_t SAVE_FLAG_UNLOCKED_50_STAR_DOOR = (1 << 20);
+constexpr uint32_t SAVE_FLAG_COLLECTED_TOAD_STAR_1 = (1 << 24);
+constexpr uint32_t SAVE_FLAG_COLLECTED_TOAD_STAR_2 = (1 << 25);
+constexpr uint32_t SAVE_FLAG_COLLECTED_TOAD_STAR_3 = (1 << 26);
+constexpr uint32_t SAVE_FLAG_COLLECTED_MIPS_STAR_1 = (1 << 27);
+constexpr uint32_t SAVE_FLAG_COLLECTED_MIPS_STAR_2 = (1 << 28);
 
-constexpr const uint8_t SAVE_COURSE_FLAG_STAR_1 = (1 << 0);
-constexpr const uint8_t SAVE_COURSE_FLAG_STAR_2 = (1 << 1);
-constexpr const uint8_t SAVE_COURSE_FLAG_STAR_3 = (1 << 2);
-constexpr const uint8_t SAVE_COURSE_FLAG_STAR_4 = (1 << 3);
-constexpr const uint8_t SAVE_COURSE_FLAG_STAR_5 = (1 << 4);
-constexpr const uint8_t SAVE_COURSE_FLAG_STAR_6 = (1 << 5);
-constexpr const uint8_t SAVE_COURSE_FLAG_STAR_100_COIN = (1 << 6);
-constexpr const uint8_t SAVE_COURSE_FLAG_STAR_CANNON_OPEN = (1 << 7);
+constexpr uint8_t SAVE_COURSE_FLAG_STAR_1 = (1 << 0);
+constexpr uint8_t SAVE_COURSE_FLAG_STAR_2 = (1 << 1);
+constexpr uint8_t SAVE_COURSE_FLAG_STAR_3 = (1 << 2);
+constexpr uint8_t SAVE_COURSE_FLAG_STAR_4 = (1 << 3);
+constexpr uint8_t SAVE_COURSE_FLAG_STAR_5 = (1 << 4);
+constexpr uint8_t SAVE_COURSE_FLAG_STAR_6 = (1 << 5);
+constexpr uint8_t SAVE_COURSE_FLAG_STAR_100_COIN = (1 << 6);
+constexpr uint8_t SAVE_COURSE_FLAG_STAR_CANNON_OPEN = (1 << 7);
 
 const char* const courseNames[COURSE_COUNT]
 {

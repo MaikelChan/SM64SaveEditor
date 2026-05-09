@@ -1,14 +1,16 @@
-#include "WindowSDL.h"
+#if ENABLE_OPENGL
+
+#include "WindowSDL_GL.h"
 
 #include <exception>
 
-#include <SDL3/SDL.h>
+#include <imgui/imgui_impl_opengl3_loader.h>
 #include <imgui/imgui_impl_sdl3.h>
-#include <imgui/imgui_impl_sdlgpu3.h>
+#include <imgui/imgui_impl_opengl3.h>
 
 #include "BaseUI.h"
 
-WindowSDL::WindowSDL(const WindowParams& params) : Window(params)
+WindowSDL_GL::WindowSDL_GL(const WindowParams& params) : Window(params)
 {
 	// Initialize SDL
 
@@ -21,9 +23,9 @@ WindowSDL::WindowSDL(const WindowParams& params) : Window(params)
 
 	float mainScale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
 #if SUPPORT_TRANSPARENCY
-	SDL_WindowFlags windowFlags = SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_TRANSPARENT;
+	SDL_WindowFlags windowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_TRANSPARENT;
 #else
-	SDL_WindowFlags windowFlags = SDL_WINDOW_HIGH_PIXEL_DENSITY;
+	SDL_WindowFlags windowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_HIGH_PIXEL_DENSITY;
 #endif
 	SDL_PropertiesID windowProperties = SDL_CreateProperties();
 	SDL_SetStringProperty(windowProperties, SDL_PROP_WINDOW_CREATE_TITLE_STRING, params.title.c_str());
@@ -40,6 +42,22 @@ WindowSDL::WindowSDL(const WindowParams& params) : Window(params)
 		throw std::runtime_error(std::string("Error - SDL_CreateWindow(): ") + SDL_GetError());
 	}
 
+	// Initialize OpenGL
+
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+
+	const char* glsl_version = "#version 130";
+
+	glContext = SDL_GL_CreateContext(window);
+	if (glContext == nullptr)
+	{
+		throw std::runtime_error(std::string("Error - SDL_GL_CreateContext(): ") + SDL_GetError());
+	}
+
+	SDL_GL_MakeCurrent(window, glContext);
+
 	// Create GPU Device
 
 #if NDEBUG
@@ -48,74 +66,26 @@ WindowSDL::WindowSDL(const WindowParams& params) : Window(params)
 	constexpr bool debugEnabled = true;
 #endif
 
-	SDL_PropertiesID deviceProperties = SDL_CreateProperties();
-	SDL_SetBooleanProperty(deviceProperties, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_SPIRV_BOOLEAN, true);
-	SDL_SetBooleanProperty(deviceProperties, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_DXIL_BOOLEAN, true);
-	SDL_SetBooleanProperty(deviceProperties, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_MSL_BOOLEAN, true);
-	SDL_SetBooleanProperty(deviceProperties, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_METALLIB_BOOLEAN, true);
-	SDL_SetBooleanProperty(deviceProperties, SDL_PROP_GPU_DEVICE_CREATE_DEBUGMODE_BOOLEAN, debugEnabled);
-	SDL_SetBooleanProperty(deviceProperties, SDL_PROP_GPU_DEVICE_CREATE_FEATURE_CLIP_DISTANCE_BOOLEAN, false);
-	//SDL_SetBooleanProperty(deviceProperties, SDL_PROP_GPU_DEVICE_CREATE_FEATURE_DEPTH_CLAMPING_BOOLEAN, false); // Used by ImGui
-	SDL_SetBooleanProperty(deviceProperties, SDL_PROP_GPU_DEVICE_CREATE_FEATURE_INDIRECT_DRAW_FIRST_INSTANCE_BOOLEAN, false);
-	SDL_SetBooleanProperty(deviceProperties, SDL_PROP_GPU_DEVICE_CREATE_FEATURE_ANISOTROPY_BOOLEAN, false);
-	SDL_SetBooleanProperty(deviceProperties, SDL_PROP_GPU_DEVICE_CREATE_D3D12_ALLOW_FEWER_RESOURCE_SLOTS_BOOLEAN, true);
-	//SDL_SetStringProperty(deviceProperties, SDL_PROP_GPU_DEVICE_CREATE_NAME_STRING, "vulkan");
-	SDL_SetBooleanProperty(deviceProperties, SDL_PROP_GPU_DEVICE_CREATE_PREFERLOWPOWER_BOOLEAN, true);
-	gpuDevice = SDL_CreateGPUDeviceWithProperties(deviceProperties);
-	SDL_DestroyProperties(deviceProperties);
-
-	if (gpuDevice == nullptr)
-	{
-		throw std::runtime_error(std::string("Error - SDL_CreateGPUDevice(): ") + SDL_GetError());
-	}
-
-	const char* driverName = SDL_GetGPUDeviceDriver(gpuDevice);
 	int sdlVersion = SDL_GetVersion();
-	snprintf(backendInfo, 64, "SDL %i.%i.%i (Lib %i.%i.%i, Backend \"%s\"):", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_MICRO_VERSION, SDL_VERSIONNUM_MAJOR(sdlVersion), SDL_VERSIONNUM_MINOR(sdlVersion), SDL_VERSIONNUM_MICRO(sdlVersion), driverName);
-
-	// Claim window for GPU Device
-
-	if (!SDL_ClaimWindowForGPUDevice(gpuDevice, window))
-	{
-		throw std::runtime_error(std::string("Error - SDL_ClaimWindowForGPUDevice(): ") + SDL_GetError());
-	}
-
-	windowClaimed = true;
+	snprintf(backendInfo, 64, "SDL %i.%i.%i (Lib %i.%i.%i, Backend \"%s\"):", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_MICRO_VERSION, SDL_VERSIONNUM_MAJOR(sdlVersion), SDL_VERSIONNUM_MINOR(sdlVersion), SDL_VERSIONNUM_MICRO(sdlVersion), "OpenGL 3.3");
 
 	// Configure Present mode
 
-	const SDL_GPUPresentMode presentMode = SDL_GPU_PRESENTMODE_VSYNC;
-	SDL_SetGPUSwapchainParameters(gpuDevice, window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, presentMode);
-	SDL_SetGPUAllowedFramesInFlight(gpuDevice, 1);
+	if (!SDL_GL_SetSwapInterval(1))
+	{
+		throw std::runtime_error(std::string("Error - SDL_GL_SetSwapInterval(): ") + SDL_GetError());
+	}
 
 	// Imgui
 
 	SetupImGui(true, mainScale);
 
-	ImGui_ImplSDL3_InitForSDLGPU(window);
-	ImGui_ImplSDLGPU3_InitInfo init_info = {};
-	init_info.Device = gpuDevice;
-	init_info.ColorTargetFormat = SDL_GetGPUSwapchainTextureFormat(gpuDevice, window);
-	init_info.MSAASamples = SDL_GPU_SAMPLECOUNT_1;
-	init_info.SwapchainComposition = SDL_GPU_SWAPCHAINCOMPOSITION_SDR;
-	init_info.PresentMode = presentMode;
-	ImGui_ImplSDLGPU3_Init(&init_info);
+	ImGui_ImplSDL3_InitForOpenGL(window, glContext);
+	ImGui_ImplOpenGL3_Init(glsl_version);
 }
 
-WindowSDL::~WindowSDL()
+WindowSDL_GL::~WindowSDL_GL()
 {
-	if (windowClaimed)
-	{
-		SDL_ReleaseWindowFromGPUDevice(gpuDevice, window);
-		windowClaimed = false;
-	}
-
-	if (gpuDevice != nullptr)
-	{
-		SDL_DestroyGPUDevice(gpuDevice);
-		gpuDevice = nullptr;
-	}
-
 	if (window != nullptr)
 	{
 		SDL_DestroyWindow(window);
@@ -126,7 +96,7 @@ WindowSDL::~WindowSDL()
 	SDL_Quit();
 }
 
-void WindowSDL::Run(BaseUI& ui)
+void WindowSDL_GL::Run(BaseUI& ui)
 {
 	ui.SetIsVisible(true);
 
@@ -177,7 +147,7 @@ void WindowSDL::Run(BaseUI& ui)
 
 		// Start the Dear ImGui frame
 
-		ImGui_ImplSDLGPU3_NewFrame();
+		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplSDL3_NewFrame();
 		ImGui::NewFrame();
 
@@ -189,44 +159,22 @@ void WindowSDL::Run(BaseUI& ui)
 
 		// SDL Rendering
 
-		ImDrawData* draw_data = ImGui::GetDrawData();
-		const bool is_minimized = (draw_data->DisplaySize.x <= 0.0f || draw_data->DisplaySize.y <= 0.0f);
-
-		SDL_GPUCommandBuffer* command_buffer = SDL_AcquireGPUCommandBuffer(gpuDevice);
-
-		SDL_GPUTexture* swapchain_texture;
-		SDL_WaitAndAcquireGPUSwapchainTexture(command_buffer, window, &swapchain_texture, nullptr, nullptr);
-
-		if (swapchain_texture != nullptr && !is_minimized)
-		{
-			ImGui_ImplSDLGPU3_PrepareDrawData(draw_data, command_buffer);
-
-			// Setup and start a render pass
-			SDL_GPUColorTargetInfo target_info = {};
-			target_info.texture = swapchain_texture;
-			target_info.clear_color = SDL_FColor{ params.backgroundColor.x * opacity, params.backgroundColor.y * opacity, params.backgroundColor.z * opacity, opacity };
-			target_info.load_op = SDL_GPU_LOADOP_CLEAR;
-			target_info.store_op = SDL_GPU_STOREOP_STORE;
-			target_info.mip_level = 0;
-			target_info.layer_or_depth_plane = 0;
-			target_info.cycle = false;
-			SDL_GPURenderPass* render_pass = SDL_BeginGPURenderPass(command_buffer, &target_info, 1, nullptr);
-
-			ImGui_ImplSDLGPU3_RenderDrawData(draw_data, command_buffer, render_pass);
-
-			SDL_EndGPURenderPass(render_pass);
-		}
-
-		SDL_SubmitGPUCommandBuffer(command_buffer);
+		ImGuiIO& io = ImGui::GetIO();
+		glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
+		glClearColor(params.backgroundColor.x * opacity, params.backgroundColor.y * opacity, params.backgroundColor.z * opacity, opacity);
+		glClear(GL_COLOR_BUFFER_BIT);
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		SDL_GL_SwapWindow(window);
 	}
 
-	SDL_WaitForGPUIdle(gpuDevice);
+	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplSDL3_Shutdown();
-	ImGui_ImplSDLGPU3_Shutdown();
 	ImGui::DestroyContext();
+
+	SDL_GL_DestroyContext(glContext);
 }
 
-void WindowSDL::ShowOpenFileDialog(const FileDialogParams* fileDialogParams) const
+void WindowSDL_GL::ShowOpenFileDialog(const FileDialogParams* fileDialogParams) const
 {
 	if (fileDialogParams == nullptr) return;
 	if (window == nullptr) return;
@@ -263,7 +211,7 @@ void WindowSDL::ShowOpenFileDialog(const FileDialogParams* fileDialogParams) con
 	SDL_DestroyProperties(dialogProperties);
 }
 
-void WindowSDL::SetTaskbarProgress(const float value)
+void WindowSDL_GL::SetTaskbarProgress(const float value)
 {
 	if (currentTaskbarProgress == value) return;
 	currentTaskbarProgress = value;
@@ -279,7 +227,7 @@ void WindowSDL::SetTaskbarProgress(const float value)
 	}
 }
 
-void WindowSDL::OpenFileDialogCallback(void* userdata, const char* const* filelist, int filter)
+void WindowSDL_GL::OpenFileDialogCallback(void* userdata, const char* const* filelist, int filter)
 {
 	const FileDialogParams* fileDialogParams = (const FileDialogParams*)userdata;
 
@@ -299,3 +247,5 @@ void WindowSDL::OpenFileDialogCallback(void* userdata, const char* const* fileli
 
 	fileDialogParams->callback(fileDialogParams, std::filesystem::u8path(filelist[0]), nullptr);
 }
+
+#endif
