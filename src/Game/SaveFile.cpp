@@ -123,14 +123,16 @@ SaveFileTypes SaveFile::CalculateType(SaveData* saveData)
 {
 	if (saveData == nullptr) return SaveFileTypes::NotValid;
 
-	if ((saveData->saveSlots[0][0].Magic == SAVE_SLOT_MAGIC_LE || saveData->saveSlots[0][1].Magic == SAVE_SLOT_MAGIC_LE) &&
-		(saveData->settings[0].Magic == SETTINGS_DATA_MAGIC_LE || saveData->settings[1].Magic == SETTINGS_DATA_MAGIC_LE))
+	bool hasLeSlot = (saveData->saveSlots[0][0].Magic == SAVE_SLOT_MAGIC_LE || saveData->saveSlots[0][1].Magic == SAVE_SLOT_MAGIC_LE);
+
+	if (hasLeSlot)
 	{
 		return SaveFileTypes::LittleEndian;
 	}
 
-	if ((saveData->saveSlots[0][0].Magic == SAVE_SLOT_MAGIC_BE || saveData->saveSlots[0][1].Magic == SAVE_SLOT_MAGIC_BE) &&
-		(saveData->settings[0].Magic == SETTINGS_DATA_MAGIC_BE || saveData->settings[1].Magic == SETTINGS_DATA_MAGIC_BE))
+	bool hasBeSlot = (saveData->saveSlots[0][0].Magic == SAVE_SLOT_MAGIC_BE || saveData->saveSlots[0][1].Magic == SAVE_SLOT_MAGIC_BE);
+
+	if (hasBeSlot)
 	{
 		return SaveFileTypes::BigEndian;
 	}
