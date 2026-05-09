@@ -54,9 +54,7 @@ protected:
 	bool isRunning = false;
 
 	float currentWindowScale = -1.0f;
-#if SUPPORT_TRANSPARENCY
 	float opacity = 1.0f;
-#endif
 
 public:
 	Window(const WindowParams& params);
