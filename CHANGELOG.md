@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2026-05-10
+### Changed
+- Add support for SM64COOPDX save files. Thanks to @juniodevs (https://github.com/MaikelChan/SM64SaveEditor/pull/3).
+### Fixed
+- Fixed some rare cases where a valid save file would trigger a warning saying it's corrupted.
+
 ## [1.4.0] - 2026-04-12
 ### Changed
 - Now you can open save files that are bigger than 512 bytes. Despite that Super Mario 64 save data is only 512 bytes, some emulators generate bigger files with padding zeroes at the end.
@@ -28,7 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.3.1] - 2025-08-01
 ### Fixed
-- Corrections to some stars descriptions.
+- Corrections to some stars descriptions. Thanks to @GyroDragona (https://github.com/MaikelChan/SM64SaveEditor/pull/1).
 - Don't treat missing config file as error.
 
 ## [1.3.0] - 2025-01-15
