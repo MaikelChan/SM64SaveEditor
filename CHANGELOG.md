@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.4.1] - 2026-05-10
 ### Changed
 - Add support for SM64COOPDX save files. Thanks to @juniodevs (https://github.com/MaikelChan/SM64SaveEditor/pull/3).
+- Darken background when opening a popup window instead of making it lighter.
 ### Fixed
 - Fixed some rare cases where a valid save file would trigger a warning saying it's corrupted.
 
