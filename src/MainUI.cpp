@@ -29,6 +29,12 @@ MainUI::~MainUI()
 	ClearSaveData();
 }
 
+void MainUI::ShowMessage(const MessageTypes type, const std::string title, const std::string message)
+{
+	popupDialogUi.SetMessage(type, title, message);
+	popupDialogUi.SetIsVisible(true);
+}
+
 void MainUI::OpenFileCallback(std::filesystem::path filePath)
 {
 	MainUI::LoadSaveData(filePath);
@@ -156,9 +162,7 @@ void MainUI::LoadSaveData(const std::filesystem::path filePath)
 
 	if (!stream || !stream.is_open())
 	{
-		popupDialogUi.SetMessage(MessageTypes::Error, "Error", "There was an error trying to open the file.");
-		popupDialogUi.SetIsVisible(true);
-
+		ShowMessage(MessageTypes::Error, "Error", "There was an error trying to open the file.");
 		return;
 	}
 
@@ -169,8 +173,7 @@ void MainUI::LoadSaveData(const std::filesystem::path filePath)
 	{
 		stream.close();
 
-		popupDialogUi.SetMessage(MessageTypes::Error, "Error", "The selected file is not a valid save file.");
-		popupDialogUi.SetIsVisible(true);
+		ShowMessage(MessageTypes::Error, "Error", "The selected file is not a valid save file.");
 
 		return;
 	}
@@ -186,8 +189,7 @@ void MainUI::LoadSaveData(const std::filesystem::path filePath)
 		delete newSaveFile;
 		newSaveFile = nullptr;
 
-		popupDialogUi.SetMessage(MessageTypes::Error, "Error", result);
-		popupDialogUi.SetIsVisible(true);
+		ShowMessage(MessageTypes::Error, "Error", result);
 
 		return;
 	}
@@ -211,8 +213,7 @@ void MainUI::LoadSaveData(const std::filesystem::path filePath)
 
 	if (!result.empty())
 	{
-		popupDialogUi.SetMessage(MessageTypes::Warning, "Warnings", result);
-		popupDialogUi.SetIsVisible(true);
+		ShowMessage(MessageTypes::Warning, "Warnings", result);
 	}
 }
 
@@ -224,9 +225,7 @@ void MainUI::SaveSaveData()
 
 	if (!stream || !stream.is_open())
 	{
-		popupDialogUi.SetMessage(MessageTypes::Error, "Error", std::string("Can't save file \"") + currentSaveFile->GetFilePath().u8string() + "\".");
-		popupDialogUi.SetIsVisible(true);
-
+		ShowMessage(MessageTypes::Error, "Error", std::string("Can't save file \"") + currentSaveFile->GetFilePath().u8string() + "\".");
 		return;
 	}
 
@@ -308,8 +307,7 @@ void MainUI::OpenFileDialogCallback(const FileDialogParams* fileDialogParams, co
 		char errorText[256];
 		snprintf(errorText, 256, "Error in OpenFileDialog: %s", error);
 
-		mainUi->popupDialogUi.SetMessage(MessageTypes::Error, "Error", errorText);
-		mainUi->popupDialogUi.SetIsVisible(true);
+		mainUi->ShowMessage(MessageTypes::Error, "Error", errorText);
 
 		return;
 	}

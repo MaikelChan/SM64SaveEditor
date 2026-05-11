@@ -43,15 +43,15 @@ void PopupDialog::DoRender()
 	{
 		switch (type)
 		{
-		case MessageTypes::Error:
-			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.4f, 1.0f));
-			break;
-		case MessageTypes::Warning:
-			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.7f, 0.4f, 1.0f));
-			break;
-		default:
-			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-			break;
+			case MessageTypes::Error:
+				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.4f, 1.0f));
+				break;
+			case MessageTypes::Warning:
+				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.7f, 0.4f, 1.0f));
+				break;
+			default:
+				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+				break;
 		}
 
 		ImGui::TextWrapped("%s", message.c_str());

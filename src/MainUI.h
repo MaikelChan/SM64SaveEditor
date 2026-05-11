@@ -45,6 +45,8 @@ public:
 	inline bool IsSaveFileLoaded() const { return currentSaveFile != nullptr; }
 	inline SaveFile* GetSaveFile() const { return currentSaveFile; }
 
+	void ShowMessage(const MessageTypes type, const std::string title, const std::string message);
+
 	void OpenFileCallback(std::filesystem::path filePath);
 
 protected:
